@@ -10,9 +10,6 @@ import Cocoa
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
 
-    
-
-
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
     }
@@ -25,6 +22,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 
+    // quit the app if the window is closed
+    func applicationShouldTerminateAfterLastWindowClosed(_ app: NSApplication) -> Bool {
+        return true
+    }
 
 }
 

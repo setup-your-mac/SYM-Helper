@@ -11,6 +11,12 @@
 		B5BBDBA329A168490040FD71 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBA229A168490040FD71 /* ViewController.swift */; };
 		B5BBDBA529A1684C0040FD71 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5BBDBA429A1684C0040FD71 /* Assets.xcassets */; };
 		B5BBDBA829A1684C0040FD71 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B5BBDBA629A1684C0040FD71 /* Main.storyboard */; };
+		B5BBDBB029A171570040FD71 /* WriteToLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBAF29A171570040FD71 /* WriteToLog.swift */; };
+		B5BBDBB229A171810040FD71 /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB129A171810040FD71 /* LoginVC.swift */; };
+		B5BBDBB429A1719D0040FD71 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB329A1719D0040FD71 /* Credentials.swift */; };
+		B5BBDBB629A171BC0040FD71 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB529A171BC0040FD71 /* Globals.swift */; };
+		B5BBDBB829A1758C0040FD71 /* TokenDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */; };
+		B5BBDBBA29A177040040FD71 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB929A177040040FD71 /* Alert.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +26,12 @@
 		B5BBDBA429A1684C0040FD71 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B5BBDBA729A1684C0040FD71 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B5BBDBA929A1684C0040FD71 /* SYM_Helper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SYM_Helper.entitlements; sourceTree = "<group>"; };
+		B5BBDBAF29A171570040FD71 /* WriteToLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WriteToLog.swift; sourceTree = "<group>"; };
+		B5BBDBB129A171810040FD71 /* LoginVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
+		B5BBDBB329A1719D0040FD71 /* Credentials.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
+		B5BBDBB529A171BC0040FD71 /* Globals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
+		B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenDelegate.swift; sourceTree = "<group>"; };
+		B5BBDBB929A177040040FD71 /* Alert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,8 +64,14 @@
 		B5BBDB9F29A168490040FD71 /* SYM-Helper */ = {
 			isa = PBXGroup;
 			children = (
+				B5BBDBB929A177040040FD71 /* Alert.swift */,
 				B5BBDBA029A168490040FD71 /* AppDelegate.swift */,
+				B5BBDBB329A1719D0040FD71 /* Credentials.swift */,
+				B5BBDBB529A171BC0040FD71 /* Globals.swift */,
+				B5BBDBB129A171810040FD71 /* LoginVC.swift */,
+				B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */,
 				B5BBDBA229A168490040FD71 /* ViewController.swift */,
+				B5BBDBAF29A171570040FD71 /* WriteToLog.swift */,
 				B5BBDBA429A1684C0040FD71 /* Assets.xcassets */,
 				B5BBDBA629A1684C0040FD71 /* Main.storyboard */,
 				B5BBDBA929A1684C0040FD71 /* SYM_Helper.entitlements */,
@@ -132,6 +150,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5BBDBA329A168490040FD71 /* ViewController.swift in Sources */,
+				B5BBDBB829A1758C0040FD71 /* TokenDelegate.swift in Sources */,
+				B5BBDBB029A171570040FD71 /* WriteToLog.swift in Sources */,
+				B5BBDBB629A171BC0040FD71 /* Globals.swift in Sources */,
+				B5BBDBB429A1719D0040FD71 /* Credentials.swift in Sources */,
+				B5BBDBB229A171810040FD71 /* LoginVC.swift in Sources */,
+				B5BBDBBA29A177040040FD71 /* Alert.swift in Sources */,
 				B5BBDBA129A168490040FD71 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -275,6 +299,7 @@
 				DEVELOPMENT_TEAM = PS2F6S478M;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -282,7 +307,8 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MARKETING_VERSION = 0.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "jamf.ie.SYM-Helper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -302,6 +328,7 @@
 				DEVELOPMENT_TEAM = PS2F6S478M;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -309,7 +336,8 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MARKETING_VERSION = 0.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "jamf.ie.SYM-Helper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
