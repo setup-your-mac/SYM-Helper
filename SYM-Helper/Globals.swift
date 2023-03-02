@@ -63,6 +63,17 @@ struct Token {
     static var sourceExpires = ""
 }
 
+func betweenTags(xmlString:String, startTag:String, endTag:String) -> String {
+    var rawValue = ""
+    if let start = xmlString.range(of: startTag),
+        let end  = xmlString.range(of: endTag, range: start.upperBound..<xmlString.endIndex) {
+        rawValue.append(String(xmlString[start.upperBound..<end.lowerBound]))
+    } else {
+        WriteToLog().message(stringOfText: "[betweenTags] Start, \(startTag), and end, \(endTag), not found.")
+    }
+    return rawValue
+}
+
 func timeDiff(forWhat: String) -> (Int,Int,Int) {
     var components:DateComponents?
     switch forWhat {

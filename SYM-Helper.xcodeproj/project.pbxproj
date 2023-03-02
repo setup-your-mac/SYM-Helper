@@ -32,6 +32,7 @@
 		B5BBDBB529A171BC0040FD71 /* Globals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenDelegate.swift; sourceTree = "<group>"; };
 		B5BBDBB929A177040040FD71 /* Alert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
+		B5BBDBBC29A4380D0040FD71 /* Notes */ = {isa = PBXFileReference; lastKnownFileType = text; path = Notes; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +49,7 @@
 		B5BBDB9429A168490040FD71 = {
 			isa = PBXGroup;
 			children = (
+				B5BBDBBC29A4380D0040FD71 /* Notes */,
 				B5BBDB9F29A168490040FD71 /* SYM-Helper */,
 				B5BBDB9E29A168490040FD71 /* Products */,
 			);
