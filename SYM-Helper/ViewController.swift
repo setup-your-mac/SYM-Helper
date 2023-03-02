@@ -317,9 +317,14 @@ policy_array=('
                             for i in 0..<allPolicies.count {
                                 let aPolicy = allPolicies[i] as [String:Any]
 //                                print("aPolicy: \(aPolicy)")
+                                
                                 if let policyName = aPolicy["name"] as? String, let policyId = aPolicy["id"] as? Int {
 //                                    print("\(policyName) (\(policyId))")
-                                    policiesArray.append(Policy(name: "\(policyName) (\(policyId))", id: "\(policyId)"))
+                                    // filter out policies created from casper remote - start
+                                        if policyName.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil {
+                                            policiesArray.append(Policy(name: "\(policyName) (\(policyId))", id: "\(policyId)"))
+                                        }
+                                    // filter out policies created from casper remote - end
                                 }
                             }
                             // sort policies - to do
