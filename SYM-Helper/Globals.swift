@@ -15,8 +15,10 @@ let refreshInterval: UInt32 = 25*60 // 25 minutes
 var runComplete     = false
 var tokenTimeCreated: Date?
 
-var scriptSource            = "https://recipes.hickoryhillseast.net/sym/Setup-Your-Mac-via-Dialog.bash"
-let recipeDownloadUrl       = (FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first as URL?)!
+//
+var scriptSource            = "https://raw.githubusercontent.com/dan-snelson/Setup-Your-Mac/main/Setup-Your-Mac-via-Dialog.bash"
+//var scriptSource            = "https://recipes.hickoryhillseast.net/sym/Setup-Your-Mac-via-Dialog.bash"
+//let recipeDownloadUrl       = (FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first as URL?)!
 
 struct AppInfo {
     static let dict    = Bundle.main.infoDictionary!

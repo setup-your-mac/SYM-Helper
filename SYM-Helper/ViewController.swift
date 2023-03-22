@@ -12,23 +12,17 @@ import Foundation
 class Policy: NSObject {
     @objc var name: String
     @objc var id: String
+//    @objc var isSelected = false
+    @objc var configs: [String]
     
-    init(name: String, id: String) {
+    init(name: String, id: String, configs: [String]) {
         self.name = name
         self.id = id
-    }
-}
-class SelectedPolicy: NSObject {
-    @objc var name: String
-    @objc var id: String
-    
-    init(name: String, id: String) {
-        self.name = name
-        self.id = id
+        self.configs = configs
     }
 }
 
-class ViewController: NSViewController, URLSessionDelegate, SendingLoginInfoDelegate {
+class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate, SendingLoginInfoDelegate {
     
     @IBOutlet weak var connectedTo_TextField: NSTextField!
     
@@ -56,8 +50,21 @@ class ViewController: NSViewController, URLSessionDelegate, SendingLoginInfoDele
         policies_TableView.reloadData()
     }
     
+    @IBOutlet weak var configuration_Button: NSPopUpButton!
+    
+    @IBAction func config_Action(_ sender: NSPopUpButton) {
+//        print("title: \(String(describing: sender.titleOfSelectedItem))")
+        policiesArray = policiesDict[sender.titleOfSelectedItem!] ?? staticAllPolicies
+        selectedPoliciesArray = selectedPoliciesDict[sender.titleOfSelectedItem!] ?? []
+        selectedPolicies_TableView.deselectAll(self)
+        progressText_TextField.stringValue = ""
+        validation_TextField.stringValue   = ""
+        policies_TableView.reloadData()
+        selectedPolicies_TableView.reloadData()
+    }
+    
     @IBOutlet weak var policies_TableView: NSTableView!
-    @IBOutlet weak var policyArray_TableView: NSTableView!
+    @IBOutlet weak var selectedPolicies_TableView: NSTableView!
     
     @IBOutlet weak var allPolicies_Spinner: NSProgressIndicator!
     @IBOutlet weak var policyArray_Spinner: NSProgressIndicator!
@@ -66,50 +73,74 @@ class ViewController: NSViewController, URLSessionDelegate, SendingLoginInfoDele
     @IBOutlet weak var validation_TextField: NSTextField!
     
     var policiesArray = [Policy]()
+    var policiesDict  = [String:[Policy]]()
     var staticAllPolicies = [Policy]()
     var selectedPoliciesArray = [Policy]()
-    var policy_array_dict = [String:[String:String]]()
+    var selectedPoliciesDict  = [String:[Policy]]()
+    var policy_array_dict = [String:[String:String]]()   // [policy id: [attribute: value]]]
+    var configsDict = [String:[String:[String:String]]]()   // [config name: [policy id: [attribute: value]]]
+    var configurationsArray = [String]()
     var symScript = ""
-    var policy_array = """
-policy_array=('
-{
-"steps": [
-"""
+    var policy_array = ""
     
     @IBOutlet weak var generateScript_Button: NSButton!
     //    var policyArray:[String]?    // array of policies to add to SYM
     
     @objc func addToPolicyArray() {
         let rowClicked = policies_TableView.clickedRow
-        let doubleClicked = policiesArray[rowClicked]
-//        print("policiesArray: \(policiesArray)")
-//        print("[\(#line)] doubleClicked Row: \(rowClicked)")
-//        print("[\(#line)] doubleClicked: \(doubleClicked)")
-        selectedPoliciesArray.append(doubleClicked)
-        getPolicy(id: doubleClicked.id) { [self]
-            (result: String) in
-            updatePoliciesDict(xml: result, policyId: doubleClicked.id)
-            policiesArray.remove(at: rowClicked)
-            policies_TableView.reloadData()
-            policyArray_TableView.reloadData()
+//        let doubleClicked = policiesArray[rowClicked]
+        
+        if rowClicked < policiesArray.count && rowClicked != -1 {
+            let doubleClicked = policiesArray[rowClicked]
+//            doubleClicked.isSelected = true
+            selectedPoliciesArray.append(doubleClicked)
+            selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
+//            print("configuration_Button.titleOfSelectedItem: \(String(describing: configuration_Button.titleOfSelectedItem))")
+            selectedPoliciesArray.last!.configs.append(configuration_Button.titleOfSelectedItem!)
+//            print("selectedPoliciesArray.last: \(String(describing: selectedPoliciesArray.last?.configs))")
+            getPolicy(id: doubleClicked.id) { [self]
+                (result: String) in
+                updatePoliciesDict(xml: result, policyId: doubleClicked.id)
+                policiesArray.remove(at: rowClicked)
+                policiesDict[configuration_Button.titleOfSelectedItem!] = policiesArray
+                
+                policies_TableView.reloadData()
+                selectedPolicies_TableView.reloadData()
+            }
         }
     }
     @objc func removeFromPolicyArray() {
-//        print("[\(#line)] doubleClicked Row: \(String(policyArray_TableView.clickedRow))")
-        let doubleClicked = selectedPoliciesArray[policyArray_TableView.clickedRow]
-//        print("[\(#line)] doubleClicked: \(doubleClicked)")
-        selectedPoliciesArray.remove(at: policyArray_TableView.clickedRow)
-        
-        policiesArray.append(doubleClicked)
+        if selectedPolicies_TableView.clickedRow != -1 {
+            var doubleClickedRow = selectedPolicies_TableView.clickedRow
 
-        policies_TableView.reloadData()
+            let doubleClicked = selectedPoliciesArray[doubleClickedRow]
+//            doubleClicked.isSelected = false
 
-        policyArray_TableView.reloadData()
+            selectedPoliciesArray.remove(at: doubleClickedRow)
+            selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
+
+            doubleClickedRow = (doubleClickedRow > selectedPoliciesArray.count-1) ? doubleClickedRow-1:doubleClickedRow
+            if selectedPoliciesArray.count > 0 {
+                selectedPolicies_TableView.selectRowIndexes(IndexSet(integer: doubleClickedRow), byExtendingSelection: false)
+                let selectedPolicy = selectedPoliciesArray[doubleClickedRow].id
+//                icon_TextField.stringValue = "\(policy_array_dict[selectedPolicy]!["icon"] ?? "")"
+                progressText_TextField.stringValue = "\(configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["listitem"]))")"
+                validation_TextField.stringValue = "\(configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["thePath"] ?? "")"
+            }
+            selectedPolicies_TableView.reloadData()
+            if let _ = Int(doubleClicked.id) {
+                policiesArray.append(doubleClicked)
+                policiesDict[configuration_Button.titleOfSelectedItem!] = policiesArray
+                policies_TableView.reloadData()
+                sortPoliciesTableView(theRow: doubleClickedRow)
+            }
+        }
     }
     
     @IBAction func generateScript_Action(_ sender: Any) {
 //        var id = ""
         generateScript_Button.isEnabled = false
+        let whichConfig = configuration_Button.titleOfSelectedItem
         var idArray = [String]()
         for selectedPolicy in selectedPoliciesArray {
 //            print("id: \(id.replacingOccurrences(of: ")", with: ""))")
@@ -119,7 +150,7 @@ policy_array=('
             policyArray_Spinner.maxValue = Double(idArray.count-1)
             policyArray_Spinner.startAnimation(self)
             policyArray_Spinner.isHidden = false
-            processPolicies(id: idArray, whichId: 0)
+            processPolicies(id: idArray, whichId: 0, theConfigIndex: 0)
         } else {
             generateScript_Button.isEnabled = true
         }
@@ -154,9 +185,32 @@ policy_array=('
                 progressText_TextField.stringValue = progresstext
                 
                 policy_array_dict[policyId] = ["listitem": policyName, "icon": icon, "progresstext": progresstext, "trigger": customTrigger, "validation": "None"]
+            configsDict[configuration_Button.titleOfSelectedItem!]![policyId] = ["listitem": policyName, "icon": icon, "progresstext": progresstext, "trigger": customTrigger, "validation": "None"]
             }
 //        let trigger = (customTrigger == "recon") ? customTrigger:policyId
         
+    }
+    
+    
+    func controlTextDidEndEditing(_ obj: Notification) {
+        if let whichField = obj.object as? NSTextField {
+            let theRow = selectedPolicies_TableView.selectedRow
+            if theRow != -1 {
+                let selectedPolicyId = selectedPoliciesArray[theRow].id
+                switch whichField.identifier!.rawValue {
+                    //            case "icon_TextField":
+                    //                policy_array_dict[selectedPolicyId]!["icon"] = icon_TextField.stringValue
+                case "progressText_TextField":
+//                    policy_array_dict[selectedPolicyId]!["progresstext"] = progressText_TextField.stringValue
+                    configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] = progressText_TextField.stringValue
+                case "validation_TextField":
+//                    policy_array_dict[selectedPolicyId]!["thePath"] = validation_TextField.stringValue
+                    configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["validation"] = validation_TextField.stringValue
+                default:
+                    break
+                }
+            }
+        }
     }
     
     private func updatePolicyCustomeTrigger(xml: String, id: String, customTrigger: String, completion: @escaping (_ result: String) -> Void ) {
@@ -205,65 +259,108 @@ policy_array=('
         task.resume()
     }
     
-    private func processPolicies(id: [String], whichId: Int) {
-        if whichId < id.count {
-            let result = policy_array_dict[id[whichId]]!
-            let policyName = result["listitem"]
-            let icon = result["icon"]
-            let progresstext = result["progresstext"]
-            let customTrigger = result["trigger"]
-            policyArray_Spinner.increment(by: 1.0)
-            usleep(1000)
+    private func processPolicies(id: [String], whichId: Int, theConfigIndex: Int) {
         
-            if whichId > 0 {
-                policy_array.append(",\n")
-            } else {
-                policy_array.append("\n")
-            }
-            policy_array.append("""
-        {
-            "listitem": "\(String(describing: policyName!))",
-            "icon": "\(String(describing: icon!))",
-                    "progresstext": "\(progresstext ?? "Processing policy \(String(describing: policyName!))")",
-            "trigger_list": [
-                {
-                    "trigger": "\(customTrigger!)",
-                    "validation": "None"
-                }
-            ]
-        }
-""")
-            processPolicies(id: id, whichId: whichId+1)
+        // move the default config to the end of the array
+        if let index = configurationsArray.firstIndex(of: "Default") {
+            configurationsArray.remove(at: index)
+            configurationsArray.append("Default")
         } else {
+            _ = Alert().display(header: "Attention:", message: "'Default' configuration must be defined.", secondButton: "")
             policyArray_Spinner.isHidden = true
-            policy_array.append("""
-\n    ]
-}
-')
-""")
-//            print("policy_array: \(policy_array)")
-            let policy_array_regex = try! NSRegularExpression(pattern: "policy_array=\\('(.|\n|\r)*?'\\)", options:.caseInsensitive)
-            var finalScript = policy_array_regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(policy_array)")
-            // use -id rather than -trigger to call policy - not doing, add custom trigger if not present
-//            finalScript = finalScript.replacingOccurrences(of: " -trigger", with: " -id")
-//            finalScript = finalScript.replacingOccurrences(of: " -id recon", with: " -trigger recon")
-            
-            let saveDialog = NSSavePanel()
-            saveDialog.canCreateDirectories = true
-            saveDialog.nameFieldStringValue = "Setup-Your-Mac.bash"
-            saveDialog.beginSheetModal(for: self.view.window!){ result in
-                if result == .OK {
-                    let scriptName = saveDialog.nameFieldStringValue
-                    let exportURL            = saveDialog.url!
-                    print("fileName", scriptName)
-                    
-                    do {
-                        try "\(finalScript)".write(to: exportURL, atomically: true, encoding: .utf8)
-                    } catch {
-                        print("failed to write script to \(exportURL.path)")
+            generateScript_Button.isEnabled = true
+            return
+        }
+
+        var configCases = ""
+        
+        for theConfig in configurationsArray {
+            let configDetails = configsDict[theConfig]!
+            if theConfig == "Default" && configDetails.count == 0 {
+                _ = Alert().display(header: "Attention:", message: "'Default' configuration must be defined.", secondButton: "")
+                policyArray_Spinner.isHidden = true
+                generateScript_Button.isEnabled = true
+                return
+            }
+            if selectedPoliciesDict[theConfig]?.count ?? 0 > 0 {
+                var firstPolicy = true
+                policy_array = ""
+                for thePolicy in selectedPoliciesDict[theConfig]! {
+                    let policyId = thePolicy.id
+
+                    let result = configsDict[theConfig]![policyId]!
+    //                let result = configsDict[theConfig]![id[whichId]]!
+                    let policyName = result["listitem"]
+                    let icon = result["icon"]
+                    let progresstext = result["progresstext"]
+                    let validation = result["validation"] ?? ""
+                    let customTrigger = result["trigger"]
+                    policyArray_Spinner.increment(by: 1.0)
+                    usleep(1000)
+                
+                    if firstPolicy {
+                        policy_array.append("\n")
+                        firstPolicy = false
+                    } else {
+                        policy_array.append(",\n")
                     }
-                        
-                    // copy to clipboard
+                    policy_array.append("""
+                        {
+                            "listitem": "\(String(describing: policyName!))",
+                            "icon": "\(String(describing: icon!))",
+                            "progresstext": "\(progresstext ?? "Processing policy \(String(describing: policyName!))")",
+                            "trigger_list": [
+                                {
+                                    "trigger": "\(customTrigger!)",
+                                    "validation": "\(validation)"
+                                }
+                            ]
+                        }
+    """)
+    //                processPolicies(id: id, whichId: whichId+1, theConfigIndex: theConfigIndex+1)
+                }   // for (policyId, _) in configDetails - end
+                if configDetails.count > 0 {
+                    // close off the policy array and generate script
+                    
+                    let whichConfig = (theConfig == "Default") ? "* ) # Catch-all":"\"\(theConfig)\""
+                    policy_array = """
+        \(whichConfig) )
+
+                policyJSON'
+                {
+                    "steps": [
+            \(policy_array)
+                    ]
+                }
+                '
+                ;;\n\n
+    """
+                    configCases.append(policy_array)
+                }   // if configDetails.count > 0 - end
+            }
+        }   // for theConfig in configurationsArray - end
+        let policy_array_regex = try! NSRegularExpression(pattern: "case \\$\\{symConfiguration\\} in(.|\n|\r)*?esac", options:.caseInsensitive)
+        var finalScript = policy_array_regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "case \\$\\{symConfiguration\\} in\n\n    \(configCases)    esac")
+        
+        policyArray_Spinner.isHidden = true
+        
+        // fix - don't save until we've hit all configs
+        let saveDialog = NSSavePanel()
+        saveDialog.canCreateDirectories = true
+        saveDialog.nameFieldStringValue = "Setup-Your-Mac.bash"
+        saveDialog.beginSheetModal(for: self.view.window!){ result in
+            if result == .OK {
+                let scriptName = saveDialog.nameFieldStringValue
+                let exportURL            = saveDialog.url!
+                print("fileName", scriptName)
+                
+                do {
+                    try "\(finalScript)".write(to: exportURL, atomically: true, encoding: .utf8)
+                } catch {
+                    print("failed to write script to \(exportURL.path)")
+                }
+                    
+                // copy to clipboard
 //                    do {
 //                        let manifest = try String(contentsOf: exportURL)
 //    //                    print("manifest: \(manifest)")
@@ -276,10 +373,9 @@ policy_array=('
 //                        print("file not found.")
 //                    }
 
-                }
             }
-            generateScript_Button.isEnabled = true
         }
+        generateScript_Button.isEnabled = true
     }
     
     // Delegate Method
@@ -305,9 +401,11 @@ policy_array=('
                     (result: String) in
                     symScript = result
 //                    print("getScript: \(symScript)")
-                    let policy_array_regex = try! NSRegularExpression(pattern: "policy_array=\\('(.|\n|\r)*?'\\)", options:.caseInsensitive)
-                    symScript = policy_array_regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "policy_array=('\n')")
-//                    print("\ngetScript: \(symScript)")
+                    
+//                    let policy_array_regex = try! NSRegularExpression(pattern: "policy_array=\\('(.|\n|\r)*?'\\)", options:.caseInsensitive)
+//                    symScript = policy_array_regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "policy_array=('\n')")
+//
+                    print("\ngetScript: \(symScript)")
                     
                     getAllPolicies() { [self]
                         (result: [String:Any]) in
@@ -321,9 +419,9 @@ policy_array=('
                                 if let policyName = aPolicy["name"] as? String, let policyId = aPolicy["id"] as? Int {
 //                                    print("\(policyName) (\(policyId))")
                                     // filter out policies created from casper remote - start
-                                        if policyName.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil {
-                                            policiesArray.append(Policy(name: "\(policyName) (\(policyId))", id: "\(policyId)"))
-                                        }
+                                    if policyName.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil {
+                                        policiesArray.append(Policy(name: "\(policyName) (\(policyId))", id: "\(policyId)", configs: []))
+                                    }
                                     // filter out policies created from casper remote - end
                                 }
                             }
@@ -376,7 +474,7 @@ policy_array=('
                     if let _ = String(data: data!, encoding: .utf8) {
                         responseData = String(data: data!, encoding: .utf8)!
 //                        WriteToLog().message(stringOfText: "[CreateEndpoints] \n\nfull response from create:\n\(responseData)") }
-//                        print("response: \(responseData)")
+                        print("response: \(responseData)")
                     } else {
                         WriteToLog().message(stringOfText: "\n[getScript] No data was returned from post/put.")
                     }
@@ -395,21 +493,43 @@ policy_array=('
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        // initialize configDict for each config
+        for i in 0..<configuration_Button.numberOfItems {
+            configuration_Button.selectItem(at: i)
+            let theConfig = configuration_Button.titleOfSelectedItem!
+            configurationsArray.append(theConfig)
+            configsDict[theConfig] = [:]
+        }
+        
+//        icon_TextField.delegate         = self
+        progressText_TextField.delegate = self
+        validation_TextField.delegate   = self
+        
         allPolicies_Spinner.startAnimation(self)
         policies_TableView.delegate = self
         policies_TableView.dataSource = self
         policies_TableView.doubleAction = #selector(addToPolicyArray)
-//        let descriptorName = NSSortDescriptor(key: "name", ascending: true)
-//        policies_TableView.tableColumns[0].sortDescriptorPrototype = descriptorName
         
-        policyArray_TableView.delegate = self
-        policyArray_TableView.dataSource = self
-        policyArray_TableView.doubleAction = #selector(removeFromPolicyArray)
+        policies_TableView.tableColumns.forEach { (column) in
+            column.headerCell.attributedStringValue = NSAttributedString(string: column.title, attributes: [NSAttributedString.Key.font: NSFont.boldSystemFont(ofSize: 16)])
+        }
+        let descriptorName = NSSortDescriptor(key: "name", ascending: true)
+        policies_TableView.tableColumns[0].sortDescriptorPrototype = descriptorName
         
-        policyArray_TableView.registerForDraggedTypes([.string])
+        selectedPolicies_TableView.delegate = self
+        selectedPolicies_TableView.dataSource = self
+        selectedPolicies_TableView.doubleAction = #selector(removeFromPolicyArray)
+        
+        selectedPolicies_TableView.tableColumns.forEach { (column) in
+            column.headerCell.attributedStringValue = NSAttributedString(string: column.title, attributes: [NSAttributedString.Key.font: NSFont.boldSystemFont(ofSize: 16)])
+        }
+        
+        selectedPolicies_TableView.registerForDraggedTypes([.string])
 //        let registeredTypes:[String] = [NSPasteboard.PasteboardType.string.rawValue]
 //        policyArray_TableView.registerForDraggedTypes(convertToNSPasteboardPasteboardTypeArray(registeredTypes))
 //        policies_TableView.registerForDraggedTypes(convertToNSPasteboardPasteboardTypeArray(registeredTypes))
+        
+        configuration_Button.selectItem(at: 0)
 
     }
     
@@ -496,6 +616,29 @@ policy_array=('
         })
     task.resume()
     }
+    
+    
+    private func sortPoliciesTableView(theRow: Int) {
+        if selectedPoliciesArray.count > 0 && theRow != -1 {
+            let selectedPolicy = selectedPoliciesArray[theRow].id
+//            icon_TextField.stringValue = "\(policy_array_dict[selectedPolicy]!["icon"] ?? "")"
+            progressText_TextField.stringValue = "\(configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["listitem"]))")"
+            validation_TextField.stringValue = "\(configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["thePath"] ?? "")"
+        } else if selectedPoliciesArray.count == 0 {
+//            icon_TextField.stringValue = ""
+            progressText_TextField.stringValue = ""
+            validation_TextField.stringValue = ""
+        }
+        let isAscending = policies_TableView.sortDescriptors.first?.ascending ?? true
+    //        let isAscending = sortDescriptor.ascending
+    //        print("isAsc: \(isAscending)")
+        if isAscending {
+            policiesArray = policiesArray.sorted(by: { $0.name.lowercased() < $1.name.lowercased() })
+        } else {
+            policiesArray = policiesArray.sorted(by: { $0.name.lowercased() > $1.name.lowercased() })
+        }
+        policies_TableView.reloadData()
+    }
 }
 
 extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
@@ -511,10 +654,11 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
     }
     
     func tableViewSelectionDidChange(_ notification: Notification) {
-        if policyArray_TableView.selectedRowIndexes.count > 0 {
-            let theRow = policyArray_TableView.selectedRow
-            let selectedPolicy = selectedPoliciesArray[theRow].id
-            progressText_TextField.stringValue = "\(policy_array_dict[selectedPolicy]!["progresstext"] ?? "Processing policy \(String(describing: policy_array_dict[selectedPolicy]!["listitem"]))")"
+        if selectedPolicies_TableView.selectedRowIndexes.count > 0 {
+            let theRow = selectedPolicies_TableView.selectedRow
+            let selectedPolicyId = selectedPoliciesArray[theRow].id
+            progressText_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"]))"
+            validation_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["validation"] ?? ""
         }
     }
     
@@ -527,12 +671,18 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
             let name = policiesArray[row].name
             newString = "\(name)"
         }
-        else if (tableView == policyArray_TableView)
+        else if (tableView == selectedPolicies_TableView)
         {
             let name = selectedPoliciesArray[row].name
             newString = "\(name)"
         }
         return newString;
+    }
+    
+    func tableView(_ tableView: NSTableView, sortDescriptorsDidChange oldDescriptors: [NSSortDescriptor]) {
+        if (tableView == policies_TableView) {
+            sortPoliciesTableView(theRow: -1)
+        }
     }
     
     func tableView(_ tableView: NSTableView, pasteboardWriterForRow row: Int) -> NSPasteboardWriting? {
@@ -562,7 +712,7 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
         let pastboard = info.draggingPasteboard
         if let sourceRowString = pastboard.string(forType: .string) {
 //            print("from \(sourceRowString). dropping row \(row)")
-            if ((info.draggingSource as? NSTableView == policyArray_TableView) && (tableView == policyArray_TableView)) {
+            if ((info.draggingSource as? NSTableView == selectedPolicies_TableView) && (tableView == selectedPolicies_TableView)) {
                 let value:Policy = selectedPoliciesArray[Int(sourceRowString)!]
                 selectedPoliciesArray.remove(at: Int(sourceRowString)!)
                 if (row > Int(sourceRowString)!)
@@ -573,7 +723,8 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
                 {
                     selectedPoliciesArray.insert(value, at: row)
                 }
-                policyArray_TableView.reloadData()
+                selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
+                selectedPolicies_TableView.reloadData()
                 return true
             } else {
                 return false
