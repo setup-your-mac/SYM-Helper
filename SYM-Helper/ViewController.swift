@@ -485,7 +485,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                     policy_array = """
         \(whichConfig) )
 
-                policyJSON'
+                policyJSON='
                 {
                     "steps": [
             \(policy_array)
