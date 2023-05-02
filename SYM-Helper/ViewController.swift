@@ -9,23 +9,50 @@ import AppKit
 import Cocoa
 import Foundation
 
-class Policy: NSObject {
+
+ class Policy: NSObject {
+     @objc var name: String
+     @objc var id: String
+     @objc var configs: [String]    // minimum, standard, full config
+     @objc var grouped: Bool
+     @objc var groupId: String
+     
+     init(name: String, id: String, configs: [String], grouped: Bool, groupId: String) {
+         self.name = name
+         self.id = id
+         self.configs = configs
+         self.grouped = grouped
+         self.groupId = groupId
+     }
+ }
+
+class EnrollmentActions: NSObject {
     @objc var name: String
     @objc var id: String
-//    @objc var isSelected = false
-    @objc var configs: [String]
+    @objc var icon: String?
+    @objc var label: String?
+    @objc var trigger: String?
+    @objc var command: String?
+    @objc var arguments: [String]?
+    @objc var objectType: String // policy or command
+    @objc var timeout: String?
     
-    init(name: String, id: String, configs: [String]) {
+    init(name: String, id: String, icon: String?, label: String?, trigger: String?, command: String?, arguments: [String]?, objectType: String, timeout: String?) {
         self.name = name
         self.id = id
-        self.configs = configs
+        self.icon = icon
+        self.label = label
+        self.trigger = trigger
+        self.command = command
+        self.arguments = arguments
+        self.objectType = objectType // policy or command
+        self.timeout = timeout
     }
 }
 
-class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate, SendingLoginInfoDelegate {
+class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate, OtherItemDelegate, SendingLoginInfoDelegate {
     
     @IBOutlet weak var connectedTo_TextField: NSTextField!
-    
     @IBOutlet weak var filter_SearchField: NSSearchField!
 
     @IBAction func filter_action(_ sender: Any) {
@@ -51,7 +78,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
     
     @IBOutlet weak var configuration_Button: NSPopUpButton!
-    
     @IBAction func config_Action(_ sender: NSPopUpButton) {
 //        print("title: \(String(describing: sender.titleOfSelectedItem))")
         policiesArray = policiesDict[sender.titleOfSelectedItem!] ?? staticAllPolicies
@@ -65,11 +91,54 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     
     @IBOutlet weak var policies_TableView: NSTableView!
     @IBOutlet weak var selectedPolicies_TableView: NSTableView!
+    @IBAction func group_Action(_ sender: Any) {
+        let selectedRows = selectedPolicies_TableView.selectedRowIndexes
+        if selectedRows.count > 1 {
+            let firstRow = selectedRows.min()
+//            var groupMembers = [String]()
+            var i = 0
+            for theRow in selectedRows {
+                let selectedPolicy = selectedPoliciesArray[theRow]
+                let theAction      = enrollmentActions[theRow]
+                selectedPolicy.grouped = true
+                selectedPolicy.groupId = "\(groupNumber)"
+//                groupMembers.append(selectedPolicy.id)
+                
+                configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy.id]?.updateValue("\(selectedPolicy.grouped)", forKey: "grouped")
+                configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy.id]?.updateValue("\(groupNumber)", forKey: "groupId")
+                
+                // put grouped objects together
+                selectedPoliciesArray.remove(at: theRow)
+                selectedPoliciesArray.insert(selectedPolicy, at: firstRow!+i)
+                enrollmentActions.remove(at: theRow)
+                enrollmentActions.insert(theAction, at: firstRow!+i)
+                i += 1
+                                
+            }
+//            groupsDict[configuration_Button.titleOfSelectedItem!] = ["\(groupNumber)":groupMembers]
+            groupNumber += 1
+            selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
+            selectedPolicies_TableView.reloadData()
+            selectedPolicies_TableView.selectRowIndexes(IndexSet(integer: firstRow!), byExtendingSelection: false)
+        } else {
+            _ = Alert().display(header: "Attention:", message: "At least 2 policies must be selected", secondButton: "")
+        }
+    }
+    
+    @IBAction func refresh_Action(_ sender: Any) {
+        sendLoginInfo(loginInfo: (JamfProServer.destination, JamfProServer.username, JamfProServer.userpass,saveCredsState))
+    }
+    
+    
+    @IBAction func showSettings(_ sender: Any) {
+        performSegue(withIdentifier: "settings", sender: nil)
+    }
     
     @IBOutlet weak var allPolicies_Spinner: NSProgressIndicator!
     @IBOutlet weak var policyArray_Spinner: NSProgressIndicator!
     
     @IBOutlet weak var progressText_TextField: NSTextField!
+    @IBOutlet weak var validation_Label: NSTextField!
     @IBOutlet weak var validation_TextField: NSTextField!
     
     var policiesArray = [Policy]()
@@ -77,14 +146,21 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     var staticAllPolicies = [Policy]()
     var selectedPoliciesArray = [Policy]()
     var selectedPoliciesDict  = [String:[Policy]]()
-    var policy_array_dict = [String:[String:String]]()   // [policy id: [attribute: value]]]
+    var policy_array_dict = [String:[String:String]]()      // [policy id: [attribute: value]]]
+    var enrollmentActions = [EnrollmentActions]()
     var configsDict = [String:[String:[String:String]]]()   // [config name: [policy id: [attribute: value]]]
+//    var groupsDict  = [String:[String:[String]]]()          // [config name: [group id: [members]]]
     var configurationsArray = [String]()
-    var symScript = ""
     var policy_array = ""
+    var saveCredsState = 0
     
     @IBOutlet weak var generateScript_Button: NSButton!
     //    var policyArray:[String]?    // array of policies to add to SYM
+    @IBOutlet weak var addOther_Button: NSPopUpButton!
+    
+    @IBAction func addOther_Action(_ sender: NSPopUpButton) {
+        performSegue(withIdentifier: "addOther", sender: nil)
+    }
     
     @objc func addToPolicyArray() {
         let rowClicked = policies_TableView.clickedRow
@@ -92,15 +168,15 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         
         if rowClicked < policiesArray.count && rowClicked != -1 {
             let doubleClicked = policiesArray[rowClicked]
-//            doubleClicked.isSelected = true
+
             selectedPoliciesArray.append(doubleClicked)
             selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
-//            print("configuration_Button.titleOfSelectedItem: \(String(describing: configuration_Button.titleOfSelectedItem))")
+
             selectedPoliciesArray.last!.configs.append(configuration_Button.titleOfSelectedItem!)
-//            print("selectedPoliciesArray.last: \(String(describing: selectedPoliciesArray.last?.configs))")
+
             getPolicy(id: doubleClicked.id) { [self]
                 (result: String) in
-                updatePoliciesDict(xml: result, policyId: doubleClicked.id)
+                updatePoliciesDict(xml: result, policyId: doubleClicked.id, grouped: doubleClicked.grouped, groupId: doubleClicked.groupId)
                 policiesArray.remove(at: rowClicked)
                 policiesDict[configuration_Button.titleOfSelectedItem!] = policiesArray
                 
@@ -117,15 +193,20 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 //            doubleClicked.isSelected = false
 
             selectedPoliciesArray.remove(at: doubleClickedRow)
-            selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
+            enrollmentActions.remove(at: doubleClickedRow)
+            
+            selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray // remove this?
 
             doubleClickedRow = (doubleClickedRow > selectedPoliciesArray.count-1) ? doubleClickedRow-1:doubleClickedRow
             if selectedPoliciesArray.count > 0 {
                 selectedPolicies_TableView.selectRowIndexes(IndexSet(integer: doubleClickedRow), byExtendingSelection: false)
                 let selectedPolicy = selectedPoliciesArray[doubleClickedRow].id
-//                icon_TextField.stringValue = "\(policy_array_dict[selectedPolicy]!["icon"] ?? "")"
-                progressText_TextField.stringValue = "\(configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["listitem"]))")"
-                validation_TextField.stringValue = "\(configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["thePath"] ?? "")"
+//                icon_TextField.stringValue = enrollmentActions[doubleClickedRow].icon ?? ""
+//                progressText_TextField.stringValue = "\(configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["listitem"]))")"
+//                validation_TextField.stringValue = "\(configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["thePath"] ?? "")"
+                
+                progressText_TextField.stringValue = "\(enrollmentActions[doubleClickedRow].label ?? "Processing policy \(String(describing: enrollmentActions[doubleClickedRow].name))")"
+                validation_TextField.stringValue = "\(enrollmentActions[doubleClickedRow].command ?? "")"
             }
             selectedPolicies_TableView.reloadData()
             if let _ = Int(doubleClicked.id) {
@@ -141,22 +222,43 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 //        var id = ""
         generateScript_Button.isEnabled = false
         let whichConfig = configuration_Button.titleOfSelectedItem
-        var idArray = [String]()
-        for selectedPolicy in selectedPoliciesArray {
+        var idArray = [[String]]()
+        var selectedPolicy: Policy?
+        var i = 0
+//        for selectedPolicy in selectedPoliciesArray {
+        while i < selectedPoliciesArray.count {
+            selectedPolicy = selectedPoliciesArray[i]
+//            print("is group member: \(selectedPolicy!.grouped)")
 //            print("id: \(id.replacingOccurrences(of: ")", with: ""))")
-            idArray.append(selectedPolicy.id)
+            if selectedPolicy!.grouped {
+                var groupArray = [String]()
+                while selectedPolicy!.grouped {
+                    groupArray.append(selectedPolicy!.id)
+                    i += 1
+                    if i < selectedPoliciesArray.count {
+                        selectedPolicy = selectedPoliciesArray[i]
+                    } else {
+                        break
+                    }
+                }
+                idArray.append(groupArray)
+            } else {
+                idArray.append([selectedPolicy!.id])
+                i += 1
+            }
         }
         if idArray.count > 0 {
             policyArray_Spinner.maxValue = Double(idArray.count-1)
             policyArray_Spinner.startAnimation(self)
             policyArray_Spinner.isHidden = false
-            processPolicies(id: idArray, whichId: 0, theConfigIndex: 0)
+            processPolicies(whichId: 0, theConfigIndex: 0)
+//            processPolicies(id: idArray, whichId: 0, theConfigIndex: 0)
         } else {
             generateScript_Button.isEnabled = true
         }
     }
     
-    private func updatePoliciesDict(xml: String, policyId: String) {
+    private func updatePoliciesDict(xml: String, policyId: String, grouped: Bool, groupId: String) {
         
         let general = betweenTags(xmlString: xml, startTag: "<general>", endTag: "</general>")
 //                let policyId = betweenTags(xmlString: general, startTag: "<id>", endTag: "</id>")
@@ -165,6 +267,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         var icon = betweenTags(xmlString: self_service, startTag: "<uri>", endTag: "</uri>")
         icon = icon.replacingOccurrences(of: "https://ics.services.jamfcloud.com/icon/hash_", with: "")
         var progresstext = betweenTags(xmlString: self_service, startTag: "<self_service_description>", endTag: "</self_service_description>")
+        progresstext = progresstext.xmlDecode
         if progresstext == "" {
             progresstext = "Processing policy: \(String(describing: policyName))"
         }
@@ -181,11 +284,12 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         updatePolicyCustomeTrigger(xml: updateXml, id: policyId, customTrigger: customTrigger) { [self]
                 (result: String) in
                 customTrigger = result
+            progressText_TextField.stringValue = progresstext
                 
-                progressText_TextField.stringValue = progresstext
-                
-                policy_array_dict[policyId] = ["listitem": policyName, "icon": icon, "progresstext": progresstext, "trigger": customTrigger, "validation": "None"]
-            configsDict[configuration_Button.titleOfSelectedItem!]![policyId] = ["listitem": policyName, "icon": icon, "progresstext": progresstext, "trigger": customTrigger, "validation": "None"]
+            policy_array_dict[policyId] = ["listitem": policyName, "icon": icon, "progresstext": progresstext, "trigger": customTrigger, "validation": "None"]
+            configsDict[configuration_Button.titleOfSelectedItem!]![policyId] = ["listitem": policyName, "icon": icon, "progresstext": progresstext, "trigger": customTrigger, "validation": "None", "grouped": "\(grouped)", "groupId": "\(groupId)"]
+            
+            enrollmentActions.append(EnrollmentActions(name: policyName, id: policyId, icon: icon, label: progresstext, trigger: customTrigger, command: "", arguments: [], objectType: "policy", timeout: ""))
             }
 //        let trigger = (customTrigger == "recon") ? customTrigger:policyId
         
@@ -200,12 +304,16 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 switch whichField.identifier!.rawValue {
                     //            case "icon_TextField":
                     //                policy_array_dict[selectedPolicyId]!["icon"] = icon_TextField.stringValue
+//                    enrollmentActions[theRow].icon = icon_TextField.stringValue
                 case "progressText_TextField":
 //                    policy_array_dict[selectedPolicyId]!["progresstext"] = progressText_TextField.stringValue
                     configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] = progressText_TextField.stringValue
+                    enrollmentActions[theRow].label = progressText_TextField.stringValue
                 case "validation_TextField":
 //                    policy_array_dict[selectedPolicyId]!["thePath"] = validation_TextField.stringValue
                     configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["validation"] = validation_TextField.stringValue
+                    enrollmentActions[theRow].command = validation_TextField.stringValue
+
                 default:
                     break
                 }
@@ -259,7 +367,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         task.resume()
     }
     
-    private func processPolicies(id: [String], whichId: Int, theConfigIndex: Int) {
+    private func processPolicies(id: [[String]] = [], whichId: Int, theConfigIndex: Int) {
         
         // move the default config to the end of the array
         if let index = configurationsArray.firstIndex(of: "Default") {
@@ -285,16 +393,69 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             if selectedPoliciesDict[theConfig]?.count ?? 0 > 0 {
                 var firstPolicy = true
                 policy_array = ""
-                for thePolicy in selectedPoliciesDict[theConfig]! {
-                    let policyId = thePolicy.id
-
-                    let result = configsDict[theConfig]![policyId]!
-    //                let result = configsDict[theConfig]![id[whichId]]!
+                var i = 0
+//                print("selectedPoliciesDict[theConfig]: \(selectedPoliciesDict[theConfig])")
+//                for thePolicy in selectedPoliciesDict[theConfig]! {
+                while i < selectedPoliciesDict[theConfig]!.count {
+//                    print("item \(i): \(selectedPoliciesDict[theConfig]![i].id)")
+//
+                     let thePolicy = selectedPoliciesDict[theConfig]![i]
+//                    let policyId = thePolicy.id
+                    var policyId = selectedPoliciesDict[theConfig]![i].id
+                    
+//                    print("[processPolicies] configsDict[\(theConfig)]!: \(configsDict[theConfig]!)")
+                    
+                   let result = configsDict[theConfig]![policyId]!
+//                   print("[processPolicies] result: \(result)")
+                    
+                    
                     let policyName = result["listitem"]
                     let icon = result["icon"]
                     let progresstext = result["progresstext"]
-                    let validation = result["validation"] ?? ""
-                    let customTrigger = result["trigger"]
+                    var customTrigger = result["trigger"]
+                    var validation = result["validation"] ?? ""
+                    
+                    var isGrouped = result["grouped"]
+                    let theGroupId = result["groupId"]
+                    var newGroupId = theGroupId
+                    
+                    var triggerListArray = """
+             {
+                                            "trigger": "\(customTrigger!)",
+                                            "validation": "\(validation)"
+                                         }
+"""
+                    while isGrouped == "true" && theGroupId == newGroupId {
+                        i += 1
+                        if i < selectedPoliciesDict[theConfig]!.count {
+                            policyId = selectedPoliciesDict[theConfig]![i].id
+                        } else {
+                            break
+                        }
+
+                        let result = configsDict[theConfig]![policyId]!
+//                        print("[processPolicies-group] result: \(result)")
+                        
+                        customTrigger = result["trigger"]
+                        validation = result["validation"] ?? ""
+                        
+                        isGrouped = result["grouped"]
+                        newGroupId = result["groupId"]
+                        
+                        if theGroupId == newGroupId {
+                            triggerListArray.append("""
+,
+                                         {
+                                            "trigger": "\(customTrigger!)",
+                                            "validation": "\(validation)"
+                                         }
+""")
+                        } else {
+                            i -= 1
+                            break
+                        }
+                    }
+                    
                     policyArray_Spinner.increment(by: 1.0)
                     usleep(1000)
                 
@@ -310,13 +471,11 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                             "icon": "\(String(describing: icon!))",
                             "progresstext": "\(progresstext ?? "Processing policy \(String(describing: policyName!))")",
                             "trigger_list": [
-                                {
-                                    "trigger": "\(customTrigger!)",
-                                    "validation": "\(validation)"
-                                }
+                                \(triggerListArray)
                             ]
                         }
     """)
+                    i += 1
     //                processPolicies(id: id, whichId: whichId+1, theConfigIndex: theConfigIndex+1)
                 }   // for (policyId, _) in configDetails - end
                 if configDetails.count > 0 {
@@ -396,7 +555,10 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 if saveCredsState == 1 {
                     Credentials().save(service: "sym-helper-\(JamfProServer.destination.fqdnFromUrl)", account: JamfProServer.username, data: JamfProServer.userpass)
                 }
-                connectedTo_TextField.stringValue = "Connected to: \(JamfProServer.destination)"
+                let lastChar = "\(JamfProServer.destination)".last
+                connectedTo_TextField.stringValue = ( JamfProServer.destination.last == "/" ) ? String("Connected to: \(JamfProServer.destination)".dropLast()):"Connected to: \(JamfProServer.destination)"
+                scriptSource = defaults.string(forKey: "scriptSource") ?? defaultScriptSource
+
                 getScript() { [self]
                     (result: String) in
                     symScript = result
@@ -406,6 +568,12 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 //                    symScript = policy_array_regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "policy_array=('\n')")
 //
                     print("\ngetScript: \(symScript)")
+                    
+                    if symScript == "" {
+                        _ = Alert().display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "")
+                        allPolicies_Spinner.stopAnimation(self)
+                        return
+                    }
                     
                     getAllPolicies() { [self]
                         (result: [String:Any]) in
@@ -420,7 +588,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 //                                    print("\(policyName) (\(policyId))")
                                     // filter out policies created from casper remote - start
                                     if policyName.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil {
-                                        policiesArray.append(Policy(name: "\(policyName) (\(policyId))", id: "\(policyId)", configs: []))
+                                        policiesArray.append(Policy(name: "\(policyName) (\(policyId))", id: "\(policyId)", configs: [], grouped: false, groupId: ""))
                                     }
                                     // filter out policies created from casper remote - end
                                 }
@@ -445,21 +613,76 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         
     }
     
+    // Delegate Method - Other
+    func sendOtherItem(newItem: [String:String]) {
+        print("command: \(newItem)")
+        
+        /*
+             let doubleClicked = policiesArray[rowClicked]
+
+             selectedPoliciesArray.append(doubleClicked)
+             selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
+
+             selectedPoliciesArray.last!.configs.append(configuration_Button.titleOfSelectedItem!)
+         */
+
+        if let commandToArray = newItem["command"]?.components(separatedBy: " ") {
+            let theLabel = newItem["label"] ?? "shell script"
+            let theId    = "\(UUID())"
+            progressText_TextField.stringValue = theLabel
+//             thePath_TextField.stringValue = newItem["command"] ?? ""
+             let icon = newItem["icon"] ?? "system:clock"
+//             icon_TextField.stringValue = icon
+             
+             var argumentArray = [String]()
+             for i in 1..<commandToArray.count {
+                 argumentArray.append(commandToArray[i])
+             }
+            
+            selectedPoliciesArray.append(Policy(name: theLabel, id: theId, configs: [configuration_Button.titleOfSelectedItem!], grouped: false, groupId: ""))
+            selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
+            selectedPoliciesArray.last!.configs.append(configuration_Button.titleOfSelectedItem!)
+            
+            policy_array_dict[theId] = ["listitem": theLabel, "icon": icon, "progresstext": theLabel, "trigger": "", "thePath": newItem["command"] ?? ""]
+            
+            configsDict[configuration_Button.titleOfSelectedItem!]![theId] = ["listitem": theLabel, "icon": icon, "progresstext": theLabel, "trigger": "", "validation": "None", "grouped": "", "groupId": ""]
+            
+            enrollmentActions.append(EnrollmentActions(name: theLabel, id: theId, icon: icon, label: theLabel, trigger: "", command: commandToArray[0], arguments: argumentArray, objectType: "command", timeout: ""))
+             
+            selectedPolicies_TableView.reloadData()
+             
+         } else {
+             WriteToLog().message(stringOfText: "[sendCommand] Unable to add command: \(newItem).")
+         }
+
+        
+    }
+    
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
         if segue.identifier == "loginView" {
             let loginVC: LoginVC = segue.destinationController as! LoginVC
             loginVC.delegate = self
             loginVC.uploadsComplete = false
+        } else if segue.identifier == "addOther" {
+            let otherItemVC: OtherItemVC = segue.destinationController as! OtherItemVC
+            otherItemVC.delegate = self
+            otherItemVC.itemType = addOther_Button.selectedItem!.title
+        } else if segue.identifier == "settings" {
+            let settingsVC: SettingsVC = segue.destinationController as! SettingsVC
+            //            settingsVC.delegate = self
+            //            settingsVC.itemType = addOther_Button.selectedItem!.title
         }
     }
     
-    private func getScript(completion: @escaping (_ authResult: String) -> Void) {
+    func getScript(completion: @escaping (_ authResult: String) -> Void) {
+        scriptSource = defaults.string(forKey: "scriptSource") ?? defaultScriptSource
         print("enter getScript")
         print("script source: \(scriptSource)")
         var responseData = ""
         URLCache.shared.removeAllCachedResponses()
         let scriptUrl      = URL(string: "\(scriptSource)")
         let configuration  = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 10
         var request        = URLRequest(url: scriptUrl!)
         request.httpMethod = "GET"
         configuration.httpAdditionalHeaders = ["User-Agent" : AppInfo.userAgentHeader]
@@ -643,6 +866,12 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 
 extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
     
+    
+    fileprivate enum CellIdentifiers {
+        static let NameCell    = "policyName"
+        static let GroupIdCell = "groupId"
+    }
+    
     func numberOfRows(in tableView: NSTableView) -> Int {
         if (tableView == policies_TableView) {
 //            print("numberOfRows: \(policiesArray.count)")
@@ -657,8 +886,20 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
         if selectedPolicies_TableView.selectedRowIndexes.count > 0 {
             let theRow = selectedPolicies_TableView.selectedRow
             let selectedPolicyId = selectedPoliciesArray[theRow].id
-            progressText_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"]))"
-            validation_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["validation"] ?? ""
+            
+            if let _ = Int(selectedPolicyId) {
+                validation_Label.stringValue = "Validation:"
+            } else {
+                validation_Label.stringValue = "Command:"
+            }
+            /*
+             progressText_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"]))"
+             validation_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["validation"] ?? ""
+             */
+//            icon_TextField.stringValue = "\(enrollmentActions[theRow].icon ?? "")"
+//            print("enrollmentActions.count: \(enrollmentActions.count)")
+            progressText_TextField.stringValue = "\(enrollmentActions[theRow].label ?? "Processing policy \(String(describing: enrollmentActions[theRow].name))")"
+            validation_TextField.stringValue = "\(enrollmentActions[theRow].command ?? "")"
         }
     }
     
@@ -671,10 +912,15 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
             let name = policiesArray[row].name
             newString = "\(name)"
         }
-        else if (tableView == selectedPolicies_TableView)
-        {
-            let name = selectedPoliciesArray[row].name
-            newString = "\(name)"
+        else if (tableView == selectedPolicies_TableView) {
+                    
+            if tableColumn == selectedPolicies_TableView.tableColumns[0] {
+                let name = selectedPoliciesArray[row].name
+                newString = "\(name)"
+            } else {
+                let groupId = selectedPoliciesArray[row].groupId
+                newString = "\(groupId)"
+            }
         }
         return newString;
     }
@@ -711,20 +957,34 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
     func tableView(_ tableView: NSTableView, acceptDrop info: NSDraggingInfo, row: Int, dropOperation: NSTableView.DropOperation) -> Bool {
         let pastboard = info.draggingPasteboard
         if let sourceRowString = pastboard.string(forType: .string) {
+            let selectionArray = sourceRowString.components(separatedBy: "\n")
+//            print("\(selectionArray.count) items selected")
 //            print("from \(sourceRowString). dropping row \(row)")
             if ((info.draggingSource as? NSTableView == selectedPolicies_TableView) && (tableView == selectedPolicies_TableView)) {
-                let value:Policy = selectedPoliciesArray[Int(sourceRowString)!]
-                selectedPoliciesArray.remove(at: Int(sourceRowString)!)
-                if (row > Int(sourceRowString)!)
-                {
-                    selectedPoliciesArray.insert(value, at: row-1)
+                var objectsMoved = 0
+                var indexAdjustment = 0
+                for thePolicy in selectionArray {
+                    let value:Policy = selectedPoliciesArray[Int(thePolicy)!-indexAdjustment]
+                    let theAction:EnrollmentActions = enrollmentActions[Int(thePolicy)!-indexAdjustment]
+                    
+                    selectedPoliciesArray.remove(at: Int(thePolicy)! - indexAdjustment)
+                    enrollmentActions.remove(at: Int(thePolicy)! - indexAdjustment)
+                    if (row > Int(thePolicy)!)
+                    {
+                        selectedPoliciesArray.insert(value, at: (row - 1 - objectsMoved + objectsMoved))
+                        enrollmentActions.insert(theAction, at: (row - 1 - objectsMoved + objectsMoved))
+                        indexAdjustment += 1
+                    }
+                    else
+                    {
+                        selectedPoliciesArray.insert(value, at: (row + objectsMoved))
+                        enrollmentActions.insert(theAction, at: (row + objectsMoved))
+                    }
+                    objectsMoved += 1
+                    selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
+                    selectedPolicies_TableView.reloadData()
                 }
-                else
-                {
-                    selectedPoliciesArray.insert(value, at: row)
-                }
-                selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
-                selectedPolicies_TableView.reloadData()
+                
                 return true
             } else {
                 return false

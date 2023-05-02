@@ -10,15 +10,19 @@ import Foundation
 
 var showLoginWindow = true
 let defaults        = UserDefaults.standard
+var groupNumber     = 0
 let httpSuccess     = 200...299
 let refreshInterval: UInt32 = 25*60 // 25 minutes
 var runComplete     = false
+var symScript       = ""
 var tokenTimeCreated: Date?
 
+
 //
-var scriptSource            = "https://raw.githubusercontent.com/dan-snelson/Setup-Your-Mac/main/Setup-Your-Mac-via-Dialog.bash"
-//var scriptSource            = "https://recipes.hickoryhillseast.net/sym/Setup-Your-Mac-via-Dialog.bash"
-//let recipeDownloadUrl       = (FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first as URL?)!
+// add option to select source
+var scriptSource        = ""
+var defaultScriptSource = "https://raw.githubusercontent.com/dan-snelson/Setup-Your-Mac/main/Setup-Your-Mac-via-Dialog.bash"
+//var scriptSource       = "https://recipes.hickoryhillseast.net/sym/Setup-Your-Mac-via-Dialog.bash"
 
 struct AppInfo {
     static let dict    = Bundle.main.infoDictionary!
@@ -135,6 +139,28 @@ extension String {
                 fqdn = fqdnArray[0]
             }
             return fqdn
+        }
+    }
+    var xmlDecode: String {
+        get {
+            let newString = self.replacingOccurrences(of: "&amp;", with: "&")
+                .replacingOccurrences(of: "&quot;", with: "\"")
+                .replacingOccurrences(of: "&apos;", with: "'")
+                .replacingOccurrences(of: "&lt;", with: "<")
+                .replacingOccurrences(of: "&gt;", with: ">")
+                .replacingOccurrences(of: "&#13;", with: "\n")
+            return newString
+        }
+    }
+    var xmlEncode: String {
+        get {
+            var newString = self
+            newString = newString.replacingOccurrences(of: "&", with: "&amp;")
+                .replacingOccurrences(of: "'", with: "&apos;")
+                .replacingOccurrences(of: "<", with: "&lt;")
+                .replacingOccurrences(of: ">", with: "&gt;")
+            
+            return newString
         }
     }
 }

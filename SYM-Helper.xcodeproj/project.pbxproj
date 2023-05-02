@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B568542D2A0004940004630D /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B568542C2A0004940004630D /* Settings.swift */; };
+		B57069DB29D891950004C848 /* OtherItemVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57069DA29D891950004C848 /* OtherItemVC.swift */; };
 		B5BBDBA129A168490040FD71 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBA029A168490040FD71 /* AppDelegate.swift */; };
 		B5BBDBA329A168490040FD71 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBA229A168490040FD71 /* ViewController.swift */; };
 		B5BBDBA529A1684C0040FD71 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5BBDBA429A1684C0040FD71 /* Assets.xcassets */; };
@@ -20,6 +22,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B568542C2A0004940004630D /* Settings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		B57069DA29D891950004C848 /* OtherItemVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherItemVC.swift; sourceTree = "<group>"; };
 		B5BBDB9D29A168490040FD71 /* SYM-Helper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SYM-Helper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5BBDBA029A168490040FD71 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B5BBDBA229A168490040FD71 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -71,6 +75,8 @@
 				B5BBDBB329A1719D0040FD71 /* Credentials.swift */,
 				B5BBDBB529A171BC0040FD71 /* Globals.swift */,
 				B5BBDBB129A171810040FD71 /* LoginVC.swift */,
+				B57069DA29D891950004C848 /* OtherItemVC.swift */,
+				B568542C2A0004940004630D /* Settings.swift */,
 				B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */,
 				B5BBDBA229A168490040FD71 /* ViewController.swift */,
 				B5BBDBAF29A171570040FD71 /* WriteToLog.swift */,
@@ -91,6 +97,7 @@
 				B5BBDB9929A168490040FD71 /* Sources */,
 				B5BBDB9A29A168490040FD71 /* Frameworks */,
 				B5BBDB9B29A168490040FD71 /* Resources */,
+				B568542A29FD3F4B0004630D /* Run Build Number Script */,
 			);
 			buildRules = (
 			);
@@ -146,14 +153,38 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		B568542A29FD3F4B0004630D /* Run Build Number Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Run Build Number Script";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "##newBuildNumber=$(date -u +%Y%m%d)\n\n##echo \"dir: ${PROJECT_DIR}\"\n##echo \"plist: ${INFOPLIST_FILE}\"\n##echo \"settings path: $PRODUCT_SETTINGS_PATH\"\n##defaults read \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n## Bundle Version: $(CURRENT_PROJECT_VERSION)\n##currentBuild=$(/usr/libexec/PlistBuddy -c \"Print :CFBundleVersion\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\")\n##echo \"previous build: $currentBuild\"\n##if [ \"$currentBuild\" = \"\" ]; then\n##    /usr/libexec/PlistBuddy -c \"Add :CFBundleVersion string $newBuildNumber\"  \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n##else\n##    /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $newBuildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n##fi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		B5BBDB9929A168490040FD71 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B57069DB29D891950004C848 /* OtherItemVC.swift in Sources */,
 				B5BBDBA329A168490040FD71 /* ViewController.swift in Sources */,
 				B5BBDBB829A1758C0040FD71 /* TokenDelegate.swift in Sources */,
 				B5BBDBB029A171570040FD71 /* WriteToLog.swift in Sources */,
+				B568542D2A0004940004630D /* Settings.swift in Sources */,
 				B5BBDBB629A171BC0040FD71 /* Globals.swift in Sources */,
 				B5BBDBB429A1719D0040FD71 /* Credentials.swift in Sources */,
 				B5BBDBB229A171810040FD71 /* LoginVC.swift in Sources */,
@@ -310,7 +341,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 0.6.0;
+				MARKETING_VERSION = 0.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "jamf.ie.SYM-Helper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -339,7 +370,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 0.6.0;
+				MARKETING_VERSION = 0.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "jamf.ie.SYM-Helper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
