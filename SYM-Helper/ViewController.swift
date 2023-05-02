@@ -559,7 +559,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 connectedTo_TextField.stringValue = ( JamfProServer.destination.last == "/" ) ? String("Connected to: \(JamfProServer.destination)".dropLast()):"Connected to: \(JamfProServer.destination)"
                 scriptSource = defaults.string(forKey: "scriptSource") ?? defaultScriptSource
 
-                getScript() { [self]
+                getScript(theSource: defaults.string(forKey: "scriptSource") ?? defaultScriptSource) { [self]
                     (result: String) in
                     symScript = result
 //                    print("getScript: \(symScript)")
@@ -572,7 +572,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                     if symScript == "" {
                         _ = Alert().display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "")
                         allPolicies_Spinner.stopAnimation(self)
-                        return
+//                        return
                     }
                     
                     getAllPolicies() { [self]
@@ -674,13 +674,15 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         }
     }
     
-    func getScript(completion: @escaping (_ authResult: String) -> Void) {
-        scriptSource = defaults.string(forKey: "scriptSource") ?? defaultScriptSource
+    func getScript(theSource: String,completion: @escaping (_ authResult: String) -> Void) {
+//        scriptSource = defaults.string(forKey: "scriptSource") ?? defaultScriptSource
         print("enter getScript")
-        print("script source: \(scriptSource)")
+//        print("script source: \(scriptSource)")
+        print("script source: \(theSource)")
         var responseData = ""
         URLCache.shared.removeAllCachedResponses()
-        let scriptUrl      = URL(string: "\(scriptSource)")
+        //        let scriptUrl      = URL(string: "\(scriptSource)")
+        let scriptUrl      = URL(string: "\(theSource)")
         let configuration  = URLSessionConfiguration.ephemeral
         configuration.timeoutIntervalForRequest = 10
         var request        = URLRequest(url: scriptUrl!)
