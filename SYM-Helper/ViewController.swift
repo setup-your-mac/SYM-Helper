@@ -399,7 +399,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 while i < selectedPoliciesDict[theConfig]!.count {
 //                    print("item \(i): \(selectedPoliciesDict[theConfig]![i].id)")
 //
-                     let thePolicy = selectedPoliciesDict[theConfig]![i]
+                    let thePolicy = selectedPoliciesDict[theConfig]![i]
 //                    let policyId = thePolicy.id
                     var policyId = selectedPoliciesDict[theConfig]![i].id
                     

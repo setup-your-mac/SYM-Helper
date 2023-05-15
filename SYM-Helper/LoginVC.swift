@@ -144,9 +144,6 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         jamfProServer_textfield.stringValue = defaults.string(forKey: "server") ?? ""
         saveCreds_button.state = NSControl.StateValue(defaults.integer(forKey: "saveCreds"))
         if jamfProServer_textfield.stringValue != "" {
-//            let regexKey = try! NSRegularExpression(pattern: "http(.*?)://", options:.caseInsensitive)
-//            let credKey  = regexKey.stringByReplacingMatches(in: jamfProServer_textfield.stringValue, options: [], range: NSRange(0..<jamfProServer_textfield.stringValue.utf16.count), withTemplate: "").replacingOccurrences(of: "?failover", with: "")
-//            print("credKey: \(credKey)")
             
             let credentialsArray = Credentials().retrieve(service: "sym-helper-\(jamfProServer_textfield.stringValue.fqdnFromUrl)")
             
