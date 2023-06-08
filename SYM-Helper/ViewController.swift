@@ -50,7 +50,7 @@ class EnrollmentActions: NSObject {
     }
 }
 
-class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate, OtherItemDelegate, SendingLoginInfoDelegate {
+class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate, OtherItemDelegate, SendingLoginInfoDelegate, SendNewConfigInfoDelegate, SendClonedConfigInfoDelegate {
     
     @IBOutlet weak var connectedTo_TextField: NSTextField!
     @IBOutlet weak var filter_SearchField: NSSearchField!
@@ -78,10 +78,35 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
     
     @IBOutlet weak var configuration_Button: NSPopUpButton!
-    @IBAction func config_Action(_ sender: NSPopUpButton) {
+    @IBOutlet weak var configuration_Menu: NSMenu!
+    
+    @IBAction func config_Action(_ sender: Any) {
 //        print("title: \(String(describing: sender.titleOfSelectedItem))")
-        policiesArray = policiesDict[sender.titleOfSelectedItem!] ?? staticAllPolicies
-        selectedPoliciesArray = selectedPoliciesDict[sender.titleOfSelectedItem!] ?? []
+        var selectedConfiguration = "Default"
+        if let _ = sender as? NSPopUpButton {
+            selectedConfiguration = (sender as! NSPopUpButton).titleOfSelectedItem!
+        } else if let _ = sender as? String {
+            selectedConfiguration = sender as! String
+        }
+        // build enrollmentActions - start
+        /*var transformedConfig = [String:[Policy]]()
+         var policyArray = [Policy]()
+         for (theConfig, configInfo) in theDict {
+             policyArray.removeAll()
+             for theConfigInfo in configInfo {
+                 policyArray.append(Policy(name: theConfigInfo["name"] as! String, id: theConfigInfo["id"] as! String, configs: theConfigInfo["configs"] as! [String], grouped: theConfigInfo["grouped"] as! Bool, groupId: theConfigInfo["groupId"] as! String))
+             }
+             transformedConfig[theConfig] = policyArray
+         }
+         */
+        enrollmentActions.removeAll()
+        let currentPolicies = configsDict[configuration_Button.titleOfSelectedItem!]!
+        for (policyId, policyInfo) in currentPolicies {
+            enrollmentActions.append(EnrollmentActions(name: policyInfo["listitem"]!, id: policyId, icon: policyInfo["icon"]!, label: policyInfo["progresstext"]!, trigger: policyInfo["trigger"]!, command: policyInfo["command"]!, arguments: [], objectType: policyInfo["objectType"]!, timeout: policyInfo["timeout"]!))
+        }
+        // build enrollmentActions - end
+        policiesArray = policiesDict[selectedConfiguration] ?? staticAllPolicies
+        selectedPoliciesArray = selectedPoliciesDict[selectedConfiguration] ?? []
         selectedPolicies_TableView.deselectAll(self)
         progressText_TextField.stringValue = ""
         validation_TextField.stringValue   = ""
@@ -131,7 +156,18 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     
     
     @IBAction func showSettings(_ sender: Any) {
-        performSegue(withIdentifier: "settings", sender: nil)
+        if NSEvent.modifierFlags.contains(.option) {
+//            isDir = true
+            let settingsFolder = AppInfo.appSupport
+            if (FileManager.default.fileExists(atPath: settingsFolder)) {
+//                NSWorkspace.shared.openFile(settingsFolder)
+                NSWorkspace.shared.open(URL(fileURLWithPath: settingsFolder))
+            } else {
+                _ = Alert().display(header: "Alert", message: "Unable to open \(settingsFolder)", secondButton: "")
+            }
+        } else {
+            performSegue(withIdentifier: "settings", sender: nil)
+        }
     }
     
     @IBOutlet weak var allPolicies_Spinner: NSProgressIndicator!
@@ -154,6 +190,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     var policy_array = ""
     var saveCredsState = 0
     
+    var saveInfo = [String:Any]()
+    
     @IBOutlet weak var generateScript_Button: NSButton!
     //    var policyArray:[String]?    // array of policies to add to SYM
     @IBOutlet weak var addOther_Button: NSPopUpButton!
@@ -162,11 +200,19 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         performSegue(withIdentifier: "addOther", sender: nil)
     }
     
+    // selectors - start
+    @objc func addNewSelector() {
+        performSegue(withIdentifier: "addNewConfig", sender: nil)
+    }
+    @objc func cloneExistingSelector() {
+        performSegue(withIdentifier: "cloneExistingConfig", sender: nil)
+    }
     @objc func addToPolicyArray() {
         let rowClicked = policies_TableView.clickedRow
 //        let doubleClicked = policiesArray[rowClicked]
         
         if rowClicked < policiesArray.count && rowClicked != -1 {
+            print("[addToPolicyArray] policiesArray: \(policiesArray[rowClicked].name)")
             let doubleClicked = policiesArray[rowClicked]
 
             selectedPoliciesArray.append(doubleClicked)
@@ -183,6 +229,9 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 policies_TableView.reloadData()
                 selectedPolicies_TableView.reloadData()
             }
+            
+            progressText_TextField.stringValue = ""
+            validation_TextField.stringValue   = ""
         }
     }
     @objc func removeFromPolicyArray() {
@@ -191,32 +240,36 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 
             let doubleClicked = selectedPoliciesArray[doubleClickedRow]
 //            doubleClicked.isSelected = false
+            
+            configsDict[configuration_Button.titleOfSelectedItem!]![doubleClicked.id] = nil
 
             selectedPoliciesArray.remove(at: doubleClickedRow)
             enrollmentActions.remove(at: doubleClickedRow)
             
-            selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray // remove this?
+            progressText_TextField.stringValue = ""
+            validation_TextField.stringValue   = ""
+            
+            selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
 
-            doubleClickedRow = (doubleClickedRow > selectedPoliciesArray.count-1) ? doubleClickedRow-1:doubleClickedRow
-            if selectedPoliciesArray.count > 0 {
-                selectedPolicies_TableView.selectRowIndexes(IndexSet(integer: doubleClickedRow), byExtendingSelection: false)
-                let selectedPolicy = selectedPoliciesArray[doubleClickedRow].id
-//                icon_TextField.stringValue = enrollmentActions[doubleClickedRow].icon ?? ""
-//                progressText_TextField.stringValue = "\(configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["listitem"]))")"
-//                validation_TextField.stringValue = "\(configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["thePath"] ?? "")"
-                
-                progressText_TextField.stringValue = "\(enrollmentActions[doubleClickedRow].label ?? "Processing policy \(String(describing: enrollmentActions[doubleClickedRow].name))")"
-                validation_TextField.stringValue = "\(enrollmentActions[doubleClickedRow].command ?? "")"
-            }
+//            doubleClickedRow = (doubleClickedRow > selectedPoliciesArray.count-1) ? doubleClickedRow-1:doubleClickedRow
+//            if selectedPoliciesArray.count > 0 {
+//                selectedPolicies_TableView.selectRowIndexes(IndexSet(integer: doubleClickedRow), byExtendingSelection: false)
+//                let selectedPolicy = selectedPoliciesArray[doubleClickedRow].id
+//
+//                progressText_TextField.stringValue = "\(enrollmentActions[doubleClickedRow].label ?? "Processing policy \(String(describing: enrollmentActions[doubleClickedRow].name))")"
+//                validation_TextField.stringValue = "\(enrollmentActions[doubleClickedRow].command ?? "")"
+//            }
             selectedPolicies_TableView.reloadData()
             if let _ = Int(doubleClicked.id) {
                 policiesArray.append(doubleClicked)
                 policiesDict[configuration_Button.titleOfSelectedItem!] = policiesArray
                 policies_TableView.reloadData()
-                sortPoliciesTableView(theRow: doubleClickedRow)
+//                sortPoliciesTableView(theRow: doubleClickedRow)
+                sortPoliciesTableView(theRow: -1)
             }
         }
     }
+    // selectors - end
     
     @IBAction func generateScript_Action(_ sender: Any) {
 //        var id = ""
@@ -284,10 +337,10 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         updatePolicyCustomeTrigger(xml: updateXml, id: policyId, customTrigger: customTrigger) { [self]
                 (result: String) in
                 customTrigger = result
-            progressText_TextField.stringValue = progresstext
+//            progressText_TextField.stringValue = progresstext
                 
             policy_array_dict[policyId] = ["listitem": policyName, "icon": icon, "progresstext": progresstext, "trigger": customTrigger, "validation": "None"]
-            configsDict[configuration_Button.titleOfSelectedItem!]![policyId] = ["listitem": policyName, "icon": icon, "progresstext": progresstext, "trigger": customTrigger, "validation": "None", "grouped": "\(grouped)", "groupId": "\(groupId)"]
+            configsDict[configuration_Button.titleOfSelectedItem!]![policyId] = ["listitem": policyName, "id": policyId, "icon": icon, "progresstext": progresstext, "trigger": customTrigger, "validation": "None", "command": "", "arguments": "", "objectType": "policy", "timeout": "", "grouped": "\(grouped)", "groupId": "\(groupId)"]
             
             enrollmentActions.append(EnrollmentActions(name: policyName, id: policyId, icon: icon, label: progresstext, trigger: customTrigger, command: "", arguments: [], objectType: "policy", timeout: ""))
             }
@@ -598,6 +651,76 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                             staticAllPolicies = policiesArray
                             policies_TableView.reloadData()
                             allPolicies_Spinner.stopAnimation(self)
+                            
+                            
+                            // create app support path if not present
+                            if !FileManager.default.fileExists(atPath: AppInfo.appSupport) {
+                                do {
+                                    try FileManager.default.createDirectory(atPath: AppInfo.appSupport, withIntermediateDirectories: true)
+                                } catch {
+                                    _ = Alert().display(header: "Attention:", message: "Unable to create '\(AppInfo.appSupport)'.  Configurations will not be saved.", secondButton: "")
+                                }
+                            } else {
+                                // look for existing configs
+                                do {
+                                    if FileManager.default.fileExists(atPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).json") {
+                                        print("found existing config(s)")
+                                        let existingConfigs = try FileManager.default
+                                            .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+                                            .appendingPathComponent("/\(JamfProServer.destination.fqdnFromUrl).json")
+                                        
+                                        let data = try Data(contentsOf: existingConfigs)
+                                        let existingConfigsDict = try JSONSerialization.jsonObject(with: data) as! [String:Any]
+                                        print("existingConfigsDict: \(existingConfigsDict)")
+                                        configurationsArray =  (existingConfigsDict["configurationsArray"] as! [String])
+                                        print("available configs: \(configurationsArray)")
+                                        // set the configurations button - start
+                                        configuration_Menu.removeAllItems()
+                                        var validatedConfigs = [String]()
+                                        
+                                        let cd = existingConfigsDict["configsDict"] as? [String:Any] ?? [:]
+                                        let pd = existingConfigsDict["policiesDict"] as? [String:Any] ?? [:]
+                                        let spd = existingConfigsDict["selectedPoliciesDict"] as? [String:Any] ?? [:]
+                                        print("spd: \(spd)\n")
+                                        
+                                        for theConfig in configurationsArray.sorted() {
+                                            
+//                                            if let _ = cd[theConfig], let _ = pd[theConfig], let _ = spd[theConfig] {
+                                                
+//                                            }
+                                            
+                                            print("spd[\(theConfig)]: \(String(describing: (spd[theConfig] as? [[String:Any]])?.count))")
+                                            if (spd[theConfig] as? [[String:Any]])?.count ?? 0 > 0 {
+                                                configuration_Menu.addItem(NSMenuItem(title: theConfig, action: nil, keyEquivalent: ""))
+                                                validatedConfigs.append(theConfig)
+                                            }
+                                        }
+                                        configurationsArray = validatedConfigs
+                                        if configuration_Button.numberOfItems == 0 {
+                                            configuration_Menu.addItem(NSMenuItem(title: "Default", action: nil, keyEquivalent: ""))
+                                        }
+                                        configuration_Button.selectItem(withTitle: "\(String(describing: existingConfigsDict["currentConfig"]))")
+                                        configuration_Menu.addItem(.separator())
+                                        configuration_Menu.addItem(NSMenuItem(title: "Add New...", action: #selector(addNewSelector), keyEquivalent: ""))
+                                        configuration_Menu.addItem(NSMenuItem(title: "Clone Existing...", action: #selector(cloneExistingSelector), keyEquivalent: ""))
+                                        // set the configurations button - end
+                                        
+                                        // reload configurations settings - start
+                                        configsDict = existingConfigsDict["configsDict"] as! [String:[String:[String:String]]]
+                                        
+                                        let policiesDictSave         = existingConfigsDict["policiesDict"] as! [String:[[String:Any]]]
+                                        let selectedPoliciesDictSave = existingConfigsDict["selectedPoliciesDict"] as! [String:[[String:Any]]]
+                                        
+                                        policiesDict         = dictToClass(theDict: policiesDictSave)
+                                        selectedPoliciesDict = dictToClass(theDict: selectedPoliciesDictSave)
+                                        
+                                        config_Action(existingConfigsDict["currentConfig"] ?? "Default")
+//                                       
+                                    }
+                                } catch {
+                                    print("import existing error: \(error)")
+                                }
+                            }
                         }
                     }
                     
@@ -612,19 +735,61 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         }
         
     }
+    func dictToClass(theDict: [String:[[String:Any]]]) -> [String:[Policy]] {
+        // selectedPoliciesArray.append(Policy(name: theLabel, id: theId, configs: [configuration_Button.titleOfSelectedItem!], grouped: false, groupId: ""))
+        var transformedConfig = [String:[Policy]]()
+        var policyArray = [Policy]()
+        for (theConfig, configInfo) in theDict {
+            policyArray.removeAll()
+            for theConfigInfo in configInfo {
+                policyArray.append(Policy(name: theConfigInfo["name"] as! String, id: theConfigInfo["id"] as! String, configs: theConfigInfo["configs"] as! [String], grouped: theConfigInfo["grouped"] as! Bool, groupId: theConfigInfo["groupId"] as! String))
+            }
+            transformedConfig[theConfig] = policyArray
+        }
+        return transformedConfig
+    }
+    
+    func sendClonedConfigInfo(newConfig: String, existingConfig: String) {
+        print("[sendClonedConfigInfo] newConfig: \(newConfig)     existingConfig: \(existingConfig)")
+        configuration_Menu.removeAllItems()
+        configurationsArray.append(newConfig)
+        for theConfig in configurationsArray.sorted() {
+            configuration_Menu.addItem(NSMenuItem(title: theConfig, action: nil, keyEquivalent: ""))
+        }
+        configuration_Button.selectItem(withTitle: newConfig)
+        configuration_Menu.addItem(.separator())
+        configuration_Menu.addItem(NSMenuItem(title: "Add New...", action: #selector(addNewSelector), keyEquivalent: ""))
+        configuration_Menu.addItem(NSMenuItem(title: "Clone Existing...", action: #selector(cloneExistingSelector), keyEquivalent: ""))
+        configsDict[newConfig]          = configsDict[existingConfig]
+        policiesDict[newConfig]         = policiesDict[existingConfig] ?? staticAllPolicies
+        selectedPoliciesDict[newConfig] = selectedPoliciesDict[existingConfig] ?? []
+        config_Action(existingConfig)
+//        print("existing config \(existingConfig): \(String(describing: configsDict[existingConfig]))")
+        
+        
+    }
+    func sendNewConfigInfo(newConfig: String) {
+        print("[sendNewConfigInfo] newConfig: \(newConfig)")
+        
+        configuration_Menu.removeAllItems()
+        configurationsArray.append(newConfig)
+        for theConfig in configurationsArray.sorted() {
+            configuration_Menu.addItem(NSMenuItem(title: theConfig, action: nil, keyEquivalent: ""))
+        }
+        configuration_Menu.addItem(.separator())
+        configuration_Menu.addItem(NSMenuItem(title: "Add New...", action: #selector(addNewSelector), keyEquivalent: ""))
+        configuration_Menu.addItem(NSMenuItem(title: "Clone Existing...", action: #selector(cloneExistingSelector), keyEquivalent: ""))
+        configuration_Button.selectItem(withTitle: newConfig)
+        configsDict[newConfig]          = [:]
+        policiesDict[newConfig]         = staticAllPolicies
+        selectedPoliciesDict[newConfig] = []
+        enrollmentActions.removeAll()
+        config_Action(newConfig)
+    }
     
     // Delegate Method - Other
     func sendOtherItem(newItem: [String:String]) {
         print("command: \(newItem)")
-        
-        /*
-             let doubleClicked = policiesArray[rowClicked]
-
-             selectedPoliciesArray.append(doubleClicked)
-             selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
-
-             selectedPoliciesArray.last!.configs.append(configuration_Button.titleOfSelectedItem!)
-         */
 
         if let commandToArray = newItem["command"]?.components(separatedBy: " ") {
             let theLabel = newItem["label"] ?? "shell script"
@@ -645,7 +810,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             
             policy_array_dict[theId] = ["listitem": theLabel, "icon": icon, "progresstext": theLabel, "trigger": "", "thePath": newItem["command"] ?? ""]
             
-            configsDict[configuration_Button.titleOfSelectedItem!]![theId] = ["listitem": theLabel, "icon": icon, "progresstext": theLabel, "trigger": "", "validation": "None", "grouped": "", "groupId": ""]
+//            configsDict[configuration_Button.titleOfSelectedItem!]![theId] = ["listitem": theLabel, "icon": icon, "progresstext": theLabel, "trigger": "", "validation": "None", "grouped": "", "groupId": ""]
+            configsDict[configuration_Button.titleOfSelectedItem!]![theId] = ["listitem": theLabel, "id": theId, "icon": icon, "progresstext": theLabel, "trigger": "", "validation": "None", "command": newItem["command"]!, "objectType": "command", "timeout": "", "grouped": "", "groupId": ""]
             
             enrollmentActions.append(EnrollmentActions(name: theLabel, id: theId, icon: icon, label: theLabel, trigger: "", command: commandToArray[0], arguments: argumentArray, objectType: "command", timeout: ""))
              
@@ -657,12 +823,20 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 
         
     }
-    
+        
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
         if segue.identifier == "loginView" {
             let loginVC: LoginVC = segue.destinationController as! LoginVC
             loginVC.delegate = self
             loginVC.uploadsComplete = false
+        } else if segue.identifier == "addNewConfig" {
+            let newConfigVC: NewConfigVC = segue.destinationController as! NewConfigVC
+            newConfigVC.delegate = self
+            newConfigVC.currentConfigs = configurationsArray
+        } else if segue.identifier == "cloneExistingConfig" {
+            let cloneConfigVC: CloneConfigVC = segue.destinationController as! CloneConfigVC
+            cloneConfigVC.delegate = self
+            cloneConfigVC.currentConfigs = configurationsArray
         } else if segue.identifier == "addOther" {
             let otherItemVC: OtherItemVC = segue.destinationController as! OtherItemVC
             otherItemVC.delegate = self
@@ -722,8 +896,10 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         for i in 0..<configuration_Button.numberOfItems {
             configuration_Button.selectItem(at: i)
             let theConfig = configuration_Button.titleOfSelectedItem!
-            configurationsArray.append(theConfig)
-            configsDict[theConfig] = [:]
+            if theConfig != "" && theConfig != "Add New..." && theConfig != "Clone Existing..." {
+                configurationsArray.append(theConfig)
+                configsDict[theConfig] = [:]
+            }
         }
         
 //        icon_TextField.delegate         = self
@@ -764,6 +940,52 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         if showLoginWindow {
             performSegue(withIdentifier: "loginView", sender: nil)
             showLoginWindow = false
+        }
+    }
+    
+    func policyClasstoDict(toConvert: [String:[Policy]]) -> [String:[[String:Any]]] {
+        var classToDict = [String:[[String:Any]]]()
+        var policyArray = [[String:Any]]()
+        for (configName, policies) in toConvert {
+            for thePolicy in policies {
+                policyArray.append(["name": thePolicy.name, "id": thePolicy.id, "configs": thePolicy.configs, "grouped": thePolicy.grouped, "groupId": thePolicy.groupId])
+            }
+            classToDict[configName] = policyArray
+            policyArray.removeAll()
+        }
+        return classToDict
+    }
+    
+    override func viewWillDisappear() {
+        super.viewWillDisappear()
+        
+        let theServer = JamfProServer.destination.fqdnFromUrl
+        saveInfo["theServer"]            = theServer as Any
+        saveInfo["currentConfig"]        = configuration_Button.titleOfSelectedItem! as Any
+        saveInfo["configurationsArray"]  = configurationsArray as Any
+        saveInfo["configsDict"]          = configsDict as Any
+        
+        let policiesDictSave         = policyClasstoDict(toConvert: policiesDict)
+        let selectedPoliciesDictSave = policyClasstoDict(toConvert: selectedPoliciesDict)
+        saveInfo["policiesDict"]         = policiesDictSave as Any
+        saveInfo["selectedPoliciesDict"] = selectedPoliciesDictSave as Any
+
+        do {
+            let saveURL = try FileManager.default
+                .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+                .appendingPathComponent("\(theServer).json")
+
+            try JSONSerialization.data(withJSONObject: saveInfo)
+                .write(to: saveURL)
+        } catch {
+            print(error)
+        }
+        
+        do {
+            let saveData = try PropertyListSerialization.data(fromPropertyList: saveInfo, format: .xml, options: 0)
+            try saveData.write(to: URL(fileURLWithPath: AppInfo.appSupport + "/\(theServer).plist"))
+        } catch {
+            _ = Alert().display(header: "Attention:", message: "Current configurations could not be saved.", secondButton: "")
         }
     }
 
@@ -894,14 +1116,14 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
             } else {
                 validation_Label.stringValue = "Command:"
             }
-            /*
-             progressText_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"]))"
-             validation_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["validation"] ?? ""
-             */
-//            icon_TextField.stringValue = "\(enrollmentActions[theRow].icon ?? "")"
+
+            progressText_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"]))"
+            validation_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["validation"] ?? ""
+
+            //            icon_TextField.stringValue = "\(enrollmentActions[theRow].icon ?? "")"
 //            print("enrollmentActions.count: \(enrollmentActions.count)")
-            progressText_TextField.stringValue = "\(enrollmentActions[theRow].label ?? "Processing policy \(String(describing: enrollmentActions[theRow].name))")"
-            validation_TextField.stringValue = "\(enrollmentActions[theRow].command ?? "")"
+//            progressText_TextField.stringValue = "\(enrollmentActions[theRow].label ?? "Processing policy \(String(describing: enrollmentActions[theRow].name))")"
+//            validation_TextField.stringValue = "\(enrollmentActions[theRow].command ?? "")"
         }
     }
     

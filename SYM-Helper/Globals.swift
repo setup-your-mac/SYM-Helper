@@ -35,7 +35,8 @@ struct AppInfo {
     
     static var bundlePath   = Bundle.main.bundleURL
     
-    static var logPath: String? = (NSHomeDirectory() + "/Library/Logs/sym-helper/")
+    static let appSupport       = NSHomeDirectory() + "/Library/Application Support"
+    static var logPath: String? = NSHomeDirectory() + "/Library/Logs/sym-helper/"
     static var logFile          = ""
     static var startTime        = Date()
 }

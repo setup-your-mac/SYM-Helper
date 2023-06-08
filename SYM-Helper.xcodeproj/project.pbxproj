@@ -19,6 +19,8 @@
 		B5BBDBB629A171BC0040FD71 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB529A171BC0040FD71 /* Globals.swift */; };
 		B5BBDBB829A1758C0040FD71 /* TokenDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */; };
 		B5BBDBBA29A177040040FD71 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB929A177040040FD71 /* Alert.swift */; };
+		CE948EBF2A2C9BCA00C889B6 /* NewConfigVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE948EBE2A2C9BCA00C889B6 /* NewConfigVC.swift */; };
+		CE948EC12A2C9C4500C889B6 /* CloneConfigVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE948EC02A2C9C4500C889B6 /* CloneConfigVC.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +39,8 @@
 		B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenDelegate.swift; sourceTree = "<group>"; };
 		B5BBDBB929A177040040FD71 /* Alert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 		B5BBDBBC29A4380D0040FD71 /* Notes */ = {isa = PBXFileReference; lastKnownFileType = text; path = Notes; sourceTree = "<group>"; };
+		CE948EBE2A2C9BCA00C889B6 /* NewConfigVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewConfigVC.swift; sourceTree = "<group>"; };
+		CE948EC02A2C9C4500C889B6 /* CloneConfigVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CloneConfigVC.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,9 +76,11 @@
 			children = (
 				B5BBDBB929A177040040FD71 /* Alert.swift */,
 				B5BBDBA029A168490040FD71 /* AppDelegate.swift */,
+				CE948EC02A2C9C4500C889B6 /* CloneConfigVC.swift */,
 				B5BBDBB329A1719D0040FD71 /* Credentials.swift */,
 				B5BBDBB529A171BC0040FD71 /* Globals.swift */,
 				B5BBDBB129A171810040FD71 /* LoginVC.swift */,
+				CE948EBE2A2C9BCA00C889B6 /* NewConfigVC.swift */,
 				B57069DA29D891950004C848 /* OtherItemVC.swift */,
 				B568542C2A0004940004630D /* Settings.swift */,
 				B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */,
@@ -180,11 +186,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE948EBF2A2C9BCA00C889B6 /* NewConfigVC.swift in Sources */,
 				B57069DB29D891950004C848 /* OtherItemVC.swift in Sources */,
 				B5BBDBA329A168490040FD71 /* ViewController.swift in Sources */,
 				B5BBDBB829A1758C0040FD71 /* TokenDelegate.swift in Sources */,
 				B5BBDBB029A171570040FD71 /* WriteToLog.swift in Sources */,
 				B568542D2A0004940004630D /* Settings.swift in Sources */,
+				CE948EC12A2C9C4500C889B6 /* CloneConfigVC.swift in Sources */,
 				B5BBDBB629A171BC0040FD71 /* Globals.swift in Sources */,
 				B5BBDBB429A1719D0040FD71 /* Credentials.swift in Sources */,
 				B5BBDBB229A171810040FD71 /* LoginVC.swift in Sources */,
