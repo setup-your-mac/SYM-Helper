@@ -89,7 +89,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             selectedConfiguration = sender as! String
         }
         // build enrollmentActions - start
-        /*var transformedConfig = [String:[Policy]]()
+        /*
+         var transformedConfig = [String:[Policy]]()
          var policyArray = [Policy]()
          for (theConfig, configInfo) in theDict {
              policyArray.removeAll()
@@ -154,6 +155,64 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         sendLoginInfo(loginInfo: (JamfProServer.destination, JamfProServer.username, JamfProServer.userpass,saveCredsState))
     }
     
+    
+    @IBAction func selectValidation_Action(_ sender: Any) {
+        
+        let dialog = NSOpenPanel()
+
+        dialog.title                   = "Select an item for the validation criteria";
+        dialog.directoryURL            = URL(string: "/Applications")
+        dialog.showsResizeIndicator    = true
+        dialog.showsHiddenFiles        = false
+        dialog.allowsMultipleSelection = false
+        dialog.canChooseFiles          = true
+        dialog.canChooseDirectories    = true
+        dialog.resolvesAliases         = true
+        dialog.treatsFilePackagesAsDirectories = false
+
+        if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
+            let result = dialog.url // Pathname of the file
+            if (result != nil) {
+                if result!.path.suffix(4) == ".app" && NSEvent.modifierFlags.contains(.option) {
+                    viewAppBundle(appBundleURL: result!)
+                } else {
+                    validation_TextField.stringValue = "\(result!.path)"
+                    updateValidation(validationString: validation_TextField.stringValue)
+                }
+            }
+        }
+    }
+    private func viewAppBundle(appBundleURL: URL) {
+        let dialog = NSOpenPanel()
+
+        dialog.title                   = "Select an item for the validation criteria";
+        dialog.directoryURL            = appBundleURL
+        dialog.showsResizeIndicator    = true
+        dialog.showsHiddenFiles        = false
+        dialog.allowsMultipleSelection = false
+        dialog.canChooseFiles          = true
+        dialog.canChooseDirectories    = true
+        dialog.resolvesAliases         = true
+        dialog.treatsFilePackagesAsDirectories = false
+
+        if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
+            let result = dialog.url // Pathname of the file
+            if (result != nil) {
+                validation_TextField.stringValue = "\(result!.path)"
+                updateValidation(validationString: validation_TextField.stringValue)
+            }
+        }
+    }
+    func updateValidation(validationString: String) {
+        let theRow = selectedPolicies_TableView.selectedRow
+        let policyId = selectedPoliciesArray[theRow].id
+        policy_array_dict[policyId]?.updateValue(validationString, forKey: "validation")
+        configsDict[configuration_Button.titleOfSelectedItem!]![policyId]?.updateValue(validationString, forKey: "validation")
+
+        // needed? todo
+        let selectedPolicyIndex = enrollmentActions.firstIndex(where: { $0.id == policyId })
+        enrollmentActions[selectedPolicyIndex!].command = validationString
+    }
     
     @IBAction func showSettings(_ sender: Any) {
         if NSEvent.modifierFlags.contains(.option) {
@@ -338,10 +397,12 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 (result: String) in
                 customTrigger = result
 //            progressText_TextField.stringValue = progresstext
+            let validation = ( validation_TextField.stringValue == "" ) ? "None":validation_TextField.stringValue
                 
-            policy_array_dict[policyId] = ["listitem": policyName, "icon": icon, "progresstext": progresstext, "trigger": customTrigger, "validation": "None"]
-            configsDict[configuration_Button.titleOfSelectedItem!]![policyId] = ["listitem": policyName, "id": policyId, "icon": icon, "progresstext": progresstext, "trigger": customTrigger, "validation": "None", "command": "", "arguments": "", "objectType": "policy", "timeout": "", "grouped": "\(grouped)", "groupId": "\(groupId)"]
+            policy_array_dict[policyId] = ["listitem": policyName, "icon": icon, "progresstext": progresstext, "trigger": customTrigger, "validation": validation]
+            configsDict[configuration_Button.titleOfSelectedItem!]![policyId] = ["listitem": policyName, "id": policyId, "icon": icon, "progresstext": progresstext, "trigger": customTrigger, "validation": validation, "command": "", "arguments": "", "objectType": "policy", "timeout": "", "grouped": "\(grouped)", "groupId": "\(groupId)"]
             
+            // command same as validation? todo
             enrollmentActions.append(EnrollmentActions(name: policyName, id: policyId, icon: icon, label: progresstext, trigger: customTrigger, command: "", arguments: [], objectType: "policy", timeout: ""))
             }
 //        let trigger = (customTrigger == "recon") ? customTrigger:policyId
@@ -684,11 +745,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                         print("spd: \(spd)\n")
                                         
                                         for theConfig in configurationsArray.sorted() {
-                                            
-//                                            if let _ = cd[theConfig], let _ = pd[theConfig], let _ = spd[theConfig] {
-                                                
-//                                            }
-                                            
                                             print("spd[\(theConfig)]: \(String(describing: (spd[theConfig] as? [[String:Any]])?.count))")
                                             if (spd[theConfig] as? [[String:Any]])?.count ?? 0 > 0 {
                                                 configuration_Menu.addItem(NSMenuItem(title: theConfig, action: nil, keyEquivalent: ""))
@@ -699,7 +755,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                         if configuration_Button.numberOfItems == 0 {
                                             configuration_Menu.addItem(NSMenuItem(title: "Default", action: nil, keyEquivalent: ""))
                                         }
-                                        configuration_Button.selectItem(withTitle: "\(String(describing: existingConfigsDict["currentConfig"]))")
+                                        let lastWorkingConfig = existingConfigsDict["currentConfig"] ?? "Default"
+                                        configuration_Button.selectItem(withTitle: "\(String(describing: lastWorkingConfig))")
                                         configuration_Menu.addItem(.separator())
                                         configuration_Menu.addItem(NSMenuItem(title: "Add New...", action: #selector(addNewSelector), keyEquivalent: ""))
                                         configuration_Menu.addItem(NSMenuItem(title: "Clone Existing...", action: #selector(cloneExistingSelector), keyEquivalent: ""))
@@ -1120,10 +1177,6 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
             progressText_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"]))"
             validation_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["validation"] ?? ""
 
-            //            icon_TextField.stringValue = "\(enrollmentActions[theRow].icon ?? "")"
-//            print("enrollmentActions.count: \(enrollmentActions.count)")
-//            progressText_TextField.stringValue = "\(enrollmentActions[theRow].label ?? "Processing policy \(String(describing: enrollmentActions[theRow].name))")"
-//            validation_TextField.stringValue = "\(enrollmentActions[theRow].command ?? "")"
         }
     }
     
