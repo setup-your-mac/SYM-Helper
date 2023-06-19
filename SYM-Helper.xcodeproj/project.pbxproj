@@ -177,7 +177,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "##newBuildNumber=$(date -u +%Y%m%d)\n\n##echo \"dir: ${PROJECT_DIR}\"\n##echo \"plist: ${INFOPLIST_FILE}\"\n##echo \"settings path: $PRODUCT_SETTINGS_PATH\"\n##defaults read \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n## Bundle Version: $(CURRENT_PROJECT_VERSION)\n##currentBuild=$(/usr/libexec/PlistBuddy -c \"Print :CFBundleVersion\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\")\n##echo \"previous build: $currentBuild\"\n##if [ \"$currentBuild\" = \"\" ]; then\n##    /usr/libexec/PlistBuddy -c \"Add :CFBundleVersion string $newBuildNumber\"  \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n##else\n##    /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $newBuildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n##fi\n";
+			shellScript = "newMajor=\"$(date -u +%Y%m%d)\"\ndate24H=$(date -u +%H%M)\ntmpMinor=$(printf \"%x\\n\" $(echo $date24H | sed 's/^0*//'))\nnewMinor=$(echo $tmpMinor | tr '[:lower:]' '[:upper:]')\nnewBuildNumber=\"$newMajor-$newMinor\"\n\n## create folder to hold exported app\nshortVer=\"v${MARKETING_VERSION}\"\nexeName=\"${EXECUTABLE_NAME}\"\nbuildDir=\"/Users/lesliehelou/Documents/Travel/- Projects/$exeName/$shortVer/\"\n\nif [ ! -d \"$buildDir\" ];then\n    mkdir -p \"$buildDir\"\nfi\n\nshortVer=\"v${MARKETING_VERSION}\"\nexeName=\"${EXECUTABLE_NAME}\"\nbuildDir=\"/Users/lesliehelou/Documents/Travel/- Projects/$exeName/$shortVer/\"\n\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $newBuildNumber\" \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/Contents/Info.plist\"\n\n## remove extended attributes (from added images)\n/usr/bin/xattr -cr \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/Contents/Resources\"\n\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
