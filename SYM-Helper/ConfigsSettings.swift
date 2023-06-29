@@ -11,21 +11,21 @@ class ConfigsSettings: NSObject {
     
     func retrieve(dataType: String) -> [String: Any] {
         var existingConfigsDict = [String: Any]()
-        // migrate to new naming
-        if FileManager.default.fileExists(atPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).json") {
+        // migrate configs to new naming
+        if FileManager.default.fileExists(atPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).json") && dataType == "configs" {
             do {
-                try FileManager.default.moveItem(atPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).json", toPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).\(dataType).json")
+                try FileManager.default.moveItem(atPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).json", toPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).configs.json")
             } catch {
                 
             }
             do {
-                try FileManager.default.moveItem(atPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).plist", toPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).\(dataType).plist")
+                try FileManager.default.moveItem(atPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).plist", toPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).configs.plist")
             } catch {
                 
             }
         }
         
-        // look for existing configs
+        // look for existing configs/settingd
         do {
             if FileManager.default.fileExists(atPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).\(dataType).json") {
                 print("found existing config for \(JamfProServer.destination.fqdnFromUrl)")

@@ -164,4 +164,13 @@ extension String {
             return newString
         }
     }
+    var listToString: String {
+        get {
+                var theList = self.replacingOccurrences(of: "\n", with: ",")
+                while theList.last == "," {
+                    theList = "\(theList.dropLast(1))"
+                }
+            return theList
+        }
+    }
 }

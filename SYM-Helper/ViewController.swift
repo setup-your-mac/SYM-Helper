@@ -620,10 +620,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             }
         }   // for theConfig in configurationsArray - end
         var finalScript = ""
-//        var regex: NSRegularExpression?
-        
-//        regex = try! NSRegularExpression(pattern: "promptForUsername=\".*?\"\n", options:.caseInsensitive)
-//        symScript = (regex?.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "promptForUsername=\"\(Settings.shared.dict["promptForUsername"] ?? "true")\"\n"))!
         
         setPrompt(whichPrompt: "promptForUsername")
         setPrompt(whichPrompt: "prefillUsername")
@@ -769,21 +765,12 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                 }
                             } else {
                                 // look for existing configs
-//                                do {
-//                                    if FileManager.default.fileExists(atPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).json") {
-//                                        print("found existing config(s)")
-//                                        let existingConfigs = try FileManager.default
-//                                            .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-//                                            .appendingPathComponent("/\(JamfProServer.destination.fqdnFromUrl).configs.json")
-                                        
-//                                        let data = try Data(contentsOf: existingConfigs)
-//                                        let existingConfigsDict = try JSONSerialization.jsonObject(with: data) as! [String:Any]
                                 let existingConfigsDict = ConfigsSettings().retrieve(dataType: "configs")
 //                                if existingConfigsDict.count > 0 {
 //
 //                                }
 //                                        print("existingConfigsDict: \(existingConfigsDict)")
-                                configurationsArray =  (existingConfigsDict["configurationsArray"] as! [String])
+                                configurationsArray =  existingConfigsDict["configurationsArray"] as? [String] ?? []
                                 print("available configs: \(configurationsArray)")
                                 
                                 

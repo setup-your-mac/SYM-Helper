@@ -79,7 +79,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         Settings.shared.dict["promptForConfiguration"] = sender.title
     }
     @IBAction func mip_Action(_ sender: NSButton) {
-        Settings.shared.dict["movableInProduction"] = sender.title
+        Settings.shared.dict["moveableInProduction"] = sender.title
     }
     
     
@@ -154,7 +154,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
             whichField = obj.name.rawValue
         }
         
-        print("whichField: \(whichField)")
+        print("[controlTextDidEndEditing] whichField: \(whichField)")
         switch whichField {
         case "scriptSource":
             spinner_Progress.startAnimation(self)
@@ -192,32 +192,45 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
 //                    configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] = progressText_TextField.stringValue
 //                    enrollmentActions[theRow].label = progressText_TextField.stringValue
         case "promptFor":
-            print("")
             if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
                 self.dismiss(self)
             }
-            case "buildings":
-                if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
-                    var theList = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",")
-                    while theList.last == "," {
-                        theList = "\(theList.dropLast(1))"
-                    }
-                    Settings.shared.dict["buildingsListRaw"] = theList
-                    self.dismiss(self)
-                }
-        case "departments":
-            Settings.shared.dict["departments"] = departments_TextField.string.components(separatedBy: "\n")
+        case "buildings":
             if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
-                var theList = departments_TextField.string.replacingOccurrences(of: "\n", with: ",")
-                while theList.last == "," {
-                    theList = "\(theList.dropLast(1))"
-                }
-                Settings.shared.dict["departmentListRaw"] = theList
+                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
+                self.dismiss(self)
+            }
+        case "departments":
+            if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
+                Settings.shared.dict["departmentListRaw"] = departments_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
                 self.dismiss(self)
             }
 
         default:
             break
+        }
+    }
+    
+    func textDidEndEditing(_ obj: Notification) {
+        if let textView = obj.object as? NSTextView {
+            switch textView.identifier!.rawValue {
+            case "buildings":
+//                var theList = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",")
+//                while theList.last == "," {
+//                    theList = "\(theList.dropLast(1))"
+//                }
+                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
+               
+            case "departments":
+//                var theList = departments_TextField.string.replacingOccurrences(of: "\n", with: ",")
+//                while theList.last == "," {
+//                    theList = "\(theList.dropLast(1))"
+//                }
+                Settings.shared.dict["departmentListRaw"] = departments_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
+               
+            default:
+                break
+            }
         }
     }
         
@@ -235,7 +248,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         pfb_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForBuilding"] as? String ?? "true")")
         pfd_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForDepartment"] as? String ?? "true")")
         pfc_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForConfiguration"] as? String ?? "true")")
-        mip_Button.selectItem(withTitle: "\(Settings.shared.dict["movableInProduction"] as? String ?? "true")")
+        mip_Button.selectItem(withTitle: "\(Settings.shared.dict["moveableInProduction"] as? String ?? "true")")
         
         let buildingsList = Settings.shared.dict["buildingsListRaw"] as? String ?? ""
         buildings_TextField.string = buildingsList.replacingOccurrences(of: ",", with: "\n")
