@@ -50,6 +50,14 @@ class EnrollmentActions: NSObject {
     }
 }
 
+public class Settings {
+    public var dict: [String:Any]
+    init(dict: [String:Any]) {
+        self.dict = dict
+    }
+    public static let shared = Settings(dict: [:])
+}
+
 class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate, OtherItemDelegate, SendingLoginInfoDelegate, SendNewConfigInfoDelegate, SendClonedConfigInfoDelegate {
     
     @IBOutlet weak var connectedTo_TextField: NSTextField!
@@ -249,7 +257,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     var policy_array = ""
     var saveCredsState = 0
     
-    var saveInfo = [String:Any]()
+    var saveInfo     = [String:Any]()
+//    var settingsDict = [String:Any]()
     
     @IBOutlet weak var generateScript_Button: NSButton!
     //    var policyArray:[String]?    // array of policies to add to SYM
@@ -364,7 +373,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             policyArray_Spinner.startAnimation(self)
             policyArray_Spinner.isHidden = false
             processPolicies(whichId: 0, theConfigIndex: 0)
-//            processPolicies(id: idArray, whichId: 0, theConfigIndex: 0)
         } else {
             generateScript_Button.isEnabled = true
         }
@@ -590,7 +598,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                         }
     """)
                     i += 1
-    //                processPolicies(id: id, whichId: whichId+1, theConfigIndex: theConfigIndex+1)
                 }   // for (policyId, _) in configDetails - end
                 if configDetails.count > 0 {
                     // close off the policy array and generate script
@@ -612,8 +619,28 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 }   // if configDetails.count > 0 - end
             }
         }   // for theConfig in configurationsArray - end
+        var finalScript = ""
+//        var regex: NSRegularExpression?
+        
+//        regex = try! NSRegularExpression(pattern: "promptForUsername=\".*?\"\n", options:.caseInsensitive)
+//        symScript = (regex?.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "promptForUsername=\"\(Settings.shared.dict["promptForUsername"] ?? "true")\"\n"))!
+        
+        setPrompt(whichPrompt: "promptForUsername")
+        setPrompt(whichPrompt: "prefillUsername")
+        setPrompt(whichPrompt: "promptForComputerName")
+        setPrompt(whichPrompt: "promptForAssetTag")
+        setPrompt(whichPrompt: "promptForRoom")
+        setPrompt(whichPrompt: "promptForBuilding")
+        setPrompt(whichPrompt: "promptForDepartment")
+        setPrompt(whichPrompt: "promptForConfiguration")
+        setPrompt(whichPrompt: "moveableInProduction")
+        
+        setLocation(type: "buildingsListRaw")
+        setLocation(type: "departmentListRaw")
+        
+        // write out configurations
         let policy_array_regex = try! NSRegularExpression(pattern: "case \\$\\{symConfiguration\\} in(.|\n|\r)*?esac", options:.caseInsensitive)
-        var finalScript = policy_array_regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "case \\$\\{symConfiguration\\} in\n\n    \(configCases)    esac")
+        finalScript = policy_array_regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "case \\$\\{symConfiguration\\} in\n\n    \(configCases)    esac")
         
         policyArray_Spinner.isHidden = true
         
@@ -651,6 +678,15 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         generateScript_Button.isEnabled = true
     }
     
+    private func setPrompt(whichPrompt: String) {
+        let regex = try! NSRegularExpression(pattern: "\(whichPrompt)=\".*?\"", options:.caseInsensitive)
+        symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(whichPrompt)=\"\(Settings.shared.dict["\(whichPrompt)"] ?? "true")\""))
+    }
+    private func setLocation(type: String) {
+        let regex = try! NSRegularExpression(pattern: "\(type)=\".*?\"", options:.caseInsensitive)
+        symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(type)=\"\(Settings.shared.dict["\(type)"] ?? "")\""))
+    }
+    
     // Delegate Method
     func sendLoginInfo(loginInfo: (String,String,String,Int)) {
         
@@ -672,8 +708,18 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 let lastChar = "\(JamfProServer.destination)".last
                 connectedTo_TextField.stringValue = ( JamfProServer.destination.last == "/" ) ? String("Connected to: \(JamfProServer.destination)".dropLast()):"Connected to: \(JamfProServer.destination)"
                 scriptSource = defaults.string(forKey: "scriptSource") ?? defaultScriptSource
-
-                getScript(theSource: defaults.string(forKey: "scriptSource") ?? defaultScriptSource) { [self]
+                
+                // read settings, if they exist
+//                settingsDict = ConfigsSettings().retrieve(dataType: "settings")
+                Settings.shared.dict = ConfigsSettings().retrieve(dataType: "settings")
+                
+//                var scriptSource = settingsDict["scriptSource"] as? String ?? defaultScriptSource
+                var scriptSource = Settings.shared.dict["scriptSource"] as? String ?? defaultScriptSource
+                if scriptSource == "" { scriptSource = defaultScriptSource }
+                print("fetch script from: \(scriptSource)")
+                SYMScript().get(scriptURL: scriptSource) { [self]
+//                SYMScript().get(scriptURL: defaults.string(forKey: "scriptSource") ?? defaultScriptSource) { [self]
+//                getScript(theSource: defaults.string(forKey: "scriptSource") ?? defaultScriptSource) { [self]
                     (result: String) in
                     symScript = result
 //                    print("getScript: \(symScript)")
@@ -681,7 +727,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 //                    let policy_array_regex = try! NSRegularExpression(pattern: "policy_array=\\('(.|\n|\r)*?'\\)", options:.caseInsensitive)
 //                    symScript = policy_array_regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "policy_array=('\n')")
 //
-                    print("\ngetScript: \(symScript)")
+//                    print("\ngetScript: \(symScript)")
                     
                     if symScript == "" {
                         _ = Alert().display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "")
@@ -723,60 +769,69 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                 }
                             } else {
                                 // look for existing configs
-                                do {
-                                    if FileManager.default.fileExists(atPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).json") {
-                                        print("found existing config(s)")
-                                        let existingConfigs = try FileManager.default
-                                            .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-                                            .appendingPathComponent("/\(JamfProServer.destination.fqdnFromUrl).json")
+//                                do {
+//                                    if FileManager.default.fileExists(atPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).json") {
+//                                        print("found existing config(s)")
+//                                        let existingConfigs = try FileManager.default
+//                                            .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+//                                            .appendingPathComponent("/\(JamfProServer.destination.fqdnFromUrl).configs.json")
                                         
-                                        let data = try Data(contentsOf: existingConfigs)
-                                        let existingConfigsDict = try JSONSerialization.jsonObject(with: data) as! [String:Any]
-                                        print("existingConfigsDict: \(existingConfigsDict)")
-                                        configurationsArray =  (existingConfigsDict["configurationsArray"] as! [String])
-                                        print("available configs: \(configurationsArray)")
-                                        // set the configurations button - start
-                                        configuration_Menu.removeAllItems()
-                                        var validatedConfigs = [String]()
-                                        
-                                        let cd = existingConfigsDict["configsDict"] as? [String:Any] ?? [:]
-                                        let pd = existingConfigsDict["policiesDict"] as? [String:Any] ?? [:]
-                                        let spd = existingConfigsDict["selectedPoliciesDict"] as? [String:Any] ?? [:]
-                                        print("spd: \(spd)\n")
-                                        
-                                        for theConfig in configurationsArray.sorted() {
-                                            print("spd[\(theConfig)]: \(String(describing: (spd[theConfig] as? [[String:Any]])?.count))")
-                                            if (spd[theConfig] as? [[String:Any]])?.count ?? 0 > 0 {
-                                                configuration_Menu.addItem(NSMenuItem(title: theConfig, action: nil, keyEquivalent: ""))
-                                                validatedConfigs.append(theConfig)
-                                            }
-                                        }
-                                        configurationsArray = validatedConfigs
-                                        if configuration_Button.numberOfItems == 0 {
-                                            configuration_Menu.addItem(NSMenuItem(title: "Default", action: nil, keyEquivalent: ""))
-                                        }
-                                        let lastWorkingConfig = existingConfigsDict["currentConfig"] ?? "Default"
-                                        configuration_Button.selectItem(withTitle: "\(String(describing: lastWorkingConfig))")
-                                        configuration_Menu.addItem(.separator())
-                                        configuration_Menu.addItem(NSMenuItem(title: "Add New...", action: #selector(addNewSelector), keyEquivalent: ""))
-                                        configuration_Menu.addItem(NSMenuItem(title: "Clone Existing...", action: #selector(cloneExistingSelector), keyEquivalent: ""))
-                                        // set the configurations button - end
-                                        
-                                        // reload configurations settings - start
-                                        configsDict = existingConfigsDict["configsDict"] as! [String:[String:[String:String]]]
-                                        
-                                        let policiesDictSave         = existingConfigsDict["policiesDict"] as! [String:[[String:Any]]]
-                                        let selectedPoliciesDictSave = existingConfigsDict["selectedPoliciesDict"] as! [String:[[String:Any]]]
-                                        
-                                        policiesDict         = dictToClass(theDict: policiesDictSave)
-                                        selectedPoliciesDict = dictToClass(theDict: selectedPoliciesDictSave)
-                                        
-                                        config_Action(existingConfigsDict["currentConfig"] ?? "Default")
-//                                       
+//                                        let data = try Data(contentsOf: existingConfigs)
+//                                        let existingConfigsDict = try JSONSerialization.jsonObject(with: data) as! [String:Any]
+                                let existingConfigsDict = ConfigsSettings().retrieve(dataType: "configs")
+//                                if existingConfigsDict.count > 0 {
+//
+//                                }
+//                                        print("existingConfigsDict: \(existingConfigsDict)")
+                                configurationsArray =  (existingConfigsDict["configurationsArray"] as! [String])
+                                print("available configs: \(configurationsArray)")
+                                
+                                
+                                // set the configurations button - start
+                                configuration_Menu.removeAllItems()
+                                var validatedConfigs = [String]()
+                                
+                                let cd = existingConfigsDict["configsDict"] as? [String:Any] ?? [:]
+                                let pd = existingConfigsDict["policiesDict"] as? [String:Any] ?? [:]
+                                let spd = existingConfigsDict["selectedPoliciesDict"] as? [String:Any] ?? [:]
+                                print("spd: \(spd)\n")
+                                
+                                // make sure Default configureation is listed
+                                if configurationsArray.firstIndex(of: "Default") == nil { configurationsArray.append("Default") }
+                                
+                                for theConfig in configurationsArray.sorted() {
+                                    print("spd[\(theConfig)]: \(String(describing: (spd[theConfig] as? [[String:Any]])?.count))")
+                                    if (spd[theConfig] as? [[String:Any]])?.count ?? 0 > 0 || theConfig == "Default" {
+                                        configuration_Menu.addItem(NSMenuItem(title: theConfig, action: nil, keyEquivalent: ""))
+                                        validatedConfigs.append(theConfig)
                                     }
-                                } catch {
-                                    print("import existing error: \(error)")
                                 }
+                                configurationsArray = validatedConfigs
+//                                if configuration_Button.numberOfItems == 0 {
+//                                    configuration_Menu.addItem(NSMenuItem(title: "Default", action: nil, keyEquivalent: ""))
+//                                }
+                                let lastWorkingConfig = existingConfigsDict["currentConfig"] ?? "Default"
+                                configuration_Button.selectItem(withTitle: "\(String(describing: lastWorkingConfig))")
+                                configuration_Menu.addItem(.separator())
+                                configuration_Menu.addItem(NSMenuItem(title: "Add New...", action: #selector(addNewSelector), keyEquivalent: ""))
+                                configuration_Menu.addItem(NSMenuItem(title: "Clone Existing...", action: #selector(cloneExistingSelector), keyEquivalent: ""))
+                                // set the configurations button - end
+                                
+                                // reload configurations settings - start
+                                configsDict = existingConfigsDict["configsDict"] as! [String:[String:[String:String]]]
+                                
+                                let policiesDictSave         = existingConfigsDict["policiesDict"] as! [String:[[String:Any]]]
+                                let selectedPoliciesDictSave = existingConfigsDict["selectedPoliciesDict"] as! [String:[[String:Any]]]
+                                
+                                policiesDict         = dictToClass(theDict: policiesDictSave)
+                                selectedPoliciesDict = dictToClass(theDict: selectedPoliciesDictSave)
+                                
+                                config_Action(existingConfigsDict["currentConfig"] ?? "Default")
+//                                       
+//                                    }
+//                                } catch {
+//                                    print("import existing error: \(error)")
+//                                }
                             }
                         }
                     }
@@ -900,11 +955,14 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             otherItemVC.itemType = addOther_Button.selectedItem!.title
         } else if segue.identifier == "settings" {
             let settingsVC: SettingsVC = segue.destinationController as! SettingsVC
-            //            settingsVC.delegate = self
-            //            settingsVC.itemType = addOther_Button.selectedItem!.title
+//            settingsVC.delegate = self
+            print("[prepare] settings.shared.dict: \(Settings.shared.dict)")
+            settingsVC.currentConfig = configuration_Button.titleOfSelectedItem!
+//            settingsVC.settingsDict = Settings.shared.dict
         }
     }
     
+    /*
     func getScript(theSource: String,completion: @escaping (_ authResult: String) -> Void) {
 //        scriptSource = defaults.string(forKey: "scriptSource") ?? defaultScriptSource
         print("enter getScript")
@@ -944,6 +1002,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         })
         task.resume()
     }
+    */
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -1027,23 +1086,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         saveInfo["policiesDict"]         = policiesDictSave as Any
         saveInfo["selectedPoliciesDict"] = selectedPoliciesDictSave as Any
 
-        do {
-            let saveURL = try FileManager.default
-                .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-                .appendingPathComponent("\(theServer).json")
-
-            try JSONSerialization.data(withJSONObject: saveInfo)
-                .write(to: saveURL)
-        } catch {
-            print(error)
-        }
-        
-        do {
-            let saveData = try PropertyListSerialization.data(fromPropertyList: saveInfo, format: .xml, options: 0)
-            try saveData.write(to: URL(fileURLWithPath: AppInfo.appSupport + "/\(theServer).plist"))
-        } catch {
-            _ = Alert().display(header: "Attention:", message: "Current configurations could not be saved.", secondButton: "")
-        }
+        ConfigsSettings().save(theServer: theServer, dataType: "configs", data: saveInfo)
     }
 
     override var representedObject: Any? {

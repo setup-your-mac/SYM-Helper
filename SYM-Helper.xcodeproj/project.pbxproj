@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B568542D2A0004940004630D /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B568542C2A0004940004630D /* Settings.swift */; };
+		B522EA932A4A2E62009F3110 /* ConfigsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B522EA922A4A2E62009F3110 /* ConfigsSettings.swift */; };
+		B522EA952A4B2697009F3110 /* SYMScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = B522EA942A4B2697009F3110 /* SYMScript.swift */; };
+		B568542D2A0004940004630D /* SettingsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B568542C2A0004940004630D /* SettingsVC.swift */; };
 		B57069DB29D891950004C848 /* OtherItemVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57069DA29D891950004C848 /* OtherItemVC.swift */; };
 		B5BBDBA129A168490040FD71 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBA029A168490040FD71 /* AppDelegate.swift */; };
 		B5BBDBA329A168490040FD71 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBA229A168490040FD71 /* ViewController.swift */; };
@@ -24,7 +26,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		B568542C2A0004940004630D /* Settings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		B522EA922A4A2E62009F3110 /* ConfigsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigsSettings.swift; sourceTree = "<group>"; };
+		B522EA942A4B2697009F3110 /* SYMScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SYMScript.swift; sourceTree = "<group>"; };
+		B568542C2A0004940004630D /* SettingsVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsVC.swift; sourceTree = "<group>"; };
 		B57069DA29D891950004C848 /* OtherItemVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherItemVC.swift; sourceTree = "<group>"; };
 		B5BBDB9D29A168490040FD71 /* SYM-Helper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SYM-Helper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5BBDBA029A168490040FD71 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -77,12 +81,14 @@
 				B5BBDBB929A177040040FD71 /* Alert.swift */,
 				B5BBDBA029A168490040FD71 /* AppDelegate.swift */,
 				CE948EC02A2C9C4500C889B6 /* CloneConfigVC.swift */,
+				B522EA922A4A2E62009F3110 /* ConfigsSettings.swift */,
 				B5BBDBB329A1719D0040FD71 /* Credentials.swift */,
 				B5BBDBB529A171BC0040FD71 /* Globals.swift */,
 				B5BBDBB129A171810040FD71 /* LoginVC.swift */,
 				CE948EBE2A2C9BCA00C889B6 /* NewConfigVC.swift */,
 				B57069DA29D891950004C848 /* OtherItemVC.swift */,
-				B568542C2A0004940004630D /* Settings.swift */,
+				B568542C2A0004940004630D /* SettingsVC.swift */,
+				B522EA942A4B2697009F3110 /* SYMScript.swift */,
 				B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */,
 				B5BBDBA229A168490040FD71 /* ViewController.swift */,
 				B5BBDBAF29A171570040FD71 /* WriteToLog.swift */,
@@ -186,12 +192,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B522EA932A4A2E62009F3110 /* ConfigsSettings.swift in Sources */,
 				CE948EBF2A2C9BCA00C889B6 /* NewConfigVC.swift in Sources */,
 				B57069DB29D891950004C848 /* OtherItemVC.swift in Sources */,
 				B5BBDBA329A168490040FD71 /* ViewController.swift in Sources */,
+				B522EA952A4B2697009F3110 /* SYMScript.swift in Sources */,
 				B5BBDBB829A1758C0040FD71 /* TokenDelegate.swift in Sources */,
 				B5BBDBB029A171570040FD71 /* WriteToLog.swift in Sources */,
-				B568542D2A0004940004630D /* Settings.swift in Sources */,
+				B568542D2A0004940004630D /* SettingsVC.swift in Sources */,
 				CE948EC12A2C9C4500C889B6 /* CloneConfigVC.swift in Sources */,
 				B5BBDBB629A171BC0040FD71 /* Globals.swift in Sources */,
 				B5BBDBB429A1719D0040FD71 /* Credentials.swift in Sources */,
