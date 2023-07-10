@@ -100,32 +100,6 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         whichTab = settingsArray[theRow].tab
         let theNotification = Notification(name: Notification.Name(rawValue: "\(whichTab)"), object: NSButton.self)
         controlTextDidEndEditing(theNotification)
-        
-//        SYMScript().get(scriptURL: scriptSource_TextField.stringValue) { [self]
-//            (result: String) in
-//            symScript = result
-//            print("[Settings] getScript: \(symScript)")
-//            spinner_Progress.stopAnimation(self)
-//            if symScript == "" {
-//                let scriptReply = Alert().display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "Use Anyway")
-//                if scriptReply == "Use Anyway" {
-//                    validScriptSource = scriptSource_TextField.stringValue
-//                    settingsDict["scriptSource"] = validScriptSource
-//                    defaults.set(scriptSource_TextField.stringValue, forKey: "scriptSource")
-//                    self.dismiss(self)
-//                } else {
-//                    ok_Button.isEnabled = true
-//                    cancel_Button.isEnabled = true
-//                    scriptSource_TextField.stringValue = validScriptSource
-//                    return
-//                }
-//            } else {
-//                validScriptSource = scriptSource_TextField.stringValue
-//                settingsDict["scriptSource"] = validScriptSource
-//                defaults.set(scriptSource_TextField.stringValue, forKey: "scriptSource")
-//                self.dismiss(self)
-//            }
-//        }
     }
 
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
@@ -136,7 +110,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
             if settings_TableView.selectedRowIndexes.count > 0 {
                 let theRow = settings_TableView.selectedRow
                 whichTab = settingsArray[theRow].tab
-                print("whichTab: \(whichTab)")
+//                print("whichTab: \(whichTab)")
                 settings_TabView.selectTabViewItem(withIdentifier: whichTab)
             }
         default:
@@ -168,7 +142,6 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
                     if scriptReply == "Use Anyway" {
                         validScriptSource = scriptSource_TextField.stringValue
                         Settings.shared.dict["scriptSource"] = validScriptSource
-//                                defaults.set(scriptSource_TextField.stringValue, forKey: "scriptSource")
                         if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
                             self.dismiss(self)
                         }
@@ -183,14 +156,11 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
                 } else {
                     validScriptSource = scriptSource_TextField.stringValue
                     Settings.shared.dict["scriptSource"] = validScriptSource
-//                            defaults.set(scriptSource_TextField.stringValue, forKey: "scriptSource")
                     if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
                         self.dismiss(self)
                     }
                 }
             }
-//                    configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] = progressText_TextField.stringValue
-//                    enrollmentActions[theRow].label = progressText_TextField.stringValue
         case "promptFor":
             if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
                 self.dismiss(self)
@@ -215,17 +185,9 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         if let textView = obj.object as? NSTextView {
             switch textView.identifier!.rawValue {
             case "buildings":
-//                var theList = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",")
-//                while theList.last == "," {
-//                    theList = "\(theList.dropLast(1))"
-//                }
                 Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
                
             case "departments":
-//                var theList = departments_TextField.string.replacingOccurrences(of: "\n", with: ",")
-//                while theList.last == "," {
-//                    theList = "\(theList.dropLast(1))"
-//                }
                 Settings.shared.dict["departmentListRaw"] = departments_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
                
             default:
@@ -283,7 +245,6 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
     
     override func viewWillDisappear() {
         super.viewWillDisappear()
-//        ViewController().settingsDict = settingsDict
         print("[viewWillDisappear] settingsDict: \(Settings.shared.dict)")
         ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
     }

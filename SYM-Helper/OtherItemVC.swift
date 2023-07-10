@@ -16,11 +16,14 @@ class OtherItemVC: NSViewController {
 
     var delegate: OtherItemDelegate? = nil
     
+    @IBOutlet weak var otherItem_TabView: NSTabView!
+    
     @IBOutlet weak var icon_TextField: NSTextField!
     @IBOutlet weak var label_TextField: NSTextField!
     @IBOutlet weak var command_TextField: NSTextField!
+    @IBOutlet weak var trigger_TextField: NSTextField!
     
-    @IBOutlet weak var commandOrWatchPath: NSTextField!
+    @IBOutlet weak var commandOrValidation: NSTextField!
     @IBOutlet weak var timeout_Label: NSTextField!
     @IBOutlet weak var timeout_TextField: NSTextField!
     
@@ -33,21 +36,30 @@ class OtherItemVC: NSViewController {
     @IBAction func add_Action(_ sender: Any) {
         let commandAsArray = command_TextField.stringValue.components(separatedBy: " ")
         let theBinary = URL(string: commandAsArray[0])?.lastPathComponent ?? ""
-        let commandDict = ["icon": icon_TextField.stringValue,
-                           "label": label_TextField.stringValue,
+        let validation = ( itemType == " Local Validation" ) ? "Local":""
+        let commandDict = ["itemType": itemType,
+                           "icon": icon_TextField.stringValue,
+                           "label": trigger_TextField.stringValue,
                            "theBinary": theBinary,
-                           "command":command_TextField.stringValue]
-        delegate?.sendOtherItem(newItem: commandDict)
-        dismiss(self)
+                           "command":command_TextField.stringValue,
+                           "trigger":trigger_TextField.stringValue,
+                           "validation":validation]
+        if itemType == " Local Validation" && trigger_TextField.stringValue == "" {
+            _ = Alert().display(header: "", message: "A trigger must be specified for local validation", secondButton: "")
+            return
+        } else {
+            delegate?.sendOtherItem(newItem: commandDict)
+            dismiss(self)
+        }
     }
  
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if itemType == " Watch Item" {
-            commandOrWatchPath.stringValue = "Watch Path"
-            timeout_Label.isHidden = false
-            timeout_TextField.isHidden = false
+        if itemType == " Local Validation" {
+            otherItem_TabView.selectTabViewItem(withIdentifier: "local_validation")
+        } else {
+            otherItem_TabView.selectTabViewItem(withIdentifier: "command")
         }
     }
     

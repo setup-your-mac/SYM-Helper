@@ -308,6 +308,9 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 
             let doubleClicked = selectedPoliciesArray[doubleClickedRow]
 //            doubleClicked.isSelected = false
+            doubleClicked.grouped = false
+            doubleClicked.groupId = ""
+            // check to see if we need to remove grouping from other policy (only one policy left in group) - todo
             
             configsDict[configuration_Button.titleOfSelectedItem!]![doubleClicked.id] = nil
 
@@ -467,14 +470,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             if let httpResponse = response as? HTTPURLResponse {
                 WriteToLog().message(stringOfText: "[updatePolicy] A custom trigger of \"\(id)\" has been added to policy id \(id).")
                 if httpSuccess.contains(httpResponse.statusCode) {
-                    
-//                    if let _ = String(data: data!, encoding: .utf8) {
-//                        responseData = String(data: data!, encoding: .utf8)!
-////                        WriteToLog().message(stringOfText: "[CreateEndpoints] \n\nfull response from create:\n\(responseData)") }
-////                        print("response: \(responseData)")
-//                    } else {
-//                        WriteToLog().message(stringOfText: "\n[updatePolicy] No data was returned trying to set the custom trigger.  Verify on the server manually.")
-//                    }
                     completion(id)
                     return
                 } else {
@@ -517,12 +512,10 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 policy_array = ""
                 var i = 0
 //                print("selectedPoliciesDict[theConfig]: \(selectedPoliciesDict[theConfig])")
-//                for thePolicy in selectedPoliciesDict[theConfig]! {
                 while i < selectedPoliciesDict[theConfig]!.count {
 //                    print("item \(i): \(selectedPoliciesDict[theConfig]![i].id)")
 //
                     let thePolicy = selectedPoliciesDict[theConfig]![i]
-//                    let policyId = thePolicy.id
                     var policyId = selectedPoliciesDict[theConfig]![i].id
                     
 //                    print("[processPolicies] configsDict[\(theConfig)]!: \(configsDict[theConfig]!)")
@@ -706,7 +699,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 scriptSource = defaults.string(forKey: "scriptSource") ?? defaultScriptSource
                 
                 // read settings, if they exist
-//                settingsDict = ConfigsSettings().retrieve(dataType: "settings")
                 Settings.shared.dict = ConfigsSettings().retrieve(dataType: "settings")
                 
 //                var scriptSource = settingsDict["scriptSource"] as? String ?? defaultScriptSource
@@ -714,16 +706,9 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 if scriptSource == "" { scriptSource = defaultScriptSource }
                 print("fetch script from: \(scriptSource)")
                 SYMScript().get(scriptURL: scriptSource) { [self]
-//                SYMScript().get(scriptURL: defaults.string(forKey: "scriptSource") ?? defaultScriptSource) { [self]
-//                getScript(theSource: defaults.string(forKey: "scriptSource") ?? defaultScriptSource) { [self]
                     (result: String) in
                     symScript = result
 //                    print("getScript: \(symScript)")
-                    
-//                    let policy_array_regex = try! NSRegularExpression(pattern: "policy_array=\\('(.|\n|\r)*?'\\)", options:.caseInsensitive)
-//                    symScript = policy_array_regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "policy_array=('\n')")
-//
-//                    print("\ngetScript: \(symScript)")
                     
                     if symScript == "" {
                         _ = Alert().display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "")
@@ -766,10 +751,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                             } else {
                                 // look for existing configs
                                 let existingConfigsDict = ConfigsSettings().retrieve(dataType: "configs")
-//                                if existingConfigsDict.count > 0 {
-//
-//                                }
-//                                        print("existingConfigsDict: \(existingConfigsDict)")
+                                
                                 configurationsArray =  existingConfigsDict["configurationsArray"] as? [String] ?? []
                                 print("available configs: \(configurationsArray)")
                                 
@@ -794,9 +776,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                     }
                                 }
                                 configurationsArray = validatedConfigs
-//                                if configuration_Button.numberOfItems == 0 {
-//                                    configuration_Menu.addItem(NSMenuItem(title: "Default", action: nil, keyEquivalent: ""))
-//                                }
+                                
                                 let lastWorkingConfig = existingConfigsDict["currentConfig"] ?? "Default"
                                 configuration_Button.selectItem(withTitle: "\(String(describing: lastWorkingConfig))")
                                 configuration_Menu.addItem(.separator())
@@ -814,11 +794,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                 selectedPoliciesDict = dictToClass(theDict: selectedPoliciesDictSave)
                                 
                                 config_Action(existingConfigsDict["currentConfig"] ?? "Default")
-//                                       
-//                                    }
-//                                } catch {
-//                                    print("import existing error: \(error)")
-//                                }
+//
                             }
                         }
                     }
@@ -889,36 +865,49 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     // Delegate Method - Other
     func sendOtherItem(newItem: [String:String]) {
         print("command: \(newItem)")
+        print("selected policy index: \(selectedPolicies_TableView.selectedRow)")
+        
+        if newItem["itemType"] == " Local Validation" {
+            // add local validation
+            print("add local validation: \(newItem)")
+            
 
-        if let commandToArray = newItem["command"]?.components(separatedBy: " ") {
-            let theLabel = newItem["label"] ?? "shell script"
-            let theId    = "\(UUID())"
-            progressText_TextField.stringValue = theLabel
-//             thePath_TextField.stringValue = newItem["command"] ?? ""
-             let icon = newItem["icon"] ?? "system:clock"
-//             icon_TextField.stringValue = icon
-             
-             var argumentArray = [String]()
-             for i in 1..<commandToArray.count {
-                 argumentArray.append(commandToArray[i])
+                selectedPoliciesArray.append(Policy(name: "Local Validation - \(newItem["trigger"])", id: "", configs: [configuration_Button.titleOfSelectedItem!], grouped: false, groupId: ""))
+                selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
+
+                selectedPoliciesArray.last!.configs.append(configuration_Button.titleOfSelectedItem!)
+            
+        } else {
+            // add new command
+            if let commandToArray = newItem["command"]?.components(separatedBy: " ") {
+                let theLabel = newItem["label"] ?? "shell script"
+                let theId    = "\(UUID())"
+                progressText_TextField.stringValue = theLabel
+    //             thePath_TextField.stringValue = newItem["command"] ?? ""
+                 let icon = newItem["icon"] ?? "system:clock"
+    //             icon_TextField.stringValue = icon
+                 
+                 var argumentArray = [String]()
+                 for i in 1..<commandToArray.count {
+                     argumentArray.append(commandToArray[i])
+                 }
+                
+                selectedPoliciesArray.append(Policy(name: theLabel, id: theId, configs: [configuration_Button.titleOfSelectedItem!], grouped: false, groupId: ""))
+                selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
+                selectedPoliciesArray.last!.configs.append(configuration_Button.titleOfSelectedItem!)
+                
+                policy_array_dict[theId] = ["listitem": theLabel, "icon": icon, "progresstext": theLabel, "trigger": "", "thePath": newItem["command"] ?? ""]
+                
+                configsDict[configuration_Button.titleOfSelectedItem!]![theId] = ["listitem": theLabel, "id": theId, "icon": icon, "progresstext": theLabel, "trigger": "", "validation": "None", "command": newItem["command"]!, "objectType": "command", "timeout": "", "grouped": "", "groupId": ""]
+                
+                enrollmentActions.append(EnrollmentActions(name: theLabel, id: theId, icon: icon, label: theLabel, trigger: "", command: commandToArray[0], arguments: argumentArray, objectType: "command", timeout: ""))
+                 
+                selectedPolicies_TableView.reloadData()
+                 
+             } else {
+                 WriteToLog().message(stringOfText: "[sendCommand] Unable to add command: \(newItem).")
              }
-            
-            selectedPoliciesArray.append(Policy(name: theLabel, id: theId, configs: [configuration_Button.titleOfSelectedItem!], grouped: false, groupId: ""))
-            selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
-            selectedPoliciesArray.last!.configs.append(configuration_Button.titleOfSelectedItem!)
-            
-            policy_array_dict[theId] = ["listitem": theLabel, "icon": icon, "progresstext": theLabel, "trigger": "", "thePath": newItem["command"] ?? ""]
-            
-//            configsDict[configuration_Button.titleOfSelectedItem!]![theId] = ["listitem": theLabel, "icon": icon, "progresstext": theLabel, "trigger": "", "validation": "None", "grouped": "", "groupId": ""]
-            configsDict[configuration_Button.titleOfSelectedItem!]![theId] = ["listitem": theLabel, "id": theId, "icon": icon, "progresstext": theLabel, "trigger": "", "validation": "None", "command": newItem["command"]!, "objectType": "command", "timeout": "", "grouped": "", "groupId": ""]
-            
-            enrollmentActions.append(EnrollmentActions(name: theLabel, id: theId, icon: icon, label: theLabel, trigger: "", command: commandToArray[0], arguments: argumentArray, objectType: "command", timeout: ""))
-             
-            selectedPolicies_TableView.reloadData()
-             
-         } else {
-             WriteToLog().message(stringOfText: "[sendCommand] Unable to add command: \(newItem).")
-         }
+        }
 
         
     }
@@ -948,48 +937,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 //            settingsVC.settingsDict = Settings.shared.dict
         }
     }
-    
-    /*
-    func getScript(theSource: String,completion: @escaping (_ authResult: String) -> Void) {
-//        scriptSource = defaults.string(forKey: "scriptSource") ?? defaultScriptSource
-        print("enter getScript")
-//        print("script source: \(scriptSource)")
-        print("script source: \(theSource)")
-        var responseData = ""
-        URLCache.shared.removeAllCachedResponses()
-        //        let scriptUrl      = URL(string: "\(scriptSource)")
-        let scriptUrl      = URL(string: "\(theSource)")
-        let configuration  = URLSessionConfiguration.ephemeral
-        configuration.timeoutIntervalForRequest = 10
-        var request        = URLRequest(url: scriptUrl!)
-        request.httpMethod = "GET"
-        configuration.httpAdditionalHeaders = ["User-Agent" : AppInfo.userAgentHeader]
-        let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-        let task = session.dataTask(with: request as URLRequest, completionHandler: {
-            (data, response, error) -> Void in
-            session.finishTasksAndInvalidate()
-            if let httpResponse = response as? HTTPURLResponse {
-                if httpSuccess.contains(httpResponse.statusCode) {
-                    print("statusCode: \(httpResponse.statusCode)")
-                    
-                    if let _ = String(data: data!, encoding: .utf8) {
-                        responseData = String(data: data!, encoding: .utf8)!
-//                        WriteToLog().message(stringOfText: "[CreateEndpoints] \n\nfull response from create:\n\(responseData)") }
-                        print("response: \(responseData)")
-                    } else {
-                        WriteToLog().message(stringOfText: "\n[getScript] No data was returned from post/put.")
-                    }
-                    completion(responseData)
-                    return
-                }
-            } else {
-                print("could not read response or no response")
-            }
-            completion(responseData)
-        })
-        task.resume()
-    }
-    */
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -1029,9 +976,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         }
         
         selectedPolicies_TableView.registerForDraggedTypes([.string])
-//        let registeredTypes:[String] = [NSPasteboard.PasteboardType.string.rawValue]
-//        policyArray_TableView.registerForDraggedTypes(convertToNSPasteboardPasteboardTypeArray(registeredTypes))
-//        policies_TableView.registerForDraggedTypes(convertToNSPasteboardPasteboardTypeArray(registeredTypes))
         
         configuration_Button.selectItem(at: 0)
 
