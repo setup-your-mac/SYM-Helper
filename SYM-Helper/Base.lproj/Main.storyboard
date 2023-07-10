@@ -988,7 +988,7 @@
                                     <action selector="refresh_Action:" target="XfG-lQ-9wD" id="R0Q-Bq-TYr"/>
                                 </connections>
                             </button>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yG8-os-7A0" userLabel="Remove">
+                            <button hidden="YES" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="yG8-os-7A0" userLabel="Remove">
                                 <rect key="frame" x="522" y="140" width="24" height="25"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="24" id="KEe-hh-iys"/>
@@ -996,7 +996,7 @@
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="23" id="XsK-69-8eT"/>
                                     <constraint firstAttribute="width" constant="24" id="uub-qq-D4e"/>
                                 </constraints>
-                                <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="minus" catalog="system" imagePosition="overlaps" alignment="center" controlSize="large" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="fQd-sV-fnz">
+                                <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="minus" catalog="system" imagePosition="overlaps" alignment="center" controlSize="large" lineBreakMode="truncatingTail" enabled="NO" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="fQd-sV-fnz">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -1017,7 +1017,7 @@
                                                 <modifierMask key="keyEquivalentModifierMask"/>
                                             </menuItem>
                                             <menuItem isSeparatorItem="YES" id="u9A-6L-NDO"/>
-                                            <menuItem title=" Command" id="Uy0-IQ-hWw"/>
+                                            <menuItem title=" Command" hidden="YES" enabled="NO" id="Uy0-IQ-hWw"/>
                                             <menuItem title=" Local Validation" id="Wbr-Ot-Tqf"/>
                                         </items>
                                     </menu>

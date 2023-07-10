@@ -249,6 +249,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     var staticAllPolicies = [Policy]()
     var selectedPoliciesArray = [Policy]()
     var selectedPoliciesDict  = [String:[Policy]]()
+    
+    // remove policy_array_dict? - todo
     var policy_array_dict = [String:[String:String]]()      // [policy id: [attribute: value]]]
     var enrollmentActions = [EnrollmentActions]()
     var configsDict = [String:[String:[String:String]]]()   // [config name: [policy id: [attribute: value]]]
@@ -308,10 +310,26 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 
             let doubleClicked = selectedPoliciesArray[doubleClickedRow]
 //            doubleClicked.isSelected = false
-            doubleClicked.grouped = false
-            doubleClicked.groupId = ""
-            // check to see if we need to remove grouping from other policy (only one policy left in group) - todo
-            
+            // get groupId if present
+            var groupMembers = [Int]()
+            let theGroupId = doubleClicked.groupId
+            if let _ = Int(theGroupId) {
+                for i in 0..<selectedPoliciesArray.count {
+                    if selectedPoliciesArray[i].groupId == theGroupId {
+                        groupMembers.append(i)
+                    }
+                }
+                if groupMembers.count < 3 {
+                    for thePolicyIndex in groupMembers {
+                        selectedPoliciesArray[thePolicyIndex].grouped = false
+                        selectedPoliciesArray[thePolicyIndex].groupId = ""
+                    }
+                } else {
+                    doubleClicked.grouped = false
+                    doubleClicked.groupId = ""
+                }
+            }
+                        
             configsDict[configuration_Button.titleOfSelectedItem!]![doubleClicked.id] = nil
 
             selectedPoliciesArray.remove(at: doubleClickedRow)
@@ -871,11 +889,17 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             // add local validation
             print("add local validation: \(newItem)")
             
+            let theId = "\(UUID())"
+            let theName = "Local Validation - \(String(describing: newItem["trigger"]!))"
+            selectedPoliciesArray.append(Policy(name: theName, id: "\(theId)", configs: [configuration_Button.titleOfSelectedItem!], grouped: false, groupId: ""))
+            selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
+            
+            configsDict[configuration_Button.titleOfSelectedItem!]![theId] = ["listitem": "", "id": theId, "icon": "", "progresstext": "", "trigger": newItem["trigger"]!, "validation": "Local", "command": "", "arguments": "", "objectType": "Local Validation", "timeout": "", "grouped": "false", "groupId": ""]
+            
+            enrollmentActions.append(EnrollmentActions(name: theName, id: theId, icon: "", label: theName, trigger: "", command: "", arguments: [], objectType: "Local Validation", timeout: ""))
 
-                selectedPoliciesArray.append(Policy(name: "Local Validation - \(newItem["trigger"])", id: "", configs: [configuration_Button.titleOfSelectedItem!], grouped: false, groupId: ""))
-                selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
-
-                selectedPoliciesArray.last!.configs.append(configuration_Button.titleOfSelectedItem!)
+            selectedPoliciesArray.last!.configs.append(configuration_Button.titleOfSelectedItem!)
+            selectedPolicies_TableView.reloadData()
             
         } else {
             // add new command
@@ -1148,6 +1172,8 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
                 validation_Label.stringValue = "Command:"
             }
 
+            print("[tableViewChange] \(configsDict[configuration_Button.titleOfSelectedItem!]!)")
+            
             progressText_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"]))"
             validation_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["validation"] ?? ""
 
