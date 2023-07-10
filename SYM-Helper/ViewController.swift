@@ -803,13 +803,15 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                 // set the configurations button - end
                                 
                                 // reload configurations settings - start
-                                configsDict = existingConfigsDict["configsDict"] as! [String:[String:[String:String]]]
-                                
-                                let policiesDictSave         = existingConfigsDict["policiesDict"] as! [String:[[String:Any]]]
-                                let selectedPoliciesDictSave = existingConfigsDict["selectedPoliciesDict"] as! [String:[[String:Any]]]
-                                
-                                policiesDict         = dictToClass(theDict: policiesDictSave)
-                                selectedPoliciesDict = dictToClass(theDict: selectedPoliciesDictSave)
+                                if let _ = existingConfigsDict["configsDict"] {
+                                    configsDict = existingConfigsDict["configsDict"] as! [String:[String:[String:String]]]
+                                    
+                                    let policiesDictSave         = existingConfigsDict["policiesDict"] as! [String:[[String:Any]]]
+                                    let selectedPoliciesDictSave = existingConfigsDict["selectedPoliciesDict"] as! [String:[[String:Any]]]
+                                    
+                                    policiesDict         = dictToClass(theDict: policiesDictSave)
+                                    selectedPoliciesDict = dictToClass(theDict: selectedPoliciesDictSave)
+                                }
                                 
                                 config_Action(existingConfigsDict["currentConfig"] ?? "Default")
 //
