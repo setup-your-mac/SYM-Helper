@@ -87,6 +87,54 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     
     @IBOutlet weak var configuration_Button: NSPopUpButton!
     @IBOutlet weak var configuration_Menu: NSMenu!
+    @IBOutlet weak var clearRemove_Button: NSPopUpButton!
+    
+    @IBAction func clearRemove_Action(_ sender: NSButton) {
+        let currentConfig = configuration_Button.titleOfSelectedItem!
+        if clearRemove_Button.titleOfSelectedItem == "Clear" {
+            let reply = Alert().display(header: "", message: "Are you sure you want to remove all items from \(currentConfig)?", secondButton: "Cancel")
+            if reply == "OK" {
+                clearSelected(currentConfig: currentConfig)
+            }
+        } else {
+            if configuration_Button.titleOfSelectedItem! == "Default" {
+                _ = Alert().display(header: "", message: "Cannot remove the default configuration", secondButton: "")
+            } else {
+                let reply = Alert().display(header: "", message: "Are you sure you want to remove \(currentConfig)?", secondButton: "Cancel")
+                if reply == "OK" {
+                    clearSelected(currentConfig: currentConfig)
+                    configuration_Button.removeItem(withTitle: currentConfig)
+                    configsDict[currentConfig]          = nil
+                    policiesDict[currentConfig]         = nil
+                    selectedPoliciesDict[currentConfig] = nil
+                    configurationsArray.removeAll(where: { $0 == currentConfig })
+                    config_Action("Default")
+                }
+            }
+        }
+        clearRemove_Button.selectItem(at: 0)
+    }
+    private func clearSelected(currentConfig: String) {
+        for i in (0..<selectedPoliciesArray.count).reversed() {
+            let thePolicy = selectedPoliciesArray[i]
+            selectedPoliciesArray.remove(at: i)
+            enrollmentActions.remove(at: i)
+            selectedPolicies_TableView.reloadData()
+
+            if let _ = Int(thePolicy.id) {
+                policiesArray.append(thePolicy)
+                policiesDict[currentConfig] = policiesArray
+                policies_TableView.reloadData()
+                sortPoliciesTableView(theRow: -1)
+            }
+        }
+            
+        configsDict[currentConfig] = [:]
+        selectedPoliciesDict[currentConfig] = []
+        progressText_TextField.stringValue = ""
+        validation_TextField.stringValue   = ""
+    }
+    
     
     @IBAction func config_Action(_ sender: Any) {
 //        print("title: \(String(describing: sender.titleOfSelectedItem))")
@@ -788,10 +836,10 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                 
                                 for theConfig in configurationsArray.sorted() {
                                     print("spd[\(theConfig)]: \(String(describing: (spd[theConfig] as? [[String:Any]])?.count))")
-                                    if (spd[theConfig] as? [[String:Any]])?.count ?? 0 > 0 || theConfig == "Default" {
+//                                    if (spd[theConfig] as? [[String:Any]])?.count ?? 0 > 0 || theConfig == "Default" {
                                         configuration_Menu.addItem(NSMenuItem(title: theConfig, action: nil, keyEquivalent: ""))
                                         validatedConfigs.append(theConfig)
-                                    }
+//                                    }
                                 }
                                 configurationsArray = validatedConfigs
                                 
@@ -1186,21 +1234,19 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
     {
         //        print("tableView: \(tableView)\t\ttableColumn: \(tableColumn)\t\trow: \(row)")
         var newString:String = ""
-        if (tableView == policies_TableView)
-        {
-            let name = policiesArray[row].name
-            newString = "\(name)"
-        }
-        else if (tableView == selectedPolicies_TableView) {
-                    
-            if tableColumn == selectedPolicies_TableView.tableColumns[0] {
-                let name = selectedPoliciesArray[row].name
+            if (tableView == policies_TableView) {
+                let name = policiesArray[row].name
                 newString = "\(name)"
-            } else {
-                let groupId = selectedPoliciesArray[row].groupId
-                newString = "\(groupId)"
             }
-        }
+            else if (tableView == selectedPolicies_TableView) {
+                if tableColumn == selectedPolicies_TableView.tableColumns[0] {
+                    let name = selectedPoliciesArray[row].name
+                    newString = "\(name)"
+                } else {
+                    let groupId = selectedPoliciesArray[row].groupId
+                    newString = "\(groupId)"
+                }
+            }
         return newString;
     }
     
