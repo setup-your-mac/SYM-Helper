@@ -142,6 +142,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         controlTextDidEndEditing(theNotification)
     }
 
+    //  remove?
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         print("keyPath: \(String(describing: keyPath))")
         guard let keyPath = keyPath else { return }
@@ -159,8 +160,8 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
     }
     
     func controlTextDidEndEditing(_ obj: Notification) {
-        print("[controlTextDidEndEditing] obj: \(obj)")
-        print("[controlTextDidEndEditing] obj.name.rawValue: \(obj.name.rawValue)")
+//        print("[controlTextDidEndEditing] obj: \(obj)")
+//        print("[controlTextDidEndEditing] obj.name.rawValue: \(obj.name.rawValue)")
         var whichField = ""
         if let textField = obj.object as? NSTextField {
             whichField = textField.identifier!.rawValue
@@ -168,7 +169,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
             whichField = obj.name.rawValue
         }
         
-        print("[controlTextDidEndEditing] whichField: \(whichField)")
+//        print("[controlTextDidEndEditing] whichField: \(whichField)")
         switch whichField {
         case "scriptSource":
             spinner_Progress.startAnimation(self)
@@ -239,8 +240,8 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        print("currentConfig: \(currentConfig)")
-        print("settingsDict: \(Settings.shared.dict)")
+//        print("currentConfig: \(currentConfig)")
+//        print("settingsDict: \(Settings.shared.dict)")
         
         pfu_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForUsername"] as? String ?? "true")")
         pu_Button.selectItem(withTitle: "\(Settings.shared.dict["prefillUsername"] as? String ?? "true")")
@@ -285,7 +286,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
     
     override func viewWillDisappear() {
         super.viewWillDisappear()
-        print("[viewWillDisappear] settingsDict: \(Settings.shared.dict)")
+//        print("[viewWillDisappear] settingsDict: \(Settings.shared.dict)")
         ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
     }
     
@@ -307,7 +308,7 @@ extension SettingsVC: NSTableViewDataSource, NSTableViewDelegate {
         if settings_TableView.selectedRowIndexes.count > 0 {
             let theRow = settings_TableView.selectedRow
             whichTab = settingsArray[theRow].tab
-            print("whichTab: \(whichTab)")
+//            print("whichTab: \(whichTab)")
             settings_TabView.selectTabViewItem(withIdentifier: whichTab)
             
         }

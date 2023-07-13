@@ -835,7 +835,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                 if configurationsArray.firstIndex(of: "Default") == nil { configurationsArray.append("Default") }
                                 
                                 for theConfig in configurationsArray.sorted() {
-                                    print("spd[\(theConfig)]: \(String(describing: (spd[theConfig] as? [[String:Any]])?.count))")
+//                                    print("spd[\(theConfig)]: \(String(describing: (spd[theConfig] as? [[String:Any]])?.count))")
 //                                    if (spd[theConfig] as? [[String:Any]])?.count ?? 0 > 0 || theConfig == "Default" {
                                         configuration_Menu.addItem(NSMenuItem(title: theConfig, action: nil, keyEquivalent: ""))
                                         validatedConfigs.append(theConfig)
