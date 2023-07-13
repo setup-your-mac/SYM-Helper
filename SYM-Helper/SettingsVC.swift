@@ -56,10 +56,12 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
             switch whichTab {
             case "buildings":
                 buildings_TextField.string = arrayToList(theArray: allObjects)
-                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
+                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string
+//                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
             default:
                 departments_TextField.string = arrayToList(theArray: allObjects)
-                Settings.shared.dict["departmentListRaw"] = departments_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
+                Settings.shared.dict["departmentListRaw"] = departments_TextField.string
+//                Settings.shared.dict["departmentListRaw"] = departments_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
             }
             
             sender.isEnabled = true
@@ -208,12 +210,14 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
             }
         case "buildings":
             if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
-                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
+                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string
+//                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
                 self.dismiss(self)
             }
         case "departments":
             if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
-                Settings.shared.dict["departmentListRaw"] = departments_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
+                Settings.shared.dict["departmentListRaw"] = departments_TextField.string
+//                Settings.shared.dict["departmentListRaw"] = departments_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
                 self.dismiss(self)
             }
 
@@ -226,10 +230,12 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         if let textView = obj.object as? NSTextView {
             switch textView.identifier!.rawValue {
             case "buildings":
-                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
+                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string
+//                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
                
             case "departments":
-                Settings.shared.dict["departmentListRaw"] = departments_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
+                Settings.shared.dict["departmentListRaw"] = departments_TextField.string
+//                Settings.shared.dict["departmentListRaw"] = departments_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
                
             default:
                 break
@@ -253,10 +259,12 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         pfc_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForConfiguration"] as? String ?? "true")")
         mip_Button.selectItem(withTitle: "\(Settings.shared.dict["moveableInProduction"] as? String ?? "true")")
         
-        let buildingsList = Settings.shared.dict["buildingsListRaw"] as? String ?? ""
-        buildings_TextField.string = buildingsList.replacingOccurrences(of: ",", with: "\n")
-        let departmentsList = Settings.shared.dict["departmentListRaw"] as? String ?? ""
-        departments_TextField.string = departmentsList.replacingOccurrences(of: ",", with: "\n")
+        buildings_TextField.string = Settings.shared.dict["buildingsListRaw"] as? String ?? ""
+        departments_TextField.string = Settings.shared.dict["departmentListRaw"] as? String ?? ""
+//        let buildingsList = Settings.shared.dict["buildingsListRaw"] as? String ?? ""
+//        buildings_TextField.string = buildingsList.replacingOccurrences(of: ",", with: "\n")
+//        let departmentsList = Settings.shared.dict["departmentListRaw"] as? String ?? ""
+//        departments_TextField.string = departmentsList.replacingOccurrences(of: ",", with: "\n")
         
         let style = NSMutableParagraphStyle()
         style.alignment = NSTextAlignment.center
