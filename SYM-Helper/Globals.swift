@@ -17,9 +17,9 @@ var runComplete     = false
 var symScript       = ""
 var tokenTimeCreated: Date?
 
+let alert: Alert           = Alert()
+let writeToLog: WriteToLog = WriteToLog()
 
-//
-// add option to select source
 var scriptSource        = ""
 var defaultScriptSource = "https://raw.githubusercontent.com/dan-snelson/Setup-Your-Mac/main/Setup-Your-Mac-via-Dialog.bash"
 //var scriptSource       = "https://recipes.hickoryhillseast.net/sym/Setup-Your-Mac-via-Dialog.bash"
@@ -76,7 +76,7 @@ func betweenTags(xmlString:String, startTag:String, endTag:String) -> String {
         let end  = xmlString.range(of: endTag, range: start.upperBound..<xmlString.endIndex) {
         rawValue.append(String(xmlString[start.upperBound..<end.lowerBound]))
     } else {
-        WriteToLog().message(stringOfText: "[betweenTags] Start, \(startTag), and end, \(endTag), not found.")
+        writeToLog.message(stringOfText: "[betweenTags] Start, \(startTag), and end, \(endTag), not found.")
     }
     return rawValue
 }
@@ -92,7 +92,7 @@ func timeDiff(forWhat: String) -> (Int,Int,Int) {
         break
     }
 //          let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
-//          WriteToLog().message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
+//          writeToLog.message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
     let timeDifference = Int(components?.second! ?? 0)
     let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
     let (m,s) = r.quotientAndRemainder(dividingBy: 60)

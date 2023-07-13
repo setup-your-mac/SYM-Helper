@@ -24,7 +24,7 @@ class CloneConfigVC: NSViewController {
             delegate?.sendClonedConfigInfo(newConfig: clonedConfigName_TextField.stringValue, existingConfig: configs_Button.titleOfSelectedItem!)
             dismiss(self)
         } else {
-            _ = Alert().display(header: "Attention:", message: "\(clonedConfigName_TextField.stringValue) already exists.  Please edit the name so that it is unique.", secondButton: "")
+            _ = alert.display(header: "Attention:", message: "\(clonedConfigName_TextField.stringValue) already exists.  Please edit the name so that it is unique.", secondButton: "")
         }
     }
     

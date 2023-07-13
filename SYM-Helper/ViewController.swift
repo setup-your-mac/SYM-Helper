@@ -13,7 +13,7 @@ import Foundation
  class Policy: NSObject {
      @objc var name: String
      @objc var id: String
-     @objc var configs: [String]    // minimum, standard, full config
+     @objc var configs: [String]    // minimum, standard, full config, custom name
      @objc var grouped: Bool
      @objc var groupId: String
      
@@ -92,15 +92,15 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     @IBAction func clearRemove_Action(_ sender: NSButton) {
         let currentConfig = configuration_Button.titleOfSelectedItem!
         if clearRemove_Button.titleOfSelectedItem == "Clear" {
-            let reply = Alert().display(header: "", message: "Are you sure you want to remove all items from \(currentConfig)?", secondButton: "Cancel")
+            let reply = alert.display(header: "", message: "Are you sure you want to remove all items from \(currentConfig)?", secondButton: "Cancel")
             if reply == "OK" {
                 clearSelected(currentConfig: currentConfig)
             }
         } else {
             if configuration_Button.titleOfSelectedItem! == "Default" {
-                _ = Alert().display(header: "", message: "Cannot remove the default configuration", secondButton: "")
+                _ = alert.display(header: "", message: "Cannot remove the default configuration", secondButton: "")
             } else {
-                let reply = Alert().display(header: "", message: "Are you sure you want to remove \(currentConfig)?", secondButton: "Cancel")
+                let reply = alert.display(header: "", message: "Are you sure you want to remove \(currentConfig)?", secondButton: "Cancel")
                 if reply == "OK" {
                     clearSelected(currentConfig: currentConfig)
                     configuration_Button.removeItem(withTitle: currentConfig)
@@ -203,7 +203,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             selectedPolicies_TableView.reloadData()
             selectedPolicies_TableView.selectRowIndexes(IndexSet(integer: firstRow!), byExtendingSelection: false)
         } else {
-            _ = Alert().display(header: "Attention:", message: "At least 2 policies must be selected", secondButton: "")
+            _ = alert.display(header: "Attention:", message: "At least 2 policies must be selected", secondButton: "")
         }
     }
     
@@ -278,7 +278,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 //                NSWorkspace.shared.openFile(settingsFolder)
                 NSWorkspace.shared.open(URL(fileURLWithPath: settingsFolder))
             } else {
-                _ = Alert().display(header: "Alert", message: "Unable to open \(settingsFolder)", secondButton: "")
+                _ = alert.display(header: "Alert", message: "Unable to open \(settingsFolder)", secondButton: "")
             }
         } else {
             performSegue(withIdentifier: "settings", sender: nil)
@@ -534,17 +534,17 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             (data, response, error) -> Void in
             session.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
-                WriteToLog().message(stringOfText: "[updatePolicy] A custom trigger of \"\(id)\" has been added to policy id \(id).")
+                writeToLog.message(stringOfText: "[updatePolicy] A custom trigger of \"\(id)\" has been added to policy id \(id).")
                 if httpSuccess.contains(httpResponse.statusCode) {
                     completion(id)
                     return
                 } else {
-                    WriteToLog().message(stringOfText: "[updatePolicy] No data was returned trying to set the custom trigger.  Verify/edit the custome trigger \"\(id)\" on the server manually.")
+                    writeToLog.message(stringOfText: "[updatePolicy] No data was returned trying to set the custom trigger.  Verify/edit the custome trigger \"\(id)\" on the server manually.")
                 }
             } else {
                 print("could not read response or no response")
             }
-            WriteToLog().message(stringOfText: "[updatePolicy] No data was returned trying to set the custom trigger.  Verify/edit the custome trigger \"\(id)\" on the server manually.")
+            writeToLog.message(stringOfText: "[updatePolicy] No data was returned trying to set the custom trigger.  Verify/edit the custome trigger \"\(id)\" on the server manually.")
             completion(id)
         })
         task.resume()
@@ -557,7 +557,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             configurationsArray.remove(at: index)
             configurationsArray.append("Default")
         } else {
-            _ = Alert().display(header: "Attention:", message: "'Default' configuration must be defined.", secondButton: "")
+            _ = alert.display(header: "Attention:", message: "'Default' configuration must be defined.", secondButton: "")
             policyArray_Spinner.isHidden = true
             generateScript_Button.isEnabled = true
             return
@@ -568,7 +568,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         for theConfig in configurationsArray {
             let configDetails = configsDict[theConfig]!
             if theConfig == "Default" && configDetails.count == 0 {
-                _ = Alert().display(header: "Attention:", message: "'Default' configuration must be defined.", secondButton: "")
+                _ = alert.display(header: "Attention:", message: "'Default' configuration must be defined.", secondButton: "")
                 policyArray_Spinner.isHidden = true
                 generateScript_Button.isEnabled = true
                 return
@@ -750,7 +750,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         let jamfUtf8Creds = "\(JamfProServer.username):\(JamfProServer.userpass)".data(using: String.Encoding.utf8)
         JamfProServer.base64Creds = (jamfUtf8Creds?.base64EncodedString())!
 
-        WriteToLog().message(stringOfText: "[ViewController] Running SYM-Helper v\(AppInfo.version)")
+        writeToLog.message(stringOfText: "[ViewController] Running SYM-Helper v\(AppInfo.version)")
         TokenDelegate().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds) { [self]
             authResult in
             let (statusCode,theResult) = authResult
@@ -777,7 +777,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 //                    print("getScript: \(symScript)")
                     
                     if symScript == "" {
-                        _ = Alert().display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "")
+                        _ = alert.display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "")
                         allPolicies_Spinner.stopAnimation(self)
 //                        return
                     }
@@ -812,7 +812,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                 do {
                                     try FileManager.default.createDirectory(atPath: AppInfo.appSupport, withIntermediateDirectories: true)
                                 } catch {
-                                    _ = Alert().display(header: "Attention:", message: "Unable to create '\(AppInfo.appSupport)'.  Configurations will not be saved.", secondButton: "")
+                                    _ = alert.display(header: "Attention:", message: "Unable to create '\(AppInfo.appSupport)'.  Configurations will not be saved.", secondButton: "")
                                 }
                             } else {
                                 // look for existing configs
@@ -870,7 +870,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 }
             } else {
                 DispatchQueue.main.async { [self] in
-                    WriteToLog().message(stringOfText: "Failed to authenticate, status code: \(statusCode)")
+                    writeToLog.message(stringOfText: "Failed to authenticate, status code: \(statusCode)")
                     performSegue(withIdentifier: "loginView", sender: nil)
 //                        working(isWorking: false)
                 }
@@ -979,7 +979,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 selectedPolicies_TableView.reloadData()
                  
              } else {
-                 WriteToLog().message(stringOfText: "[sendCommand] Unable to add command: \(newItem).")
+                 writeToLog.message(stringOfText: "[sendCommand] Unable to add command: \(newItem).")
              }
         }
 
@@ -1125,7 +1125,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                            completion(endpointJSON)
                            return
                        } else {
-                           WriteToLog().message(stringOfText: "\n[getScript] No data was returned from post/put.")
+                           writeToLog.message(stringOfText: "\n[getScript] No data was returned from post/put.")
                        }
                }
            } else {
@@ -1158,7 +1158,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                        completion(String(data: data!, encoding: .utf8)!)
                        return
                     } else {
-                        WriteToLog().message(stringOfText: "\n[getScript] No data was returned from post/put.")
+                        writeToLog.message(stringOfText: "\n[getScript] No data was returned from post/put.")
                     }
                }
            } else {

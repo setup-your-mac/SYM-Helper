@@ -37,6 +37,46 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
     @IBOutlet var buildings_TextField: NSTextView!
     @IBOutlet var departments_TextField: NSTextView!
     
+    @IBAction func fetch_Action(_ sender: NSButton) {
+        spinner_Progress.startAnimation(self)
+        sender.isEnabled = false
+        let theRow = settings_TableView.selectedRow
+        whichTab = settingsArray[theRow].tab
+        ClassicAPI().getAll(endpoint: whichTab) { [self]
+            (result: [String:Any]) in
+            var allObjects = [String]()
+            let allObjectsDict = result[whichTab] as! [[String:Any]]
+            //                        print("all policies: \(allPolicies)")
+            for object in allObjectsDict {
+                let objectName = object["name"] as? String ?? ""
+                if objectName != "" {
+                    allObjects.append(objectName)
+                }
+            }
+            switch whichTab {
+            case "buildings":
+                buildings_TextField.string = arrayToList(theArray: allObjects)
+                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
+            default:
+                departments_TextField.string = arrayToList(theArray: allObjects)
+                Settings.shared.dict["departmentListRaw"] = departments_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
+            }
+            
+            sender.isEnabled = true
+            spinner_Progress.stopAnimation(self)
+        }
+    }
+    private func arrayToList(theArray: [String]) -> String {
+        var theString = ""
+        for object in theArray.sorted() {
+            theString = "\(theString)\(object)\n"
+        }
+        if theString.last == "\n" {
+            theString = String(theString.dropLast(1))
+        }
+        return theString
+    }
+    
     @IBOutlet weak var cancel_Button: NSButton!
     @IBOutlet weak var ok_Button: NSButton!
     @IBOutlet weak var spinner_Progress: NSProgressIndicator!
@@ -138,7 +178,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
 //                        print("[Settings] getScript: \(symScript)")
                 spinner_Progress.stopAnimation(self)
                 if symScript == "" {
-                    let scriptReply = Alert().display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "Use Anyway")
+                    let scriptReply = alert.display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "Use Anyway")
                     if scriptReply == "Use Anyway" {
                         validScriptSource = scriptSource_TextField.stringValue
                         Settings.shared.dict["scriptSource"] = validScriptSource

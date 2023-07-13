@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		B522EA932A4A2E62009F3110 /* ConfigsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B522EA922A4A2E62009F3110 /* ConfigsSettings.swift */; };
 		B522EA952A4B2697009F3110 /* SYMScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = B522EA942A4B2697009F3110 /* SYMScript.swift */; };
+		B54D66972A60016600998963 /* ClassicAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54D66962A60016600998963 /* ClassicAPI.swift */; };
 		B568542D2A0004940004630D /* SettingsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B568542C2A0004940004630D /* SettingsVC.swift */; };
 		B57069DB29D891950004C848 /* OtherItemVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57069DA29D891950004C848 /* OtherItemVC.swift */; };
 		B5BBDBA129A168490040FD71 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBA029A168490040FD71 /* AppDelegate.swift */; };
@@ -28,6 +29,7 @@
 /* Begin PBXFileReference section */
 		B522EA922A4A2E62009F3110 /* ConfigsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigsSettings.swift; sourceTree = "<group>"; };
 		B522EA942A4B2697009F3110 /* SYMScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SYMScript.swift; sourceTree = "<group>"; };
+		B54D66962A60016600998963 /* ClassicAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassicAPI.swift; sourceTree = "<group>"; };
 		B568542C2A0004940004630D /* SettingsVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsVC.swift; sourceTree = "<group>"; };
 		B57069DA29D891950004C848 /* OtherItemVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherItemVC.swift; sourceTree = "<group>"; };
 		B5BBDB9D29A168490040FD71 /* SYM-Helper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SYM-Helper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -80,6 +82,7 @@
 			children = (
 				B5BBDBB929A177040040FD71 /* Alert.swift */,
 				B5BBDBA029A168490040FD71 /* AppDelegate.swift */,
+				B54D66962A60016600998963 /* ClassicAPI.swift */,
 				CE948EC02A2C9C4500C889B6 /* CloneConfigVC.swift */,
 				B522EA922A4A2E62009F3110 /* ConfigsSettings.swift */,
 				B5BBDBB329A1719D0040FD71 /* Credentials.swift */,
@@ -203,6 +206,7 @@
 				CE948EC12A2C9C4500C889B6 /* CloneConfigVC.swift in Sources */,
 				B5BBDBB629A171BC0040FD71 /* Globals.swift in Sources */,
 				B5BBDBB429A1719D0040FD71 /* Credentials.swift in Sources */,
+				B54D66972A60016600998963 /* ClassicAPI.swift in Sources */,
 				B5BBDBB229A171810040FD71 /* LoginVC.swift in Sources */,
 				B5BBDBBA29A177040040FD71 /* Alert.swift in Sources */,
 				B5BBDBA129A168490040FD71 /* AppDelegate.swift in Sources */,
@@ -357,7 +361,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 0.6.6;
+				MARKETING_VERSION = 0.6.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "jamf.ie.SYM-Helper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -386,7 +390,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 0.6.6;
+				MARKETING_VERSION = 0.6.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "jamf.ie.SYM-Helper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

@@ -23,7 +23,7 @@ class NewConfigVC: NSViewController {
             delegate?.sendNewConfigInfo(newConfig: newConfigName_TextField.stringValue)
             dismiss(self)
         } else {
-            _ = Alert().display(header: "Attention:", message: "\(newConfigName_TextField.stringValue) already exists, or is blank.  Please edit the name so that it is unique.", secondButton: "")
+            _ = alert.display(header: "Attention:", message: "\(newConfigName_TextField.stringValue) already exists, or is blank.  Please edit the name so that it is unique.", secondButton: "")
         }
     }
     
