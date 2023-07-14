@@ -1109,7 +1109,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         
         var endpoint = "\(JamfProServer.destination)/JSSResource/policies"
         endpoint = endpoint.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-        endpoint = endpoint.replacingOccurrences(of: "/?failover", with: "")
+//        endpoint = endpoint.replacingOccurrences(of: "/?failover", with: "")
         let endpointUrl      = URL(string: "\(endpoint)")
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: endpointUrl!)
@@ -1143,9 +1143,10 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         
         URLCache.shared.removeAllCachedResponses()
         
+        print("[getPolicy] serverURL: \(JamfProServer.destination)")
         var endpoint = "\(JamfProServer.destination)/JSSResource/policies/id/\(id)"
         endpoint = endpoint.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-        endpoint = endpoint.replacingOccurrences(of: "/?failover", with: "")
+//        endpoint = endpoint.replacingOccurrences(of: "/?failover", with: "")
         let endpointUrl      = URL(string: "\(endpoint)")
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: endpointUrl!)

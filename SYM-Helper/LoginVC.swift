@@ -47,7 +47,8 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     }
     
     @IBAction func login_action(_ sender: Any) {
-        JamfProServer.destination = jamfProServer_textfield.stringValue
+        JamfProServer.destination = jamfProServer_textfield.stringValue.failoverFix
+        jamfProServer_textfield.stringValue = JamfProServer.destination
         JamfProServer.username    = jamfProUsername_textfield.stringValue
         JamfProServer.userpass    = jamfProPassword_textfield.stringValue
         

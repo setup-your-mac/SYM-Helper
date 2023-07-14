@@ -126,6 +126,15 @@ func leadingZero(value: Int) -> String {
 }
 
 extension String {
+    var failoverFix: String {
+        get {
+            var serverUrlString = ""
+            let toArray = self.components(separatedBy: "/?failover")
+            serverUrlString = toArray[0]
+            print("ext string: \(serverUrlString)")
+            return serverUrlString
+        }
+    }
     var fqdnFromUrl: String {
         get {
             var fqdn = ""
