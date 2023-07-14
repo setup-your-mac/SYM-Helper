@@ -684,8 +684,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         setPrompt(whichPrompt: "prefillUsername")
         setPrompt(whichPrompt: "promptForRealName")
         setPrompt(whichPrompt: "prefillRealname")
-        setPrompt(whichPrompt: "promptForComputerName")
         setPrompt(whichPrompt: "promptForEmail")
+        setPrompt(whichPrompt: "promptForComputerName")
         setPrompt(whichPrompt: "promptForAssetTag")
         setPrompt(whichPrompt: "promptForRoom")
         setPrompt(whichPrompt: "promptForBuilding")
@@ -739,7 +739,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     private func setPrompt(whichPrompt: String) {
         let regex = try! NSRegularExpression(pattern: "\(whichPrompt)=\".*?\"")
         symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(whichPrompt)=\"\(Settings.shared.dict["\(whichPrompt)"] ?? "true")\""))
-        print("\(whichPrompt)=\"\(Settings.shared.dict["\(whichPrompt)"] ?? "true")\"")
     }
     private func setLocation(type: String) {
         let regex = try! NSRegularExpression(pattern: "\(type)=\".*?\"", options:.caseInsensitive)
@@ -780,7 +779,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                     symScript = result
 //                    print("getScript: \(symScript)")
                     
-                    if symScript == "" {
+                    if !symScript.contains("# Setup Your Mac via swiftDialog") || !symScript.contains("# https://snelson.us/sym") {
                         _ = alert.display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "")
                         allPolicies_Spinner.stopAnimation(self)
 //                        return

@@ -1719,7 +1719,7 @@ DQ
                                                     <rect key="frame" x="4" y="-2" width="688" height="322"/>
                                                     <clipView key="contentView" drawsBackground="NO" id="zoq-bL-5tw">
                                                         <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
-                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
                                                         <subviews>
                                                             <textView identifier="buildings" wantsLayer="YES" importsGraphics="NO" richText="NO" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="28C-7p-jXE">
                                                                 <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
@@ -1788,7 +1788,7 @@ DQ
                                                     <rect key="frame" x="4" y="-2" width="688" height="322"/>
                                                     <clipView key="contentView" drawsBackground="NO" id="zgH-OI-j38">
                                                         <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
-                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
                                                         <subviews>
                                                             <textView identifier="departments" wantsLayer="YES" importsGraphics="NO" richText="NO" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="rbr-34-ZXP">
                                                                 <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
@@ -1885,7 +1885,6 @@ DQ
                         <outlet property="pfrn_Button" destination="4ah-Be-2S4" id="nrM-DJ-gbh"/>
                         <outlet property="pfu_Button" destination="bbc-dr-40z" id="j0o-9A-Zgh"/>
                         <outlet property="prn_Button" destination="WvS-LP-F86" id="kUQ-SU-50I"/>
-                        <outlet property="pru_Button" destination="bbc-dr-40z" id="gd5-Zb-nhf"/>
                         <outlet property="pu_Button" destination="eQH-Nw-saW" id="Q6o-K4-bcK"/>
                         <outlet property="scriptSource_TextField" destination="JsP-um-KOm" id="6xB-eB-q6n"/>
                         <outlet property="settings_AC" destination="oub-Db-T6g" id="VHY-3j-sjn"/>
