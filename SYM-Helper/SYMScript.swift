@@ -31,7 +31,6 @@ class SYMScript: NSObject, URLSessionDelegate {
                     if let _ = String(data: data!, encoding: .utf8) {
                         responseData = String(data: data!, encoding: .utf8)!
 //                        writeToLog.message(stringOfText: "[CreateEndpoints] \n\nfull response from create:\n\(responseData)") }
-//                        print("response: \(responseData)")
                         print("[SYMScript] done fetching script")
                     } else {
                         writeToLog.message(stringOfText: "\n[getScript] No data was returned from post/put.")

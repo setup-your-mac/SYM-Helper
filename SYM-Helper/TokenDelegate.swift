@@ -12,7 +12,6 @@ class TokenDelegate: NSObject, URLSessionDelegate {
     var renewQ = DispatchQueue(label: "com.token_refreshQ", qos: DispatchQoS.background)   // running background process for refreshing token
         
     func getToken(whichServer: String, serverUrl: String, base64creds: String, completion: @escaping (_ authResult: (Int,String)) -> Void) {
-       print("serverURL: \(serverUrl)")
         let forceBasicAuth = (defaults.integer(forKey: "forceBasicAuth") == 1) ? true:false
         writeToLog.message(stringOfText: "[TokenDelegate.getToken] Force basic authentication on \(serverUrl): \(forceBasicAuth)")
        

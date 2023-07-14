@@ -131,7 +131,6 @@ extension String {
             var serverUrlString = ""
             let toArray = self.components(separatedBy: "/?failover")
             serverUrlString = toArray[0]
-            print("ext string: \(serverUrlString)")
             return serverUrlString
         }
     }

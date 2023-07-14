@@ -162,7 +162,6 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
 
     //  remove?
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        print("keyPath: \(String(describing: keyPath))")
         guard let keyPath = keyPath else { return }
         switch keyPath {
         case "selectedObjects":

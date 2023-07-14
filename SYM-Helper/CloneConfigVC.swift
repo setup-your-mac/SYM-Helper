@@ -18,9 +18,9 @@ class CloneConfigVC: NSViewController {
     
     
     @IBAction func ok_Action(_ sender: NSButton) {
-        print("[copy config] newConfig: \(clonedConfigName_TextField.stringValue)")
+//        print("[copy config] newConfig: \(clonedConfigName_TextField.stringValue)")
         if currentConfigs.firstIndex(of: clonedConfigName_TextField.stringValue) == nil {
-            print("[ok_Action] send newConfig: \(clonedConfigName_TextField.stringValue)")
+//            print("[ok_Action] send newConfig: \(clonedConfigName_TextField.stringValue)")
             delegate?.sendClonedConfigInfo(newConfig: clonedConfigName_TextField.stringValue, existingConfig: configs_Button.titleOfSelectedItem!)
             dismiss(self)
         } else {

@@ -17,9 +17,9 @@ class NewConfigVC: NSViewController {
     var delegate: SendNewConfigInfoDelegate? = nil
     
     @IBAction func ok_Action(_ sender: NSButton) {
-        print("[copy config] newConfig: \(newConfigName_TextField.stringValue)")
+//        print("[copy config] newConfig: \(newConfigName_TextField.stringValue)")
         if currentConfigs.firstIndex(of: newConfigName_TextField.stringValue) == nil && newConfigName_TextField.stringValue != "" {
-            print("[ok_Action] send newConfig: \(newConfigName_TextField.stringValue)")
+//            print("[ok_Action] send newConfig: \(newConfigName_TextField.stringValue)")
             delegate?.sendNewConfigInfo(newConfig: newConfigName_TextField.stringValue)
             dismiss(self)
         } else {

@@ -28,7 +28,7 @@ class ConfigsSettings: NSObject {
         // look for existing configs/settingd
         do {
             if FileManager.default.fileExists(atPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).\(dataType).json") {
-                print("found existing config for \(JamfProServer.destination.fqdnFromUrl)")
+//                print("found existing config for \(JamfProServer.destination.fqdnFromUrl)")
                 let existingConfigs = try FileManager.default
                     .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
                     .appendingPathComponent("/\(JamfProServer.destination.fqdnFromUrl).\(dataType).json")

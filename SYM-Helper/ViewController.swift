@@ -330,7 +330,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 //        let doubleClicked = policiesArray[rowClicked]
         
         if rowClicked < policiesArray.count && rowClicked != -1 {
-            print("[addToPolicyArray] policiesArray: \(policiesArray[rowClicked].name)")
+//            print("[addToPolicyArray] policiesArray: \(policiesArray[rowClicked].name)")
             let doubleClicked = policiesArray[rowClicked]
 
             selectedPoliciesArray.append(doubleClicked)
@@ -710,7 +710,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             if result == .OK {
                 let scriptName = saveDialog.nameFieldStringValue
                 let exportURL            = saveDialog.url!
-                print("fileName", scriptName)
+//                print("fileName", scriptName)
                 
                 do {
                     try "\(finalScript)".write(to: exportURL, atomically: true, encoding: .utf8)
@@ -822,7 +822,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                 let existingConfigsDict = ConfigsSettings().retrieve(dataType: "configs")
                                 
                                 configurationsArray =  existingConfigsDict["configurationsArray"] as? [String] ?? []
-                                print("available configs: \(configurationsArray)")
+//                                print("available configs: \(configurationsArray)")
                                 
                                 
                                 // set the configurations button - start
@@ -832,7 +832,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                 let cd = existingConfigsDict["configsDict"] as? [String:Any] ?? [:]
                                 let pd = existingConfigsDict["policiesDict"] as? [String:Any] ?? [:]
                                 let spd = existingConfigsDict["selectedPoliciesDict"] as? [String:Any] ?? [:]
-                                print("spd: \(spd)\n")
                                 
                                 // make sure Default configureation is listed
                                 if configurationsArray.firstIndex(of: "Default") == nil { configurationsArray.append("Default") }
@@ -896,7 +895,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
     
     func sendClonedConfigInfo(newConfig: String, existingConfig: String) {
-        print("[sendClonedConfigInfo] newConfig: \(newConfig)     existingConfig: \(existingConfig)")
+//        print("[sendClonedConfigInfo] newConfig: \(newConfig)     existingConfig: \(existingConfig)")
         configuration_Menu.removeAllItems()
         configurationsArray.append(newConfig)
         for theConfig in configurationsArray.sorted() {
@@ -915,7 +914,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         
     }
     func sendNewConfigInfo(newConfig: String) {
-        print("[sendNewConfigInfo] newConfig: \(newConfig)")
+//        print("[sendNewConfigInfo] newConfig: \(newConfig)")
         
         configuration_Menu.removeAllItems()
         configurationsArray.append(newConfig)
@@ -935,12 +934,12 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     
     // Delegate Method - Other
     func sendOtherItem(newItem: [String:String]) {
-        print("command: \(newItem)")
-        print("selected policy index: \(selectedPolicies_TableView.selectedRow)")
+//        print("command: \(newItem)")
+//        print("selected policy index: \(selectedPolicies_TableView.selectedRow)")
         
         if newItem["itemType"] == " Local Validation" {
             // add local validation
-            print("add local validation: \(newItem)")
+//            print("add local validation: \(newItem)")
             
             let theId = "\(UUID())"
             let theName = "Local Validation - \(String(describing: newItem["trigger"]!))"
@@ -1009,7 +1008,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         } else if segue.identifier == "settings" {
             let settingsVC: SettingsVC = segue.destinationController as! SettingsVC
 //            settingsVC.delegate = self
-            print("[prepare] settings.shared.dict: \(Settings.shared.dict)")
             settingsVC.currentConfig = configuration_Button.titleOfSelectedItem!
 //            settingsVC.settingsDict = Settings.shared.dict
         }
@@ -1143,7 +1141,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         
         URLCache.shared.removeAllCachedResponses()
         
-        print("[getPolicy] serverURL: \(JamfProServer.destination)")
         var endpoint = "\(JamfProServer.destination)/JSSResource/policies/id/\(id)"
         endpoint = endpoint.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
 //        endpoint = endpoint.replacingOccurrences(of: "/?failover", with: "")
@@ -1225,8 +1222,6 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
             } else {
                 validation_Label.stringValue = "Command:"
             }
-
-            print("[tableViewChange] \(configsDict[configuration_Button.titleOfSelectedItem!]!)")
             
             progressText_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"]))"
             validation_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["validation"] ?? ""
