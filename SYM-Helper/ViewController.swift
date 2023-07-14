@@ -682,7 +682,10 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         
         setPrompt(whichPrompt: "promptForUsername")
         setPrompt(whichPrompt: "prefillUsername")
+        setPrompt(whichPrompt: "promptForRealName")
+        setPrompt(whichPrompt: "prefillRealname")
         setPrompt(whichPrompt: "promptForComputerName")
+        setPrompt(whichPrompt: "promptForEmail")
         setPrompt(whichPrompt: "promptForAssetTag")
         setPrompt(whichPrompt: "promptForRoom")
         setPrompt(whichPrompt: "promptForBuilding")
@@ -734,8 +737,9 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
     
     private func setPrompt(whichPrompt: String) {
-        let regex = try! NSRegularExpression(pattern: "\(whichPrompt)=\".*?\"", options:.caseInsensitive)
+        let regex = try! NSRegularExpression(pattern: "\(whichPrompt)=\".*?\"")
         symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(whichPrompt)=\"\(Settings.shared.dict["\(whichPrompt)"] ?? "true")\""))
+        print("\(whichPrompt)=\"\(Settings.shared.dict["\(whichPrompt)"] ?? "true")\"")
     }
     private func setLocation(type: String) {
         let regex = try! NSRegularExpression(pattern: "\(type)=\".*?\"", options:.caseInsensitive)

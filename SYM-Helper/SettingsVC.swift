@@ -26,6 +26,9 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
     
     @IBOutlet weak var pfu_Button: NSPopUpButton!
     @IBOutlet weak var pu_Button: NSPopUpButton!
+    @IBOutlet weak var pfrn_Button: NSPopUpButton!
+    @IBOutlet weak var prn_Button: NSPopUpButton!
+    @IBOutlet weak var pfe_Button: NSPopUpButton!
     @IBOutlet weak var pfcn_Button: NSPopUpButton!
     @IBOutlet weak var pfat_Button: NSPopUpButton!
     @IBOutlet weak var pfr_Button: NSPopUpButton!
@@ -45,23 +48,26 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         ClassicAPI().getAll(endpoint: whichTab) { [self]
             (result: [String:Any]) in
             var allObjects = [String]()
-            let allObjectsDict = result[whichTab] as! [[String:Any]]
-            //                        print("all policies: \(allPolicies)")
-            for object in allObjectsDict {
-                let objectName = object["name"] as? String ?? ""
-                if objectName != "" {
-                    allObjects.append(objectName)
+            if let allObjectsDict = result[whichTab] as? [[String:Any]] {
+                //                        print("all policies: \(allPolicies)")
+                for object in allObjectsDict {
+                    let objectName = object["name"] as? String ?? ""
+                    if objectName != "" {
+                        allObjects.append(objectName)
+                    }
                 }
-            }
-            switch whichTab {
-            case "buildings":
-                buildings_TextField.string = arrayToList(theArray: allObjects)
-                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string
-//                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
-            default:
-                departments_TextField.string = arrayToList(theArray: allObjects)
-                Settings.shared.dict["departmentListRaw"] = departments_TextField.string
-//                Settings.shared.dict["departmentListRaw"] = departments_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
+                switch whichTab {
+                case "buildings":
+                    buildings_TextField.string = arrayToList(theArray: allObjects)
+                    Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string
+                    //                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
+                default:
+                    departments_TextField.string = arrayToList(theArray: allObjects)
+                    Settings.shared.dict["departmentListRaw"] = departments_TextField.string
+                    //                Settings.shared.dict["departmentListRaw"] = departments_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
+                }
+            } else {
+                _ = Alert().display(header: "", message: "Unable to fetch \(whichTab), verify the account has permissions to read \(whichTab)", secondButton: "")
             }
             
             sender.isEnabled = true
@@ -96,6 +102,15 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
     var currentConfig     = ""
     var validScriptSource = ""
     
+    @IBAction func prompt_Action(_ sender: NSButton) {
+        guard let theIdentifier = sender.identifier?.rawValue else {
+            WriteToLog().message(stringOfText: "Unknown prompt/prefill value")
+            return
+        }
+        Settings.shared.dict[theIdentifier] = sender.title
+    }
+    
+    /*
     @IBAction func pfu_Action(_ sender: NSButton) {
         Settings.shared.dict["promptForUsername"] = sender.title
     }
@@ -123,6 +138,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
     @IBAction func mip_Action(_ sender: NSButton) {
         Settings.shared.dict["moveableInProduction"] = sender.title
     }
+    */
     
     
     @IBAction func resetToDefault(_ sender: Any) {
@@ -252,6 +268,9 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         pfu_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForUsername"] as? String ?? "true")")
         pu_Button.selectItem(withTitle: "\(Settings.shared.dict["prefillUsername"] as? String ?? "true")")
         pfcn_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForComputerName"] as? String ?? "true")")
+        pfrn_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForRealName"] as? String ?? "true")")
+        prn_Button.selectItem(withTitle: "\(Settings.shared.dict["prefillRealname"] as? String ?? "true")")
+        pfe_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForEmail"] as? String ?? "true")")
         pfat_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForAssetTag"] as? String ?? "true")")
         pfr_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForRoom"] as? String ?? "true")")
         pfb_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForBuilding"] as? String ?? "true")")
