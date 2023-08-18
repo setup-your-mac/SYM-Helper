@@ -60,11 +60,9 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
                 case "buildings":
                     buildings_TextField.string = arrayToList(theArray: allObjects)
                     Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string
-                    //                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
                 default:
                     departments_TextField.string = arrayToList(theArray: allObjects)
                     Settings.shared.dict["departmentListRaw"] = departments_TextField.string
-                    //                Settings.shared.dict["departmentListRaw"] = departments_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
                 }
             } else {
                 _ = Alert().display(header: "", message: "Unable to fetch \(whichTab), verify the account has permissions to read \(whichTab)", secondButton: "")
