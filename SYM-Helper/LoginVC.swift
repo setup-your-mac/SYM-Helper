@@ -24,6 +24,8 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     @IBOutlet weak var password_label: NSTextField!
     
     @IBOutlet weak var saveCreds_button: NSButton!
+    @IBOutlet weak var useApiClient_button: NSButton!
+    
     
 //    @IBOutlet weak var upload_progressIndicator: NSProgressIndicator!
 //    @IBOutlet weak var continueButton: NSButton!
@@ -46,13 +48,43 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         setWindowSize(setting: hideCreds_button.state.rawValue)
     }
     
+    @IBAction func useApiClient_action(_ sender: NSButton) {
+        setLabels()
+        defaults.set(useApiClient_button.state.rawValue, forKey: "useApiClient")
+        fetchPassword()
+    }
+    
+    func fetchPassword() {
+        let credentialsArray = Credentials().retrieve(service: "\(jamfProServer_textfield.stringValue.fqdnFromUrl)")
+        
+        if credentialsArray.count == 2 {
+            jamfProUsername_textfield.stringValue = credentialsArray[0]
+            jamfProPassword_textfield.stringValue = credentialsArray[1]
+        } else {
+            jamfProUsername_textfield.stringValue = ""
+            jamfProPassword_textfield.stringValue = ""
+            setWindowSize(setting: 1)
+        }
+    }
+
+    func setLabels() {
+        useApiClient = useApiClient_button.state.rawValue
+        if useApiClient == 0 {
+            username_label.stringValue = "Username:"
+            password_label.stringValue = "Password:"
+        } else {
+            username_label.stringValue = "Client ID:"
+            password_label.stringValue = "Client Secret:"
+        }
+    }
+    
     @IBAction func login_action(_ sender: Any) {
         JamfProServer.destination = jamfProServer_textfield.stringValue.failoverFix
         jamfProServer_textfield.stringValue = JamfProServer.destination
         JamfProServer.username    = jamfProUsername_textfield.stringValue
         JamfProServer.userpass    = jamfProPassword_textfield.stringValue
         
-        let dataToBeSent = (jamfProServer_textfield.stringValue, jamfProUsername_textfield.stringValue, jamfProPassword_textfield.stringValue,saveCreds_button.state.rawValue)
+        let dataToBeSent = (JamfProServer.destination, JamfProServer.username, JamfProServer.userpass,saveCreds_button.state.rawValue)
         delegate?.sendLoginInfo(loginInfo: dataToBeSent)
         dismiss(self)
         
@@ -75,7 +107,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         if let textField = obj.object as? NSTextField {
             switch textField.identifier!.rawValue {
             case "server":
-                let credentialsArray = Credentials().retrieve(service: "sym-helper-\(jamfProServer_textfield.stringValue.fqdnFromUrl)")
+                let credentialsArray = Credentials().retrieve(service: "\(jamfProServer_textfield.stringValue.fqdnFromUrl)")
                 
                 if credentialsArray.count == 2 {
                     jamfProUsername_textfield.stringValue = credentialsArray[0]
@@ -94,7 +126,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             switch textField.identifier!.rawValue {
             case "server":
                 if jamfProUsername_textfield.stringValue != "" || jamfProPassword_textfield.stringValue != "" {
-                    let credentialsArray = Credentials().retrieve(service: "sym-helper-\(jamfProServer_textfield.stringValue.fqdnFromUrl)")
+                    let credentialsArray = Credentials().retrieve(service: "\(jamfProServer_textfield.stringValue.fqdnFromUrl)")
                     
                     if credentialsArray.count == 2 {
                         jamfProUsername_textfield.stringValue = credentialsArray[0]
@@ -114,7 +146,8 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     
     func setWindowSize(setting: Int) {
         if setting == 0 {
-            preferredContentSize = CGSize(width: 450, height: 85)
+            preferredContentSize = CGSize(width: 518, height: 85)
+//            preferredContentSize = CGSize(width: 450, height: 85)
             hideCreds_button.toolTip = "show username/password fields"
             jamfProUsername_textfield.isHidden = true
             jamfProPassword_textfield.isHidden = true
@@ -122,7 +155,8 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             password_label.isHidden            = true
             saveCreds_button.isHidden          = true
         } else {
-            preferredContentSize = CGSize(width: 450, height: 142)
+            preferredContentSize = CGSize(width: 518, height: 166)
+//            preferredContentSize = CGSize(width: 450, height: 142)
             hideCreds_button.toolTip = "hide username/password fields"
             jamfProUsername_textfield.isHidden    = false
             jamfProPassword_textfield.isHidden    = false
@@ -144,9 +178,12 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         
         jamfProServer_textfield.stringValue = defaults.string(forKey: "server") ?? ""
         saveCreds_button.state = NSControl.StateValue(defaults.integer(forKey: "saveCreds"))
+        useApiClient = defaults.integer(forKey: "useApiClient")
+        useApiClient_button.state = NSControl.StateValue(rawValue: useApiClient)
+
         if jamfProServer_textfield.stringValue != "" {
             
-            let credentialsArray = Credentials().retrieve(service: "sym-helper-\(jamfProServer_textfield.stringValue.fqdnFromUrl)")
+            let credentialsArray = Credentials().retrieve(service: "\(jamfProServer_textfield.stringValue.fqdnFromUrl)")
             
             if credentialsArray.count == 2 {
                 jamfProUsername_textfield.stringValue = credentialsArray[0]

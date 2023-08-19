@@ -1,0 +1,56 @@
+## create Use API client button
+    
+@IBOutlet weak var useApiClient_button: NSButton!
+
+## Button Action
+    @IBAction func useApiClient_action() {
+        setLabels()
+        userDefaults.set(JamfProServer.useApiClient, forKey: "useApiClient")
+        fetchPassword(whichServer: "source", url: source_jp_server_field.stringValue)
+    }
+    
+    func setLabels() {
+        useApiClient = useApiClient_button.state.rawValue
+        if useApiClient == 0 {
+            username_TextField.stringValue = "Username"
+            password_TextField.stringValue = "Password"
+        } else {
+            username_TextField.stringValue = "Client ID"
+            password_TextField.stringValue = "Client Secret"
+        }
+    }
+
+## generate token delegate      
+var tokenUrlString = "\(serverUrl)/api/v1/auth/token"
+        
+var apiClient = false
+if useApiClient == 1 {
+	tokenUrlString = "\(serverUrl)/api/oauth/token"
+	apiClient = true
+}
+
+           
+if apiClient {
+	let clientId = JamfProServer.username
+	let secret   = JamfProServer.userpass
+	let clientString = "grant_type=client_credentials&client_id=\(String(describing: clientId))&client_secret=\(String(describing: secret))"
+//                print("[getToken] clientString: \(clientString)")
+
+	let requestData = clientString.data(using: .utf8)
+	request.httpBody = requestData
+	configuration.httpAdditionalHeaders = ["Content-Type" : "application/x-www-form-urlencoded", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+} else {
+	configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+}
+            
+let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+if let endpointJSON = json! as? [String: Any] {
+	JamfProServer.validToken  = true
+	JamfProServer.authCreds   = apiClient ? (endpointJSON["access_token"] as? String ?? "")!:(endpointJSON["token"] as? String ?? "")!
+	
+	
+## viewDidLoad - LoginWindow
+
+        saveCreds_button.state = NSControl.StateValue(defaults.integer(forKey: "saveCreds"))
+        useApiClient = defaults.integer(forKey: "useApiClient")
+        useApiClient_button.state = NSControl.StateValue(rawValue: useApiClient)

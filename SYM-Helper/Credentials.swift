@@ -13,46 +13,80 @@ let kSecAttrAccountString          = NSString(format: kSecAttrAccount)
 let kSecValueDataString            = NSString(format: kSecValueData)
 let kSecClassGenericPasswordString = NSString(format: kSecClassGenericPassword)
 let keychainQ                      = DispatchQueue(label: "com.jamf.sym-helper", qos: DispatchQoS.background)
+let prefix                         = "sym-helper"
 
 class Credentials {
     
     func save(service: String, account: String, data: String) {
-        
-        if let password = data.data(using: String.Encoding.utf8) {
-            keychainQ.async { [self] in
-                var keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
-                                                    kSecAttrService as String: service,
-                                                    kSecAttrAccount as String: account,
-                                                    kSecValueData as String: password]
-                
-                // see if credentials already exist for server
-                let accountCheck = retrieve(service: service)
-                if accountCheck.count == 0 {
-                    // try to add new credentials, if account exists we'll try updating it
-                    let addStatus = SecItemAdd(keychainQuery as CFDictionary, nil)
-                    if (addStatus != errSecSuccess) {
-                        if let addErr = SecCopyErrorMessageString(addStatus, nil) {
-                            print("[addStatus] Write failed for new credentials: \(addErr)")
-                        }
-                    }
-                } else {
-                    // credentials already exist, try to update
-                    keychainQuery = [kSecClass as String: kSecClassGenericPasswordString,
-                                     kSecAttrService as String: service,
-                                     kSecMatchLimit as String: kSecMatchLimitOne,
-                                     kSecReturnAttributes as String: true]
-                    let updateStatus = SecItemUpdate(keychainQuery as CFDictionary, [kSecAttrAccountString:account,kSecValueDataString:password] as CFDictionary)
-                    if (updateStatus != errSecSuccess) {
-                        if let updateErr = SecCopyErrorMessageString(updateStatus, nil) {
-                            print("[updateStatus] Update failed for existing credentials: \(updateErr)")
-                        }
-                    }
+        if service != "" && service.first != "/" {
+            var theService = service
+            
+                if useApiClient == 1 {
+                    theService = "apiClient-" + theService
                 }
+            
+            let keychainName = "JamfProApps-\(theService)"
+
+            if let password = data.data(using: String.Encoding.utf8) {
+                keychainQ.async { [self] in
+                    var keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
+                                                        kSecAttrService as String: keychainName,
+                                                        kSecAttrAccount as String: account,
+                                                        kSecValueData as String: password]
+                    
+                    // see if credentials already exist for server
+                    let accountCheck = retrieve(service: keychainName)
+                    if accountCheck.count == 0 {
+                        // try to add new credentials, if account exists we'll try updating it
+                        let addStatus = SecItemAdd(keychainQuery as CFDictionary, nil)
+                        if (addStatus != errSecSuccess) {
+                            if let addErr = SecCopyErrorMessageString(addStatus, nil) {
+                                print("[addStatus] Write failed for new credentials: \(addErr)")
+                            }
+                        }
+                    } else {
+                        // credentials already exist, try to update
+                        keychainQuery = [kSecClass as String: kSecClassGenericPasswordString,
+                                         kSecAttrService as String: keychainName,
+                                         kSecMatchLimit as String: kSecMatchLimitOne,
+                                         kSecReturnAttributes as String: true]
+                        let updateStatus = SecItemUpdate(keychainQuery as CFDictionary, [kSecAttrAccountString:account,kSecValueDataString:password] as [NSString : Any] as CFDictionary)
+                        if (updateStatus != errSecSuccess) {
+                            if let updateErr = SecCopyErrorMessageString(updateStatus, nil) {
+                                print("[updateStatus] Update failed for existing credentials: \(updateErr)")
+                            }
+                        }
+                    }
+            }
+            }
         }
+    }   // func save - end
+    
+    func retrieve(service: String, whichServer: String = "") -> [String] {
+        
+        var keychainResult = [String]()
+        var theService = service
+        
+//        print("[credentials] JamfProServer.sourceApiClient: \(JamfProServer.sourceUseApiClient)")
+        
+        if useApiClient == 1 {
+            theService = "apiClient-" + theService
         }
+        
+        var keychainName = "JamfProApps-\(theService)"
+//        print("[credentials] keychainName: \(keychainName)")
+        // look for common keychain item
+        keychainResult = itemLookup(service: keychainName)
+        // look for legacy keychain item
+        if keychainResult.count < 2 {
+            keychainName   = "\(prefix)-\(theService)"
+            keychainResult = itemLookup(service: keychainName)
+        }
+        
+        return keychainResult
     }
     
-    func retrieve(service: String) -> [String] {
+    private func itemLookup(service: String) -> [String] {
         
         var storedCreds = [String]()
         

@@ -8,6 +8,11 @@
 import Cocoa
 import Foundation
 
+var appsGroupId            = "group.PS2F6S478M.jamfie.SharedJPMA"
+let sharedDefaults         = UserDefaults(suiteName: appsGroupId)
+let sharedContainerUrl     = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appsGroupId)
+let sharedSettingsPlistUrl = (sharedContainerUrl?.appendingPathComponent("Library/Preferences/\(appsGroupId).plist"))!
+
 var showLoginWindow = true
 let defaults        = UserDefaults.standard
 var groupNumber     = 0
@@ -16,6 +21,8 @@ let refreshInterval: UInt32 = 25*60 // 25 minutes
 var runComplete     = false
 var symScript       = ""
 var tokenTimeCreated: Date?
+
+var useApiClient    = 0
 
 let alert: Alert           = Alert()
 let writeToLog: WriteToLog = WriteToLog()

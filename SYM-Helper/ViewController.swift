@@ -58,6 +58,7 @@ public class Settings {
     public static let shared = Settings(dict: [:])
 }
 
+
 class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate, OtherItemDelegate, SendingLoginInfoDelegate, SendNewConfigInfoDelegate, SendClonedConfigInfoDelegate {
     
     @IBOutlet weak var connectedTo_TextField: NSTextField!
@@ -757,11 +758,12 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         TokenDelegate().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds) { [self]
             authResult in
             let (statusCode,theResult) = authResult
+            print("[sendLoginInfo] statusCode: \(statusCode)  theResult: \(theResult)")
             if theResult == "success" {
                 defaults.set(JamfProServer.destination, forKey: "server")
                 defaults.set(JamfProServer.username, forKey: "username")
                 if saveCredsState == 1 {
-                    Credentials().save(service: "sym-helper-\(JamfProServer.destination.fqdnFromUrl)", account: JamfProServer.username, data: JamfProServer.userpass)
+                    Credentials().save(service: "\(JamfProServer.destination.fqdnFromUrl)", account: JamfProServer.username, data: JamfProServer.userpass)
                 }
                 let lastChar = "\(JamfProServer.destination)".last
                 connectedTo_TextField.stringValue = ( JamfProServer.destination.last == "/" ) ? String("Connected to: \(JamfProServer.destination)".dropLast()):"Connected to: \(JamfProServer.destination)"
@@ -878,8 +880,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 }
             }
         }
-        
     }
+    
     func dictToClass(theDict: [String:[[String:Any]]]) -> [String:[Policy]] {
         // selectedPoliciesArray.append(Policy(name: theLabel, id: theId, configs: [configuration_Button.titleOfSelectedItem!], grouped: false, groupId: ""))
         var transformedConfig = [String:[Policy]]()

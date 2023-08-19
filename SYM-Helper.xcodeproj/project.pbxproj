@@ -32,6 +32,7 @@
 		B54D66962A60016600998963 /* ClassicAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassicAPI.swift; sourceTree = "<group>"; };
 		B568542C2A0004940004630D /* SettingsVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsVC.swift; sourceTree = "<group>"; };
 		B57069DA29D891950004C848 /* OtherItemVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherItemVC.swift; sourceTree = "<group>"; };
+		B59888F02A902A480031E72F /* API Client */ = {isa = PBXFileReference; lastKnownFileType = text; path = "API Client"; sourceTree = "<group>"; };
 		B5BBDB9D29A168490040FD71 /* SYM-Helper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SYM-Helper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5BBDBA029A168490040FD71 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B5BBDBA229A168490040FD71 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -63,6 +64,7 @@
 		B5BBDB9429A168490040FD71 = {
 			isa = PBXGroup;
 			children = (
+				B59888F02A902A480031E72F /* API Client */,
 				B5BBDBBC29A4380D0040FD71 /* Notes */,
 				B5BBDB9F29A168490040FD71 /* SYM-Helper */,
 				B5BBDB9E29A168490040FD71 /* Products */,

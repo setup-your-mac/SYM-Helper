@@ -18,10 +18,23 @@ class TokenDelegate: NSObject, URLSessionDelegate {
         URLCache.shared.removeAllCachedResponses()
                 
         var tokenUrlString = "\(serverUrl)/api/v1/auth/token"
+        
+        var apiClient = false
+        if useApiClient == 1 {
+            tokenUrlString = "\(serverUrl)/api/oauth/token"
+            apiClient = true
+        }
+        
         tokenUrlString     = tokenUrlString.replacingOccurrences(of: "//api", with: "/api")
-    //        print("\(tokenUrlString)")
+        print("[TokenDelegate] tokenUrlString: \(tokenUrlString)")
         
         let tokenUrl       = URL(string: "\(tokenUrlString)")
+        guard let _ = tokenUrl else {
+            print("problem constructing the URL from \(tokenUrlString)")
+            completion((500, "failed"))
+            return
+        }
+        
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: tokenUrl!)
         request.httpMethod = "POST"
@@ -30,8 +43,21 @@ class TokenDelegate: NSObject, URLSessionDelegate {
 //        print("[JamfPro] \(whichServer) tokenAge: \(minutesOld) minutes")
         if !JamfProServer.validToken || (JamfProServer.base64Creds != base64creds) || (minutesOld > 25) {
             writeToLog.message(stringOfText: "[TokenDelegate.getToken] Attempting to retrieve token from \(String(describing: tokenUrl!)) for version look-up")
+                        
+            if apiClient {
+                let clientId = JamfProServer.username
+                let secret   = JamfProServer.userpass
+                let clientString = "grant_type=client_credentials&client_id=\(String(describing: clientId))&client_secret=\(String(describing: secret))"
+                print("[TokenDelegate] clientString: \(clientString)")
+
+                let requestData = clientString.data(using: .utf8)
+                request.httpBody = requestData
+                configuration.httpAdditionalHeaders = ["Content-Type" : "application/x-www-form-urlencoded", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+            } else {
+                configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+            }
             
-            configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+            
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
             let task = session.dataTask(with: request as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
@@ -39,9 +65,10 @@ class TokenDelegate: NSObject, URLSessionDelegate {
                 if let httpResponse = response as? HTTPURLResponse {
                     if httpSuccess.contains(httpResponse.statusCode) {
                         let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                        if let endpointJSON = json! as? [String: Any], let _ = endpointJSON["token"], let _ = endpointJSON["expires"] {
+                        if let endpointJSON = json! as? [String: Any] {
                             JamfProServer.validToken  = true
-                            JamfProServer.authCreds   = (endpointJSON["token"] as? String)!
+                            JamfProServer.authCreds   = apiClient ? (endpointJSON["access_token"] as? String ?? "")!:(endpointJSON["token"] as? String ?? "")!
+//                            JamfProServer.authCreds   = (endpointJSON["token"] as? String)!
 //                            JamfProServer.authExpires = "\(endpointJSON["expires"] ?? "")"
                             JamfProServer.authType    = "Bearer"
                             JamfProServer.base64Creds = base64creds
