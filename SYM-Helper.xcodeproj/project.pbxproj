@@ -18,7 +18,6 @@
 		B5BBDBA529A1684C0040FD71 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5BBDBA429A1684C0040FD71 /* Assets.xcassets */; };
 		B5BBDBA829A1684C0040FD71 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B5BBDBA629A1684C0040FD71 /* Main.storyboard */; };
 		B5BBDBB029A171570040FD71 /* WriteToLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBAF29A171570040FD71 /* WriteToLog.swift */; };
-		B5BBDBB229A171810040FD71 /* Login2VC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB129A171810040FD71 /* Login2VC.swift */; };
 		B5BBDBB429A1719D0040FD71 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB329A1719D0040FD71 /* Credentials.swift */; };
 		B5BBDBB629A171BC0040FD71 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB529A171BC0040FD71 /* Globals.swift */; };
 		B5BBDBB829A1758C0040FD71 /* TokenDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */; };
@@ -42,7 +41,6 @@
 		B5BBDBA729A1684C0040FD71 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B5BBDBA929A1684C0040FD71 /* SYM_Helper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SYM_Helper.entitlements; sourceTree = "<group>"; };
 		B5BBDBAF29A171570040FD71 /* WriteToLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WriteToLog.swift; sourceTree = "<group>"; };
-		B5BBDBB129A171810040FD71 /* Login2VC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Login2VC.swift; sourceTree = "<group>"; };
 		B5BBDBB329A1719D0040FD71 /* Credentials.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
 		B5BBDBB529A171BC0040FD71 /* Globals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenDelegate.swift; sourceTree = "<group>"; };
@@ -92,7 +90,6 @@
 				B5BBDBB329A1719D0040FD71 /* Credentials.swift */,
 				B5BBDBB529A171BC0040FD71 /* Globals.swift */,
 				B59888F12A90F23B0031E72F /* LoginVC.swift */,
-				B5BBDBB129A171810040FD71 /* Login2VC.swift */,
 				CE948EBE2A2C9BCA00C889B6 /* NewConfigVC.swift */,
 				B57069DA29D891950004C848 /* OtherItemVC.swift */,
 				B568542C2A0004940004630D /* SettingsVC.swift */,
@@ -213,7 +210,6 @@
 				B59888F22A90F23B0031E72F /* LoginVC.swift in Sources */,
 				B5BBDBB429A1719D0040FD71 /* Credentials.swift in Sources */,
 				B54D66972A60016600998963 /* ClassicAPI.swift in Sources */,
-				B5BBDBB229A171810040FD71 /* Login2VC.swift in Sources */,
 				B5BBDBBA29A177040040FD71 /* Alert.swift in Sources */,
 				B5BBDBA129A168490040FD71 /* AppDelegate.swift in Sources */,
 			);
@@ -367,7 +363,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 0.6.9;
+				MARKETING_VERSION = 0.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "jamf.ie.SYM-Helper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -396,7 +392,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 0.6.9;
+				MARKETING_VERSION = 0.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "jamf.ie.SYM-Helper";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
