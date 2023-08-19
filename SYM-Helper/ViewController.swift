@@ -60,6 +60,10 @@ public class Settings {
 
 
 class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate, OtherItemDelegate, SendingLoginInfoDelegate, SendNewConfigInfoDelegate, SendClonedConfigInfoDelegate {
+//    func sendLoginInfo(loginInfo: (String, String, String, String, Int)) {
+//        <#code#>
+//    }
+    
     
     @IBOutlet weak var connectedTo_TextField: NSTextField!
     @IBOutlet weak var filter_SearchField: NSSearchField!
@@ -209,7 +213,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
     
     @IBAction func refresh_Action(_ sender: Any) {
-        sendLoginInfo(loginInfo: (JamfProServer.destination, JamfProServer.username, JamfProServer.userpass,saveCredsState))
+        sendLoginInfo(loginInfo: (JamfProServer.displayName, JamfProServer.destination, JamfProServer.username, JamfProServer.userpass,saveCredsState))
     }
     
     
@@ -747,10 +751,10 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
     
     // Delegate Method
-    func sendLoginInfo(loginInfo: (String,String,String,Int)) {
+    func sendLoginInfo(loginInfo: (String,String,String,String,Int)) {
         
         var saveCredsState: Int?
-        (JamfProServer.destination, JamfProServer.username, JamfProServer.userpass,saveCredsState) = loginInfo
+        (JamfProServer.displayName, JamfProServer.destination, JamfProServer.username, JamfProServer.userpass,saveCredsState) = loginInfo
         let jamfUtf8Creds = "\(JamfProServer.username):\(JamfProServer.userpass)".data(using: String.Encoding.utf8)
         JamfProServer.base64Creds = (jamfUtf8Creds?.base64EncodedString())!
 
@@ -760,8 +764,11 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             let (statusCode,theResult) = authResult
             print("[sendLoginInfo] statusCode: \(statusCode)  theResult: \(theResult)")
             if theResult == "success" {
-                defaults.set(JamfProServer.destination, forKey: "server")
+                
+                defaults.set(JamfProServer.destination, forKey: "currentServer")
+//                defaults.set(JamfProServer.destination, forKey: "server")
                 defaults.set(JamfProServer.username, forKey: "username")
+                
                 if saveCredsState == 1 {
                     Credentials().save(service: "\(JamfProServer.destination.fqdnFromUrl)", account: JamfProServer.username, data: JamfProServer.userpass)
                 }

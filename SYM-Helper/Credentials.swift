@@ -14,6 +14,7 @@ let kSecValueDataString            = NSString(format: kSecValueData)
 let kSecClassGenericPasswordString = NSString(format: kSecClassGenericPassword)
 let keychainQ                      = DispatchQueue(label: "com.jamf.sym-helper", qos: DispatchQoS.background)
 let prefix                         = "sym-helper"
+let sharedPrefix                   = "JPMA"
 
 class Credentials {
     
@@ -25,7 +26,7 @@ class Credentials {
                     theService = "apiClient-" + theService
                 }
             
-            let keychainName = "JamfProApps-\(theService)"
+            let keychainName = sharedPrefix + "-" + theService
 
             if let password = data.data(using: String.Encoding.utf8) {
                 keychainQ.async { [self] in
@@ -73,7 +74,7 @@ class Credentials {
             theService = "apiClient-" + theService
         }
         
-        var keychainName = "JamfProApps-\(theService)"
+        var keychainName = sharedPrefix + "-" + theService
 //        print("[credentials] keychainName: \(keychainName)")
         // look for common keychain item
         keychainResult = itemLookup(service: keychainName)

@@ -59,6 +59,7 @@ struct JamfProServer {
     static var version      = ""
     static var authType     = "Basic"
     static var destination  = ""
+    static var displayName  = ""
     static var username     = ""
     static var userpass     = ""
     static var authCreds    = ""

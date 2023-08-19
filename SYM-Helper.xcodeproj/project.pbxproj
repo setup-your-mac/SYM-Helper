@@ -12,12 +12,13 @@
 		B54D66972A60016600998963 /* ClassicAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54D66962A60016600998963 /* ClassicAPI.swift */; };
 		B568542D2A0004940004630D /* SettingsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B568542C2A0004940004630D /* SettingsVC.swift */; };
 		B57069DB29D891950004C848 /* OtherItemVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57069DA29D891950004C848 /* OtherItemVC.swift */; };
+		B59888F22A90F23B0031E72F /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59888F12A90F23B0031E72F /* LoginVC.swift */; };
 		B5BBDBA129A168490040FD71 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBA029A168490040FD71 /* AppDelegate.swift */; };
 		B5BBDBA329A168490040FD71 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBA229A168490040FD71 /* ViewController.swift */; };
 		B5BBDBA529A1684C0040FD71 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5BBDBA429A1684C0040FD71 /* Assets.xcassets */; };
 		B5BBDBA829A1684C0040FD71 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B5BBDBA629A1684C0040FD71 /* Main.storyboard */; };
 		B5BBDBB029A171570040FD71 /* WriteToLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBAF29A171570040FD71 /* WriteToLog.swift */; };
-		B5BBDBB229A171810040FD71 /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB129A171810040FD71 /* LoginVC.swift */; };
+		B5BBDBB229A171810040FD71 /* Login2VC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB129A171810040FD71 /* Login2VC.swift */; };
 		B5BBDBB429A1719D0040FD71 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB329A1719D0040FD71 /* Credentials.swift */; };
 		B5BBDBB629A171BC0040FD71 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB529A171BC0040FD71 /* Globals.swift */; };
 		B5BBDBB829A1758C0040FD71 /* TokenDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */; };
@@ -33,6 +34,7 @@
 		B568542C2A0004940004630D /* SettingsVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsVC.swift; sourceTree = "<group>"; };
 		B57069DA29D891950004C848 /* OtherItemVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherItemVC.swift; sourceTree = "<group>"; };
 		B59888F02A902A480031E72F /* API Client */ = {isa = PBXFileReference; lastKnownFileType = text; path = "API Client"; sourceTree = "<group>"; };
+		B59888F12A90F23B0031E72F /* LoginVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		B5BBDB9D29A168490040FD71 /* SYM-Helper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SYM-Helper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5BBDBA029A168490040FD71 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B5BBDBA229A168490040FD71 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -40,7 +42,7 @@
 		B5BBDBA729A1684C0040FD71 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B5BBDBA929A1684C0040FD71 /* SYM_Helper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SYM_Helper.entitlements; sourceTree = "<group>"; };
 		B5BBDBAF29A171570040FD71 /* WriteToLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WriteToLog.swift; sourceTree = "<group>"; };
-		B5BBDBB129A171810040FD71 /* LoginVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
+		B5BBDBB129A171810040FD71 /* Login2VC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Login2VC.swift; sourceTree = "<group>"; };
 		B5BBDBB329A1719D0040FD71 /* Credentials.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
 		B5BBDBB529A171BC0040FD71 /* Globals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenDelegate.swift; sourceTree = "<group>"; };
@@ -89,7 +91,8 @@
 				B522EA922A4A2E62009F3110 /* ConfigsSettings.swift */,
 				B5BBDBB329A1719D0040FD71 /* Credentials.swift */,
 				B5BBDBB529A171BC0040FD71 /* Globals.swift */,
-				B5BBDBB129A171810040FD71 /* LoginVC.swift */,
+				B59888F12A90F23B0031E72F /* LoginVC.swift */,
+				B5BBDBB129A171810040FD71 /* Login2VC.swift */,
 				CE948EBE2A2C9BCA00C889B6 /* NewConfigVC.swift */,
 				B57069DA29D891950004C848 /* OtherItemVC.swift */,
 				B568542C2A0004940004630D /* SettingsVC.swift */,
@@ -207,9 +210,10 @@
 				B568542D2A0004940004630D /* SettingsVC.swift in Sources */,
 				CE948EC12A2C9C4500C889B6 /* CloneConfigVC.swift in Sources */,
 				B5BBDBB629A171BC0040FD71 /* Globals.swift in Sources */,
+				B59888F22A90F23B0031E72F /* LoginVC.swift in Sources */,
 				B5BBDBB429A1719D0040FD71 /* Credentials.swift in Sources */,
 				B54D66972A60016600998963 /* ClassicAPI.swift in Sources */,
-				B5BBDBB229A171810040FD71 /* LoginVC.swift in Sources */,
+				B5BBDBB229A171810040FD71 /* Login2VC.swift in Sources */,
 				B5BBDBBA29A177040040FD71 /* Alert.swift in Sources */,
 				B5BBDBA129A168490040FD71 /* AppDelegate.swift in Sources */,
 			);
