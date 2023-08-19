@@ -8,6 +8,9 @@
 import Cocoa
 import Foundation
 
+// for saving servers, shared settings - LoginVC
+var saveServers            = true
+var maxServerList          = 40
 var appsGroupId            = "group.PS2F6S478M.jamfie.SharedJPMA"
 let sharedDefaults         = UserDefaults(suiteName: appsGroupId)
 let sharedContainerUrl     = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appsGroupId)
