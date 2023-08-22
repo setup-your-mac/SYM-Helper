@@ -24,6 +24,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
     
     @IBOutlet weak var scriptSource_TextField: NSTextField!
     
+    /*
     @IBOutlet weak var pfu_Button: NSPopUpButton!
     @IBOutlet weak var pu_Button: NSPopUpButton!
     @IBOutlet weak var pfrn_Button: NSPopUpButton!
@@ -36,6 +37,20 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
     @IBOutlet weak var pfd_Button: NSPopUpButton!
     @IBOutlet weak var pfc_Button: NSPopUpButton!
     @IBOutlet weak var mip_Button: NSPopUpButton!
+     */
+    
+    @IBOutlet weak var pfu_Switch: NSPopUpButton!
+    @IBOutlet weak var pu_Switch: NSPopUpButton!
+    @IBOutlet weak var pfrn_Switch: NSPopUpButton!
+    @IBOutlet weak var prn_Switch: NSPopUpButton!
+    @IBOutlet weak var pfe_Switch: NSPopUpButton!
+    @IBOutlet weak var pfcn_Switch: NSPopUpButton!
+    @IBOutlet weak var pfat_Switch: NSPopUpButton!
+    @IBOutlet weak var pfr_Switch: NSPopUpButton!
+    @IBOutlet weak var pfb_Switch: NSPopUpButton!
+    @IBOutlet weak var pfd_Switch: NSPopUpButton!
+    @IBOutlet weak var pfc_Switch: NSPopUpButton!
+    @IBOutlet weak var mip_Switch: NSPopUpButton!
     
     @IBOutlet var buildings_TextField: NSTextView!
     @IBOutlet var departments_TextField: NSTextView!
@@ -107,36 +122,13 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         }
         Settings.shared.dict[theIdentifier] = sender.title
     }
-    
-    /*
-    @IBAction func pfu_Action(_ sender: NSButton) {
-        Settings.shared.dict["promptForUsername"] = sender.title
+    @IBAction func switchPrompt_Action(_ sender: NSSwitch) {
+        guard let theIdentifier = sender.identifier?.rawValue else {
+            WriteToLog().message(stringOfText: "Unknown prompt/prefill value")
+            return
+        }
+        Settings.shared.dict[theIdentifier] = sender.state.rawValue
     }
-    @IBAction func pu_Action(_ sender: NSButton) {
-        Settings.shared.dict["prefillUsername"] = sender.title
-    }
-    @IBAction func pfcn_Action(_ sender: NSButton) {
-        Settings.shared.dict["promptForComputerName"] = sender.title
-    }
-    @IBAction func pfat_Action(_ sender: NSButton) {
-        Settings.shared.dict["promptForAssetTag"] = sender.title
-    }
-    @IBAction func pfr_Action(_ sender: NSButton) {
-        Settings.shared.dict["promptForRoom"] = sender.title
-    }
-    @IBAction func pfb_Action(_ sender: NSButton) {
-        Settings.shared.dict["promptForBuilding"] = sender.title
-    }
-    @IBAction func pfd_Action(_ sender: NSButton) {
-        Settings.shared.dict["promptForDepartment"] = sender.title
-    }
-    @IBAction func pfc_Action(_ sender: NSButton) {
-        Settings.shared.dict["promptForConfiguration"] = sender.title
-    }
-    @IBAction func mip_Action(_ sender: NSButton) {
-        Settings.shared.dict["moveableInProduction"] = sender.title
-    }
-    */
     
     
     @IBAction func resetToDefault(_ sender: Any) {
@@ -261,7 +253,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         
 //        print("currentConfig: \(currentConfig)")
 //        print("settingsDict: \(Settings.shared.dict)")
-        
+        /*
         pfu_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForUsername"] as? String ?? "true")")
         pu_Button.selectItem(withTitle: "\(Settings.shared.dict["prefillUsername"] as? String ?? "true")")
         pfcn_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForComputerName"] as? String ?? "true")")
@@ -274,6 +266,37 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         pfd_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForDepartment"] as? String ?? "true")")
         pfc_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForConfiguration"] as? String ?? "true")")
         mip_Button.selectItem(withTitle: "\(Settings.shared.dict["moveableInProduction"] as? String ?? "true")")
+         */
+//        let promptForButtons = ["promptForUsername","prefillUsername","promptForComputerName","promptForRealName","prefillRealname","promptForEmail","promptForAssetTag","promptForRoom","promptForBuilding","promptForDepartment","promptForConfiguration","moveableInProduction"]
+//        for whichButton in promptForButtons {
+//            var buttonState = "true"
+//            if let theState = Settings.shared.dict[whichButton] as? Int {
+//                buttonState = ( theState == 1 ) ? "true":"false"
+//            } else if let theState = Settings.shared.dict[whichButton] as? String {
+//                buttonState = theState
+//            }
+//        }
+        func onOff(whichButton: String) -> Int {
+            var buttonState = 1
+            if let theState = Settings.shared.dict[whichButton] as? Int {
+                buttonState = theState
+            } else if let theState = Settings.shared.dict[whichButton] as? String {
+                buttonState = ( theState == "true" ) ? 1:0
+            }
+            return buttonState
+        }
+        pfu_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForUsername"))
+        pu_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "prefillUsername"))
+        pfcn_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForComputerName"))
+        pfrn_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForRealName"))
+        prn_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "prefillRealname"))
+        pfe_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForEmail"))
+        pfat_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForAssetTag"))
+        pfr_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForRoom"))
+        pfb_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForBuilding"))
+        pfd_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForDepartment"))
+        pfc_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForConfiguration"))
+        mip_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "moveableInProduction"))
         
         buildings_TextField.string = Settings.shared.dict["buildingsListRaw"] as? String ?? ""
         departments_TextField.string = Settings.shared.dict["departmentListRaw"] as? String ?? ""

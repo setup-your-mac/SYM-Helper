@@ -750,8 +750,16 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
     
     private func setPrompt(whichPrompt: String) {
+//        let regex = try! NSRegularExpression(pattern: "\(whichPrompt)=\".*?\"")
+//        symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(whichPrompt)=\"\(Settings.shared.dict["\(whichPrompt)"] ?? "true")\""))
+        var trueFalse = "true"
+        if let settingsRawValue = Settings.shared.dict["\(whichPrompt)"] as? Int {
+            trueFalse = ( settingsRawValue == 1 ) ? "true":"false"
+        } else if let settingsRawValue = Settings.shared.dict["\(whichPrompt)"] as? String {
+            trueFalse = settingsRawValue
+        }
         let regex = try! NSRegularExpression(pattern: "\(whichPrompt)=\".*?\"")
-        symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(whichPrompt)=\"\(Settings.shared.dict["\(whichPrompt)"] ?? "true")\""))
+        symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(whichPrompt)=\"\(trueFalse)\""))
     }
     private func setLocation(type: String) {
         let regex = try! NSRegularExpression(pattern: "\(type)=\".*?\"", options:.caseInsensitive)
