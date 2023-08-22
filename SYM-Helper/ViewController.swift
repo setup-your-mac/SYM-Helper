@@ -345,6 +345,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 
             getPolicy(id: doubleClicked.id) { [self]
                 (result: String) in
+                print("[addToPolicyArray] policy ID: \(doubleClicked.id)")
+                print("[addToPolicyArray] policy XML: \(result)")
                 updatePoliciesDict(xml: result, policyId: doubleClicked.id, grouped: doubleClicked.grouped, groupId: doubleClicked.groupId)
                 policiesArray.remove(at: rowClicked)
                 policiesDict[configuration_Button.titleOfSelectedItem!] = policiesArray
@@ -359,7 +361,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
     @objc func removeFromPolicyArray() {
         if selectedPolicies_TableView.clickedRow != -1 {
-            var doubleClickedRow = selectedPolicies_TableView.clickedRow
+            let doubleClickedRow = selectedPolicies_TableView.clickedRow
 
             let doubleClicked = selectedPoliciesArray[doubleClickedRow]
 //            doubleClicked.isSelected = false
@@ -458,8 +460,10 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         let self_service = betweenTags(xmlString: xml, startTag: "<self_service>", endTag: "</self_service>")
         
         var policyName = betweenTags(xmlString: self_service, startTag: "<self_service_display_name>", endTag: "</self_service_display_name>")
+        print("[updatePoliciesDict] self service name: \(policyName)")
         if policyName == "" {
             policyName = betweenTags(xmlString: general, startTag: "<name>", endTag: "</name>")
+            print("[updatePoliciesDict] general: \(policyName)")
         }
 
         var icon = betweenTags(xmlString: self_service, startTag: "<uri>", endTag: "</uri>")
@@ -900,9 +904,12 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         for (theConfig, configInfo) in theDict {
             policyArray.removeAll()
             for theConfigInfo in configInfo {
+                if theConfig == "Default" {
+                    print("[dictToClass] policy: \(String(describing: theConfigInfo["name"]))")
+                }
                 policyArray.append(Policy(name: theConfigInfo["name"] as! String, id: theConfigInfo["id"] as! String, configs: theConfigInfo["configs"] as! [String], grouped: theConfigInfo["grouped"] as! Bool, groupId: theConfigInfo["groupId"] as! String))
             }
-            transformedConfig[theConfig] = policyArray
+            transformedConfig[theConfig] = policyArray.sorted(by: {$0.name.lowercased() < $1.name.lowercased()})
         }
         return transformedConfig
     }

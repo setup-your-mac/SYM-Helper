@@ -4,7 +4,6 @@
 <dict>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>$(TeamIdentifierPrefix)</string>
 		<string>group.PS2F6S478M.jamfie.SharedJPMA</string>
 	</array>
 	<key>keychain-access-groups</key>
