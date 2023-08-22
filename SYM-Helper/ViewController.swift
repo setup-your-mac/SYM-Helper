@@ -455,9 +455,13 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     private func updatePoliciesDict(xml: String, policyId: String, grouped: Bool, groupId: String) {
         
         let general = betweenTags(xmlString: xml, startTag: "<general>", endTag: "</general>")
-//                let policyId = betweenTags(xmlString: general, startTag: "<id>", endTag: "</id>")
-        let policyName = betweenTags(xmlString: general, startTag: "<name>", endTag: "</name>")
         let self_service = betweenTags(xmlString: xml, startTag: "<self_service>", endTag: "</self_service>")
+        
+        var policyName = betweenTags(xmlString: self_service, startTag: "<self_service_display_name>", endTag: "</self_service_display_name>")
+        if policyName == "" {
+            policyName = betweenTags(xmlString: general, startTag: "<name>", endTag: "</name>")
+        }
+
         var icon = betweenTags(xmlString: self_service, startTag: "<uri>", endTag: "</uri>")
         icon = icon.replacingOccurrences(of: "https://ics.services.jamfcloud.com/icon/hash_", with: "")
         var progresstext = betweenTags(xmlString: self_service, startTag: "<self_service_description>", endTag: "</self_service_description>")

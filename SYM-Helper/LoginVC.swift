@@ -459,6 +459,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         
         useApiClient = defaults.integer(forKey: "useApiClient")
         useApiClient_button.state = NSControl.StateValue(rawValue: useApiClient)
+        setLabels()
                 
         // check shared settings
 //        print("[viewDidLoad] sharedSettingsPlistUrl: \(sharedSettingsPlistUrl.path)")
