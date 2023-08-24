@@ -9,8 +9,8 @@ import Foundation
 
 class SYMScript: NSObject, URLSessionDelegate {
     func get(scriptURL: String,completion: @escaping (_ authResult: String) -> Void) {
-        print("enter getScript")
-        print("script source: \(scriptURL)")
+//        print("enter getScript")
+        print("[SYMScript.get] script source: \(scriptURL)")
         var responseData = ""
         URLCache.shared.removeAllCachedResponses()
         //        let scriptUrl      = URL(string: "\(scriptSource)")

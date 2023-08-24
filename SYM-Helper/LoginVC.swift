@@ -56,6 +56,41 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
 //            header_TextField.wantsLayer = true
 //            header_TextField.stringValue = ""
 //            header_TextField.frame.size.height = 0.0
+            if NSEvent.modifierFlags.contains(.option) {
+                    let selectedServer =  selectServer_Button.titleOfSelectedItem!
+                    let response = Alert().display(header: "", message: "Are you sure you want to remove \(selectedServer) from the list?", secondButton: "Cancel")
+                    if response == "Cancel" {
+                        return
+                    } else {
+                        for (displayName, _) in availableServersDict {
+                            if displayName == selectedServer {
+                                availableServersDict[displayName] = nil
+                                selectServer_Button.removeItem(withTitle: selectedServer)
+                                sortedDisplayNames.removeAll(where: {$0 == displayName})
+//                                if displayName == lastServerDN {
+//                                    jamfProServer_textfield.stringValue   = ""
+//                                    jamfProUsername_textfield.stringValue = ""
+//                                    jamfProPassword_textfield.stringValue = ""
+//                                    selectServer_Button.selectItem(withTitle: "")
+//                                }
+                            }
+                        }
+                        if saveServers {
+                            sharedDefaults!.set(availableServersDict, forKey: "serversDict")
+                        }
+                        if sortedDisplayNames.firstIndex(of: lastServerDN) != nil {
+                            selectServer_Button.selectItem(withTitle: lastServerDN)
+                        } else {
+                            selectServer_Button.selectItem(withTitle: "")
+                            jamfProServer_textfield.stringValue   = ""
+                            jamfProUsername_textfield.stringValue = ""
+                            jamfProPassword_textfield.stringValue = ""
+                            selectServer_Button.selectItem(withTitle: "")
+                        }
+                    }
+                
+                return
+            }
             displayName_Label.stringValue = "Server:"
             selectServer_Button.isHidden = false
             displayName_TextField.isHidden = true
@@ -100,8 +135,9 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     var uploadCount            = 0
     var totalObjects           = 0
     var uploadsComplete        = false
-    var sortedDisplayNames      = [String]()
+    var sortedDisplayNames     = [String]()
     var lastServer             = ""
+    var lastServerDN           = ""
 
     @IBOutlet weak var saveCreds_button: NSButton!
     
@@ -112,6 +148,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     }
     
     @IBAction func login_action(_ sender: Any) {
+        didRun = true
         JamfProServer.destination = jamfProServer_textfield.stringValue
         JamfProServer.username    = jamfProUsername_textfield.stringValue
         JamfProServer.userpass    = jamfProPassword_textfield.stringValue
@@ -163,10 +200,9 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             }
         }
         
-        
         if theSender == "Login" {
             JamfProServer.validToken = false
-            let dataToBeSent = (displayName_TextField.stringValue, JamfProServer.destination, JamfProServer.username, JamfProServer.userpass, saveCreds_button.state.rawValue)
+            let dataToBeSent = (selectServer_Button.titleOfSelectedItem!, JamfProServer.destination, JamfProServer.username, JamfProServer.userpass, saveCreds_button.state.rawValue)
             delegate?.sendLoginInfo(loginInfo: dataToBeSent)
             dismiss(self)
         } else {
@@ -495,7 +531,6 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             availableServersDict[serverName] = nil
         }
 //        print("lastServer: \(lastServer)")
-        var lastServerDN = ""
         if availableServersDict.count > 0 {
             for (displayName, serverInfo) in availableServersDict {
                 if displayName != "" {
@@ -532,6 +567,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         jamfProServer_textfield.stringValue = lastServer
         saveCreds_button.state = NSControl.StateValue(defaults.integer(forKey: "saveCreds"))
         
+//        print("[LoginVC.viewDidLoad] availableServersDict: \(availableServersDict)")
         if availableServersDict.count != 0 {
             if jamfProServer_textfield.stringValue != "" {
                 credentialsCheck()

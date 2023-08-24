@@ -24,23 +24,23 @@ class ClassicAPI: NSObject, URLSessionDelegate {
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
            (data, response, error) -> Void in
-           session.finishTasksAndInvalidate()
-           if let httpResponse = response as? HTTPURLResponse {
-               if httpSuccess.contains(httpResponse.statusCode) {
-//                   print("getAllPolicies statusCode: \(httpResponse.statusCode)")
+            session.finishTasksAndInvalidate()
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpSuccess.contains(httpResponse.statusCode) {
+                //                   print("getAllPolicies statusCode: \(httpResponse.statusCode)")
                    
                     let responseData = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                       if let endpointJSON = responseData! as? [String: Any] {
-                           completion(endpointJSON)
-                           return
-                       } else {
-                           writeToLog.message(stringOfText: "[getAllPolicies] No data was returned from post/put.")
-                       }
-               }
-           } else {
+                    if let endpointJSON = responseData! as? [String: Any] {
+                       completion(endpointJSON)
+                       return
+                    } else {
+                       writeToLog.message(stringOfText: "[getAllPolicies] No data was returned from post/put.")
+                    }
+                }
+            } else {
                print("could not read response or no response")
-           }
-           completion([:])
+            }
+            completion([:])
         })
     task.resume()
     }

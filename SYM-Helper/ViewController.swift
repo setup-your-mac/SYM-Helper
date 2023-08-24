@@ -60,12 +60,13 @@ public class Settings {
 
 
 class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate, OtherItemDelegate, SendingLoginInfoDelegate, SendNewConfigInfoDelegate, SendClonedConfigInfoDelegate {
-//    func sendLoginInfo(loginInfo: (String, String, String, String, Int)) {
-//        <#code#>
-//    }
     
     
-    @IBOutlet weak var connectedTo_TextField: NSTextField!
+    @IBOutlet weak var connectTo_Button: NSButton!
+    @IBAction func connectedTo_Action(_ sender: NSButton) {
+        NSWorkspace.shared.open(URL(string: sender.toolTip!)!)
+    }
+    
     @IBOutlet weak var filter_SearchField: NSSearchField!
 
     @IBAction func filter_action(_ sender: Any) {
@@ -150,24 +151,17 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             selectedConfiguration = sender as! String
         }
         // build enrollmentActions - start
-        /*
-         var transformedConfig = [String:[Policy]]()
-         var policyArray = [Policy]()
-         for (theConfig, configInfo) in theDict {
-             policyArray.removeAll()
-             for theConfigInfo in configInfo {
-                 policyArray.append(Policy(name: theConfigInfo["name"] as! String, id: theConfigInfo["id"] as! String, configs: theConfigInfo["configs"] as! [String], grouped: theConfigInfo["grouped"] as! Bool, groupId: theConfigInfo["groupId"] as! String))
-             }
-             transformedConfig[theConfig] = policyArray
-         }
-         */
         enrollmentActions.removeAll()
         let currentPolicies = configsDict[configuration_Button.titleOfSelectedItem!]!
+        
+        policiesArray = staticAllPolicies
+        
         for (policyId, policyInfo) in currentPolicies {
             enrollmentActions.append(EnrollmentActions(name: policyInfo["listitem"]!, id: policyId, icon: policyInfo["icon"]!, label: policyInfo["progresstext"]!, trigger: policyInfo["trigger"]!, command: policyInfo["command"]!, arguments: [], objectType: policyInfo["objectType"]!, timeout: policyInfo["timeout"]!))
+            policiesArray.removeAll(where: { $0.id == policyId })
         }
         // build enrollmentActions - end
-        policiesArray = policiesDict[selectedConfiguration] ?? staticAllPolicies
+//        policiesArray = policiesDict[selectedConfiguration] ?? staticAllPolicies
         selectedPoliciesArray = selectedPoliciesDict[selectedConfiguration] ?? []
         selectedPolicies_TableView.deselectAll(self)
         progressText_TextField.stringValue = ""
@@ -296,6 +290,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     @IBOutlet weak var progressText_TextField: NSTextField!
     @IBOutlet weak var validation_Label: NSTextField!
     @IBOutlet weak var validation_TextField: NSTextField!
+    @IBOutlet weak var version_TextField: NSTextField!
     
     var policiesArray = [Policy]()
     var policiesDict  = [String:[Policy]]()
@@ -345,8 +340,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 
             getPolicy(id: doubleClicked.id) { [self]
                 (result: String) in
-                print("[addToPolicyArray] policy ID: \(doubleClicked.id)")
-                print("[addToPolicyArray] policy XML: \(result)")
                 updatePoliciesDict(xml: result, policyId: doubleClicked.id, grouped: doubleClicked.grouped, groupId: doubleClicked.groupId)
                 policiesArray.remove(at: rowClicked)
                 policiesDict[configuration_Button.titleOfSelectedItem!] = policiesArray
@@ -460,10 +453,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         let self_service = betweenTags(xmlString: xml, startTag: "<self_service>", endTag: "</self_service>")
         
         var policyName = betweenTags(xmlString: self_service, startTag: "<self_service_display_name>", endTag: "</self_service_display_name>")
-        print("[updatePoliciesDict] self service name: \(policyName)")
         if policyName == "" {
             policyName = betweenTags(xmlString: general, startTag: "<name>", endTag: "</name>")
-            print("[updatePoliciesDict] general: \(policyName)")
         }
 
         var icon = betweenTags(xmlString: self_service, startTag: "<uri>", endTag: "</uri>")
@@ -768,6 +759,12 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     
     // Delegate Method
     func sendLoginInfo(loginInfo: (String,String,String,String,Int)) {
+        //create log file
+        Log.file = getCurrentTime().replacingOccurrences(of: ":", with: "") + "_" + Log.file
+        if !(FileManager.default.fileExists(atPath: Log.path! + Log.file)) {
+            FileManager.default.createFile(atPath: Log.path! + Log.file, contents: nil, attributes: nil)
+        }
+        cleanup()
         
         var saveCredsState: Int?
         (JamfProServer.displayName, JamfProServer.destination, JamfProServer.username, JamfProServer.userpass,saveCredsState) = loginInfo
@@ -788,14 +785,14 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 if saveCredsState == 1 {
                     Credentials().save(service: "\(JamfProServer.destination.fqdnFromUrl)", account: JamfProServer.username, data: JamfProServer.userpass)
                 }
-                let lastChar = "\(JamfProServer.destination)".last
-                connectedTo_TextField.stringValue = ( JamfProServer.destination.last == "/" ) ? String("Connected to: \(JamfProServer.destination)".dropLast()):"Connected to: \(JamfProServer.destination)"
+                connectTo_Button.title = "Connected to: \(JamfProServer.displayName)"
+                connectTo_Button.toolTip = ( JamfProServer.destination.last == "/" ) ? String("\(JamfProServer.destination)".dropLast()):"\(JamfProServer.destination)"
+                connectTo_Button.isHidden = false
                 scriptSource = defaults.string(forKey: "scriptSource") ?? defaultScriptSource
                 
                 // read settings, if they exist
                 Settings.shared.dict = ConfigsSettings().retrieve(dataType: "settings")
                 
-//                var scriptSource = settingsDict["scriptSource"] as? String ?? defaultScriptSource
                 var scriptSource = Settings.shared.dict["scriptSource"] as? String ?? defaultScriptSource
                 if scriptSource == "" { scriptSource = defaultScriptSource }
                 print("fetch script from: \(scriptSource)")
@@ -813,7 +810,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                     getAllPolicies() { [self]
                         (result: [String:Any]) in
                         let allPolicies = result["policies"] as! [[String:Any]]
-//                        print("all policies: \(allPolicies)")
+                        print("all policies count: \(allPolicies.count)")
                         if allPolicies.count > 0 {
                             for i in 0..<allPolicies.count {
                                 let aPolicy = allPolicies[i] as [String:Any]
@@ -823,14 +820,17 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 //                                    print("\(policyName) (\(policyId))")
                                     // filter out policies created from casper remote - start
                                     if policyName.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil {
+//                                        print("[sendLoginInfo] add to policiesArray: \(policyName) (\(policyId))")
                                         policiesArray.append(Policy(name: "\(policyName) (\(policyId))", id: "\(policyId)", configs: [], grouped: false, groupId: ""))
                                     }
                                     // filter out policies created from casper remote - end
+                                    policies_TableView.reloadData()
                                 }
                             }
+                            print("[sendLoginInfo] policies found on server: \(policiesArray.count)")
                             // sort policies - to do
 //                            policies_ArrayController.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
-                            staticAllPolicies = policiesArray
+                            staticAllPolicies = policiesArray.sorted(by: {$0.name.lowercased() < $1.name.lowercased()})
                             policies_TableView.reloadData()
                             allPolicies_Spinner.stopAnimation(self)
                             
@@ -846,6 +846,10 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                 // look for existing configs
                                 let existingConfigsDict = ConfigsSettings().retrieve(dataType: "configs")
                                 
+                                let cd = existingConfigsDict["configsDict"] as? [String:Any] ?? [:]
+                                let pd = existingConfigsDict["policiesDict"] as? [String:Any] ?? [:]
+                                let spd = existingConfigsDict["selectedPoliciesDict"] as? [String:Any] ?? [:]
+                                
                                 configurationsArray =  existingConfigsDict["configurationsArray"] as? [String] ?? []
 //                                print("available configs: \(configurationsArray)")
                                 
@@ -853,10 +857,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                 // set the configurations button - start
                                 configuration_Menu.removeAllItems()
                                 var validatedConfigs = [String]()
-                                
-                                let cd = existingConfigsDict["configsDict"] as? [String:Any] ?? [:]
-                                let pd = existingConfigsDict["policiesDict"] as? [String:Any] ?? [:]
-                                let spd = existingConfigsDict["selectedPoliciesDict"] as? [String:Any] ?? [:]
                                 
                                 // make sure Default configureation is listed
                                 if configurationsArray.firstIndex(of: "Default") == nil { configurationsArray.append("Default") }
@@ -889,7 +889,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                 }
                                 
                                 config_Action(existingConfigsDict["currentConfig"] ?? "Default")
-//
                             }
                         }
                     }
@@ -906,15 +905,11 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
     
     func dictToClass(theDict: [String:[[String:Any]]]) -> [String:[Policy]] {
-        // selectedPoliciesArray.append(Policy(name: theLabel, id: theId, configs: [configuration_Button.titleOfSelectedItem!], grouped: false, groupId: ""))
         var transformedConfig = [String:[Policy]]()
         var policyArray = [Policy]()
         for (theConfig, configInfo) in theDict {
             policyArray.removeAll()
             for theConfigInfo in configInfo {
-                if theConfig == "Default" {
-                    print("[dictToClass] policy: \(String(describing: theConfigInfo["name"]))")
-                }
                 policyArray.append(Policy(name: theConfigInfo["name"] as! String, id: theConfigInfo["id"] as! String, configs: theConfigInfo["configs"] as! [String], grouped: theConfigInfo["grouped"] as! Bool, groupId: theConfigInfo["groupId"] as! String))
             }
             transformedConfig[theConfig] = policyArray.sorted(by: {$0.name.lowercased() < $1.name.lowercased()})
@@ -1045,6 +1040,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        version_TextField.stringValue = "v\(AppInfo.version)"
         // initialize configDict for each config
         for i in 0..<configuration_Button.numberOfItems {
             configuration_Button.selectItem(at: i)
@@ -1064,6 +1060,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         policies_TableView.dataSource = self
         policies_TableView.doubleAction = #selector(addToPolicyArray)
         
+        // set columg headers
         policies_TableView.tableColumns.forEach { (column) in
             column.headerCell.attributedStringValue = NSAttributedString(string: column.title, attributes: [NSAttributedString.Key.font: NSFont.boldSystemFont(ofSize: 16)])
         }

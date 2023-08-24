@@ -26,11 +26,11 @@ class TokenDelegate: NSObject, URLSessionDelegate {
         }
         
         tokenUrlString     = tokenUrlString.replacingOccurrences(of: "//api", with: "/api")
-        print("[TokenDelegate] tokenUrlString: \(tokenUrlString)")
+//        print("[TokenDelegate] tokenUrlString: \(tokenUrlString)")
         
         let tokenUrl       = URL(string: "\(tokenUrlString)")
         guard let _ = tokenUrl else {
-            print("problem constructing the URL from \(tokenUrlString)")
+            writeToLog.message(stringOfText: "[TokenDelegate.getToken] Problem constructing the URL from \(tokenUrlString)")
             completion((500, "failed"))
             return
         }
@@ -48,7 +48,7 @@ class TokenDelegate: NSObject, URLSessionDelegate {
                 let clientId = JamfProServer.username
                 let secret   = JamfProServer.userpass
                 let clientString = "grant_type=client_credentials&client_id=\(String(describing: clientId))&client_secret=\(String(describing: secret))"
-                print("[TokenDelegate] clientString: \(clientString)")
+//                print("[TokenDelegate] clientString: \(clientString)")
 
                 let requestData = clientString.data(using: .utf8)
                 request.httpBody = requestData

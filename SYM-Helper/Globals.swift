@@ -16,6 +16,7 @@ let sharedDefaults         = UserDefaults(suiteName: appsGroupId)
 let sharedContainerUrl     = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appsGroupId)
 let sharedSettingsPlistUrl = (sharedContainerUrl?.appendingPathComponent("Library/Preferences/\(appsGroupId).plist"))!
 
+var didRun          = false
 var showLoginWindow = true
 let defaults        = UserDefaults.standard
 var groupNumber     = 0
@@ -46,8 +47,6 @@ struct AppInfo {
     static var bundlePath   = Bundle.main.bundleURL
     
     static let appSupport       = NSHomeDirectory() + "/Library/Application Support"
-    static var logPath: String? = NSHomeDirectory() + "/Library/Logs/sym-helper/"
-    static var logFile          = ""
     static var startTime        = Date()
 }
 
@@ -69,16 +68,60 @@ struct JamfProServer {
 }
 
 struct Log {
-    static var path: String? = (NSHomeDirectory() + "/Library/Logs/sym-helper/")
+    static var path: String? = (NSHomeDirectory() + "/Library/Logs/")
     static var file          = "sym-helper.log"
-    static var maxFiles      = 10
-    static var maxSize       = 10000000 // 10MB
+    static var maxFiles      = 42
 }
 
 struct Token {
     static var refreshInterval:UInt32 = 15*60  // 15 minutes
     static var sourceServer  = ""
     static var sourceExpires = ""
+}
+
+// func cleanup - start
+func cleanup() {
+    var logArray: [String] = []
+    var logCount: Int = 0
+    do {
+        let logFiles = try FileManager.default.contentsOfDirectory(atPath: Log.path!)
+        
+        for logFile in logFiles {
+            let filePath: String = Log.path! + logFile //Log.file
+//            print("filePath: \(filePath)")
+            logArray.append(filePath)
+        }
+        logArray.sort()
+        logCount = logArray.count
+        if didRun {
+            // remove old history files
+            if logCount > Log.maxFiles {
+                for i in (0..<logCount-Log.maxFiles) {
+//                    if LogLevel.debug { WriteToLog().message(stringOfText: "Deleting log file: " + logArray[i] + "\n") }
+                    
+                    do {
+                        try FileManager.default.removeItem(atPath: logArray[i])
+                    }
+                    catch let error as NSError {
+                        WriteToLog().message(stringOfText: "Error deleting log file:\n    " + logArray[i] + "\n    \(error)")
+                    }
+                }
+            }
+        } else {
+            // delete empty log file
+            if logCount > 0 {
+                
+            }
+            do {
+                try FileManager.default.removeItem(atPath: logArray[0])
+            }
+            catch let error as NSError {
+                WriteToLog().message(stringOfText: "Error deleting log file:    \n" + Log.path! + logArray[0] + "    \(error)")
+            }
+        }
+    } catch {
+        WriteToLog().message(stringOfText: "no log files found")
+    }
 }
 
 func betweenTags(xmlString:String, startTag:String, endTag:String) -> String {
