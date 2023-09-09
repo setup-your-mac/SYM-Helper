@@ -458,7 +458,12 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         }
 
         var icon = betweenTags(xmlString: self_service, startTag: "<uri>", endTag: "</uri>")
-        icon = icon.replacingOccurrences(of: "https://ics.services.jamfcloud.com/icon/hash_", with: "")
+        
+        
+        let icon_regex = try! NSRegularExpression(pattern: "https://.*?/hash_")
+        icon = (icon_regex.stringByReplacingMatches(in: icon, range: NSRange(0..<icon.utf16.count), withTemplate: ""))
+        print("[updatePoliciesDict] icon: \(icon)")
+//        icon = icon.replacingOccurrences(of: "https://ics.services.jamfcloud.com/icon/hash_", with: "")
         var progresstext = betweenTags(xmlString: self_service, startTag: "<self_service_description>", endTag: "</self_service_description>")
         progresstext = progresstext.xmlDecode
         if progresstext == "" {
@@ -960,7 +965,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 //        print("command: \(newItem)")
 //        print("selected policy index: \(selectedPolicies_TableView.selectedRow)")
         
-        if newItem["itemType"] == " Local Validation" {
+        if newItem["itemType"] == "Validation" {
             // add local validation
 //            print("add local validation: \(newItem)")
             

@@ -61,92 +61,103 @@ class TokenDelegate: NSObject, URLSessionDelegate {
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
             let task = session.dataTask(with: request as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
+                let dataString = String(data: data!, encoding: .utf8)
                 session.finishTasksAndInvalidate()
                 if let httpResponse = response as? HTTPURLResponse {
                     if httpSuccess.contains(httpResponse.statusCode) {
-                        let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                        if let endpointJSON = json! as? [String: Any] {
-                            JamfProServer.validToken  = true
-                            JamfProServer.authCreds   = apiClient ? (endpointJSON["access_token"] as? String ?? "")!:(endpointJSON["token"] as? String ?? "")!
-//                            JamfProServer.authCreds   = (endpointJSON["token"] as? String)!
-//                            JamfProServer.authExpires = "\(endpointJSON["expires"] ?? "")"
-                            JamfProServer.authType    = "Bearer"
-                            JamfProServer.base64Creds = base64creds
-                            
-                            tokenTimeCreated = Date()
-                            
-    //                      if LogLevel.debug { writeToLog.message(stringOfText: "[TokenDelegate.getToken] Retrieved token: \(token)") }
-    //                      print("[JamfPro] result of token request: \(endpointJSON)")
-                            writeToLog.message(stringOfText: "[TokenDelegate.getToken] new token created for \(serverUrl)")
-                            
-                            if JamfProServer.version == "" {
-                                // get Jamf Pro version - start
-                                self.getVersion(serverUrl: serverUrl, endpoint: "jamf-pro-version", apiData: [:], id: "", token: JamfProServer.authCreds, method: "GET") {
-                                    (result: [String:Any]) in
-                                    if let versionString = result["version"] as? String {
-                                        
-                                        if versionString != "" {
-                                            writeToLog.message(stringOfText: "[TokenDelegate.getVersion] Jamf Pro Version: \(versionString)")
-                                            JamfProServer.version = versionString
-                                            let tmpArray = versionString.components(separatedBy: ".")
-                                            if tmpArray.count > 2 {
-                                                for i in 0...2 {
-                                                    switch i {
-                                                    case 0:
-                                                        JamfProServer.majorVersion = Int(tmpArray[i]) ?? 0
-                                                    case 1:
-                                                        JamfProServer.minorVersion = Int(tmpArray[i]) ?? 0
-                                                    case 2:
-                                                        let tmp = tmpArray[i].components(separatedBy: "-")
-                                                        JamfProServer.patchVersion = Int(tmp[0]) ?? 0
-                                                        if tmp.count > 1 {
-                                                            JamfProServer.build = tmp[1]
+                        if let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments) {
+                            print("[getToken] json: \(json)")
+                            if let endpointJSON = json as? [String: Any] {
+                                JamfProServer.validToken  = true
+                                JamfProServer.authCreds   = apiClient ? (endpointJSON["access_token"] as? String ?? "")!:(endpointJSON["token"] as? String ?? "")!
+                                //                            JamfProServer.authCreds   = (endpointJSON["token"] as? String)!
+                                //                            JamfProServer.authExpires = "\(endpointJSON["expires"] ?? "")"
+                                JamfProServer.authType    = "Bearer"
+                                JamfProServer.base64Creds = base64creds
+                                
+                                tokenTimeCreated = Date()
+                                
+                                //                      if LogLevel.debug { writeToLog.message(stringOfText: "[TokenDelegate.getToken] Retrieved token: \(token)") }
+                                //                      print("[JamfPro] result of token request: \(endpointJSON)")
+                                writeToLog.message(stringOfText: "[TokenDelegate.getToken] new token created for \(serverUrl)")
+                                
+                                if JamfProServer.version == "" {
+                                    // get Jamf Pro version - start
+                                    self.getVersion(serverUrl: serverUrl, endpoint: "jamf-pro-version", apiData: [:], id: "", token: JamfProServer.authCreds, method: "GET") {
+                                        (result: [String:Any]) in
+                                        if let versionString = result["version"] as? String {
+                                            
+                                            if versionString != "" {
+                                                writeToLog.message(stringOfText: "[TokenDelegate.getVersion] Jamf Pro Version: \(versionString)")
+                                                JamfProServer.version = versionString
+                                                let tmpArray = versionString.components(separatedBy: ".")
+                                                if tmpArray.count > 2 {
+                                                    for i in 0...2 {
+                                                        switch i {
+                                                        case 0:
+                                                            JamfProServer.majorVersion = Int(tmpArray[i]) ?? 0
+                                                        case 1:
+                                                            JamfProServer.minorVersion = Int(tmpArray[i]) ?? 0
+                                                        case 2:
+                                                            let tmp = tmpArray[i].components(separatedBy: "-")
+                                                            JamfProServer.patchVersion = Int(tmp[0]) ?? 0
+                                                            if tmp.count > 1 {
+                                                                JamfProServer.build = tmp[1]
+                                                            }
+                                                        default:
+                                                            break
                                                         }
-                                                    default:
-                                                        break
                                                     }
+                                                    if ( JamfProServer.majorVersion > 9 && JamfProServer.minorVersion > 34 ) && !forceBasicAuth {
+                                                        JamfProServer.authType = "Bearer"
+                                                        JamfProServer.validToken = true
+                                                        writeToLog.message(stringOfText: "[TokenDelegate.getVersion] \(serverUrl) set to use Bearer Token")
+                                                        
+                                                    } else {
+                                                        JamfProServer.authType  = "Basic"
+                                                        JamfProServer.validToken = false
+                                                        JamfProServer.authCreds = base64creds
+                                                        writeToLog.message(stringOfText: "[TokenDelegate.getVersion] \(serverUrl) set to use Basic Authentication")
+                                                    }
+                                                    if JamfProServer.authType == "Bearer" {
+                                                        self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds)
+                                                    }
+                                                    completion((200, "success"))
+                                                    return
                                                 }
-                                                if ( JamfProServer.majorVersion > 9 && JamfProServer.minorVersion > 34 ) && !forceBasicAuth {
-                                                    JamfProServer.authType = "Bearer"
-                                                    JamfProServer.validToken = true
-                                                    writeToLog.message(stringOfText: "[TokenDelegate.getVersion] \(serverUrl) set to use Bearer Token")
-                                                    
-                                                } else {
-                                                    JamfProServer.authType  = "Basic"
-                                                    JamfProServer.validToken = false
-                                                    JamfProServer.authCreds = base64creds
-                                                    writeToLog.message(stringOfText: "[TokenDelegate.getVersion] \(serverUrl) set to use Basic Authentication")
-                                                }
-                                                if JamfProServer.authType == "Bearer" {
-                                                    self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds)
-                                                }
-                                                completion((200, "success"))
-                                                return
                                             }
+                                        } else {   // if let versionString - end
+                                            writeToLog.message(stringOfText: "[TokenDelegate.getToken] failed to get version information from \(String(describing: serverUrl))")
+                                            JamfProServer.validToken = false
+                                            _ = alert.display(header: "Attention", message: "Failed to get version information from \(String(describing: serverUrl))", secondButton: "")
+                                            completion((httpResponse.statusCode, "failed"))
+                                            return
                                         }
-                                    } else {   // if let versionString - end
-                                        writeToLog.message(stringOfText: "[TokenDelegate.getToken] failed to get version information from \(String(describing: serverUrl))")
-                                        JamfProServer.validToken = false
-                                        _ = alert.display(header: "Attention", message: "Failed to get version information from \(String(describing: serverUrl))", secondButton: "")
-                                        completion((httpResponse.statusCode, "failed"))
-                                        return
                                     }
+                                    // get Jamf Pro version - end
+                                } else {
+                                    if JamfProServer.authType == "Bearer" {
+                                        writeToLog.message(stringOfText: "[TokenDelegate.getVersion] call token refresh process for \(serverUrl)")
+                                        self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds)
+                                    }
+                                    completion((200, "success"))
+                                    return
                                 }
-                                // get Jamf Pro version - end
-                            } else {
-                                if JamfProServer.authType == "Bearer" {
-                                    writeToLog.message(stringOfText: "[TokenDelegate.getVersion] call token refresh process for \(serverUrl)")
-                                    self.refresh(server: serverUrl, whichServer: whichServer, b64Creds: JamfProServer.base64Creds)
-                                }
-                                completion((200, "success"))
+                            } else {    // if let endpointJSON error
+                                writeToLog.message(stringOfText: "[TokenDelegate.getToken] JSON error.\n\(String(describing: json))")
+                                JamfProServer.validToken  = false
+                                completion((httpResponse.statusCode, "failed"))
                                 return
                             }
-                        } else {    // if let endpointJSON error
-                            writeToLog.message(stringOfText: "[TokenDelegate.getToken] JSON error.\n\(String(describing: json))")
+                        } else {
+                            // no response
+                            _ = alert.display(header: "", message: "failed to get a response from \(String(describing: serverUrl)).", secondButton: "")
+                            writeToLog.message(stringOfText: "[TokenDelegate.getToken] failed to get a response from \(String(describing: serverUrl)).  Status Code: \(httpResponse.statusCode)")
                             JamfProServer.validToken  = false
                             completion((httpResponse.statusCode, "failed"))
                             return
                         }
+                        
                     } else {    // if httpResponse.statusCode <200 or >299
                         writeToLog.message(stringOfText: "[TokenDelegate.getToken] Failed to authenticate to \(serverUrl).  Response error: \(httpResponse.statusCode).")
 

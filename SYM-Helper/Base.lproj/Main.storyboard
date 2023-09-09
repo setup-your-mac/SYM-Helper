@@ -1020,7 +1020,7 @@
                                             </menuItem>
                                             <menuItem isSeparatorItem="YES" id="u9A-6L-NDO"/>
                                             <menuItem title=" Command" hidden="YES" enabled="NO" id="Uy0-IQ-hWw"/>
-                                            <menuItem title=" Local Validation" id="Wbr-Ot-Tqf"/>
+                                            <menuItem title="Validation" id="Wbr-Ot-Tqf"/>
                                         </items>
                                     </menu>
                                 </popUpButtonCell>
@@ -1103,7 +1103,7 @@
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="23" id="HK5-cc-8de"/>
                                 </constraints>
                                 <textFieldCell key="cell" lineBreakMode="clipping" id="0Ah-7X-y75">
-                                    <font key="font" metaFont="system" size="11"/>
+                                    <font key="font" metaFont="smallSystem"/>
                                     <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>

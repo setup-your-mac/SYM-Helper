@@ -15,6 +15,7 @@ let kSecClassGenericPasswordString = NSString(format: kSecClassGenericPassword)
 let keychainQ                      = DispatchQueue(label: "com.jamf.sym-helper", qos: DispatchQoS.background)
 let prefix                         = "sym-helper"
 let sharedPrefix                   = "JPMA"
+let accessGroup                    = "PS2F6S478M.jamfie.SharedJPMA"
 
 class Credentials {
     
@@ -32,6 +33,8 @@ class Credentials {
                 keychainQ.async { [self] in
                     var keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
                                                         kSecAttrService as String: keychainName,
+                                                        kSecAttrAccessGroup as String: accessGroup,
+                                                        kSecUseDataProtectionKeychain as String: true,
                                                         kSecAttrAccount as String: account,
                                                         kSecValueData as String: password]
                     
@@ -49,6 +52,8 @@ class Credentials {
                         // credentials already exist, try to update
                         keychainQuery = [kSecClass as String: kSecClassGenericPasswordString,
                                          kSecAttrService as String: keychainName,
+                                         kSecAttrAccessGroup as String: accessGroup,
+                                         kSecUseDataProtectionKeychain as String: true,
                                          kSecMatchLimit as String: kSecMatchLimitOne,
                                          kSecReturnAttributes as String: true]
                         let updateStatus = SecItemUpdate(keychainQuery as CFDictionary, [kSecAttrAccountString:account,kSecValueDataString:password] as [NSString : Any] as CFDictionary)
@@ -93,6 +98,8 @@ class Credentials {
         
         let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPasswordString,
                                             kSecAttrService as String: service,
+                                            kSecAttrAccessGroup as String: accessGroup,
+                                            kSecUseDataProtectionKeychain as String: true,
                                             kSecMatchLimit as String: kSecMatchLimitOne,
                                             kSecReturnAttributes as String: true,
                                             kSecReturnData as String: true]

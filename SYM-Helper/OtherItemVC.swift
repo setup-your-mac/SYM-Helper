@@ -36,7 +36,7 @@ class OtherItemVC: NSViewController {
     @IBAction func add_Action(_ sender: Any) {
         let commandAsArray = command_TextField.stringValue.components(separatedBy: " ")
         let theBinary = URL(string: commandAsArray[0])?.lastPathComponent ?? ""
-        let validation = ( itemType == " Local Validation" ) ? "Local":""
+        let validation = ( itemType == "Validation" ) ? "Local":""
         let commandDict = ["itemType": itemType,
                            "icon": icon_TextField.stringValue,
                            "label": trigger_TextField.stringValue,
@@ -44,7 +44,7 @@ class OtherItemVC: NSViewController {
                            "command":command_TextField.stringValue,
                            "trigger":trigger_TextField.stringValue,
                            "validation":validation]
-        if itemType == " Local Validation" && trigger_TextField.stringValue == "" {
+        if itemType == "Validation" && trigger_TextField.stringValue == "" {
             _ = alert.display(header: "", message: "A trigger must be specified for local validation", secondButton: "")
             return
         } else {
@@ -55,8 +55,8 @@ class OtherItemVC: NSViewController {
  
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        if itemType == " Local Validation" {
+        print("[OtherItemVC.viewDidLoad] itemType: \(itemType)")
+        if itemType == "Validation" {
             otherItem_TabView.selectTabViewItem(withIdentifier: "local_validation")
         } else {
             otherItem_TabView.selectTabViewItem(withIdentifier: "command")
