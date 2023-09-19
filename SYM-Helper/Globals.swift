@@ -33,7 +33,6 @@ let writeToLog: WriteToLog = WriteToLog()
 
 var scriptSource        = ""
 var defaultScriptSource = "https://raw.githubusercontent.com/dan-snelson/Setup-Your-Mac/main/Setup-Your-Mac-via-Dialog.bash"
-//var scriptSource       = "https://recipes.hickoryhillseast.net/sym/Setup-Your-Mac-via-Dialog.bash"
 
 struct AppInfo {
     static let dict    = Bundle.main.infoDictionary!

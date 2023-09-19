@@ -462,8 +462,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         var icon = betweenTags(xmlString: self_service, startTag: "<uri>", endTag: "</uri>")
         
         
-        let icon_regex = try! NSRegularExpression(pattern: "https://.*?/hash_")
-        icon = (icon_regex.stringByReplacingMatches(in: icon, range: NSRange(0..<icon.utf16.count), withTemplate: ""))
+//        let icon_regex = try! NSRegularExpression(pattern: "https://.*?/hash_")
+//        icon = (icon_regex.stringByReplacingMatches(in: icon, range: NSRange(0..<icon.utf16.count), withTemplate: ""))
         print("[updatePoliciesDict] icon: \(icon)")
 //        icon = icon.replacingOccurrences(of: "https://ics.services.jamfcloud.com/icon/hash_", with: "")
         var progresstext = betweenTags(xmlString: self_service, startTag: "<self_service_description>", endTag: "</self_service_description>")
@@ -707,6 +707,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         setLocation(type: "buildingsListRaw")
         setLocation(type: "departmentListRaw")
         
+        iconFix()
+        
         // write out configurations
         let policy_array_regex = try! NSRegularExpression(pattern: "case \\$\\{symConfiguration\\} in(.|\n|\r)*?esac", options:.caseInsensitive)
         finalScript = policy_array_regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "case \\$\\{symConfiguration\\} in\n\n    \(configCases)    esac")
@@ -762,6 +764,12 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     private func setLocation(type: String) {
         let regex = try! NSRegularExpression(pattern: "\(type)=\".*?\"", options:.caseInsensitive)
         symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(type)=\"\(Settings.shared.dict["\(type)"] ?? "")\""))
+    }
+    private func iconFix() {
+        let regex1 = try! NSRegularExpression(pattern: "setupYourMacPolicyArrayIconPrefixUrl=", options:.caseInsensitive)
+        symScript = (regex1.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "## setupYourMacPolicyArrayIconPrefixUrl="))
+        let regex2 = try! NSRegularExpression(pattern: "\\$\\{setupYourMacPolicyArrayIconPrefixUrl\\}", options:.caseInsensitive)
+        symScript = (regex2.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: ""))
     }
     
     // Delegate Method
