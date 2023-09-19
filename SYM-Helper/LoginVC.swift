@@ -595,6 +595,9 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         }
         
         jamfProServer_textfield.stringValue = lastServer
+        if lastServer != "" {
+            jamfProUsername_textfield.stringValue = defaults.string(forKey: "username") ?? ""
+        }
         saveCreds_button.state = NSControl.StateValue(defaults.integer(forKey: "saveCreds"))
         
 //        print("[LoginVC.viewDidLoad] availableServersDict: \(availableServersDict)")
