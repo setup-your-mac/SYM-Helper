@@ -66,7 +66,7 @@ class TokenDelegate: NSObject, URLSessionDelegate {
                 if let httpResponse = response as? HTTPURLResponse {
                     if httpSuccess.contains(httpResponse.statusCode) {
                         if let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments) {
-                            print("[getToken] json: \(json)")
+//                            print("[getToken] json: \(json)")
                             if let endpointJSON = json as? [String: Any] {
                                 JamfProServer.validToken  = true
                                 JamfProServer.authCreds   = apiClient ? (endpointJSON["access_token"] as? String ?? "")!:(endpointJSON["token"] as? String ?? "")!
@@ -150,9 +150,9 @@ class TokenDelegate: NSObject, URLSessionDelegate {
                                 return
                             }
                         } else {
-                            // no response
-                            _ = alert.display(header: "", message: "failed to get a response from \(String(describing: serverUrl)).", secondButton: "")
-                            writeToLog.message(stringOfText: "[TokenDelegate.getToken] failed to get a response from \(String(describing: serverUrl)).  Status Code: \(httpResponse.statusCode)")
+                            // server down
+                            _ = alert.display(header: "", message: "Failed to get an expected response from \(String(describing: serverUrl)).", secondButton: "")
+                            writeToLog.message(stringOfText: "[TokenDelegate.getToken] Failed to get an expected response from \(String(describing: serverUrl)).  Status Code: \(httpResponse.statusCode)")
                             JamfProServer.validToken  = false
                             completion((httpResponse.statusCode, "failed"))
                             return

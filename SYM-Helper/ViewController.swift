@@ -67,6 +67,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         NSWorkspace.shared.open(URL(string: sender.toolTip!)!)
     }
     
+    @IBOutlet weak var settings_Button: NSButton!
+    
     @IBOutlet weak var filter_SearchField: NSSearchField!
 
     @IBAction func filter_action(_ sender: Any) {
@@ -788,7 +790,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 defaults.set(JamfProServer.username, forKey: "username")
                 
                 if saveCredsState == 1 {
-                    Credentials().save(service: "\(JamfProServer.destination.fqdnFromUrl)", account: JamfProServer.username, data: JamfProServer.userpass)
+                    Credentials().save(service: "\(JamfProServer.destination.fqdnFromUrl)", account: JamfProServer.username, credential: JamfProServer.userpass)
                 }
                 connectTo_Button.title = "Connected to: \(JamfProServer.displayName)"
                 connectTo_Button.toolTip = ( JamfProServer.destination.last == "/" ) ? String("\(JamfProServer.destination)".dropLast()):"\(JamfProServer.destination)"

@@ -24,21 +24,6 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
     
     @IBOutlet weak var scriptSource_TextField: NSTextField!
     
-    /*
-    @IBOutlet weak var pfu_Button: NSPopUpButton!
-    @IBOutlet weak var pu_Button: NSPopUpButton!
-    @IBOutlet weak var pfrn_Button: NSPopUpButton!
-    @IBOutlet weak var prn_Button: NSPopUpButton!
-    @IBOutlet weak var pfe_Button: NSPopUpButton!
-    @IBOutlet weak var pfcn_Button: NSPopUpButton!
-    @IBOutlet weak var pfat_Button: NSPopUpButton!
-    @IBOutlet weak var pfr_Button: NSPopUpButton!
-    @IBOutlet weak var pfb_Button: NSPopUpButton!
-    @IBOutlet weak var pfd_Button: NSPopUpButton!
-    @IBOutlet weak var pfc_Button: NSPopUpButton!
-    @IBOutlet weak var mip_Button: NSPopUpButton!
-     */
-    
     @IBOutlet weak var pfu_Switch: NSPopUpButton!
     @IBOutlet weak var pu_Switch: NSPopUpButton!
     @IBOutlet weak var pfrn_Switch: NSPopUpButton!

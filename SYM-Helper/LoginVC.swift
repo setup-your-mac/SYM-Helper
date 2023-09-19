@@ -41,6 +41,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             displayName_TextField.isHidden = false
             serverURL_Label.isHidden = false
             jamfProServer_textfield.isHidden = false
+            jamfProServer_textfield.isEditable = true
             jamfProServer_textfield.stringValue = ""
             jamfProUsername_textfield.stringValue = ""
             jamfProPassword_textfield.stringValue = ""
@@ -96,6 +97,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             displayName_TextField.isHidden = true
             serverURL_Label.isHidden = false
             jamfProServer_textfield.isHidden = false
+            jamfProServer_textfield.isEditable = false
             hideCreds_button.isHidden = false
             displayName_TextField.stringValue = selectedServer_ButtonCell.title
             jamfProServer_textfield.stringValue = (availableServersDict[selectedServer_ButtonCell.title]?["server"])! as! String
@@ -103,7 +105,6 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             quit_Button.title  = "Quit"
             login_Button.title = "Login"
             
-//            setWindowSize(setting: 0)
         }
     }
     @IBOutlet weak var selectServer_Menu: NSMenu!
@@ -130,6 +131,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
 //    var sourcePlistsURL        = URL(string: "/")
 //    var xmlFileNames           = [String]()
         
+    var accountDict            = [String:String]()
     var currentServer          = ""
     var categoryName           = ""
     var uploadCount            = 0
@@ -142,6 +144,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     @IBOutlet weak var saveCreds_button: NSButton!
     
     @IBAction func hideCreds_action(_ sender: NSButton) {
+        print("[hideCreds_action] button state: \(hideCreds_button.state.rawValue)")
         hideCreds_button.image = (hideCreds_button.state.rawValue == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
         defaults.set("\(hideCreds_button.state.rawValue)", forKey: "hideCreds")
         setWindowSize(setting: hideCreds_button.state.rawValue)
@@ -292,6 +295,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             displayName_TextField.isHidden = true
             serverURL_Label.isHidden = false
             jamfProServer_textfield.isHidden = false
+            jamfProServer_textfield.isEditable = false
             hideCreds_button.isHidden = false
             if lastServer != "" {
                 var tmpName = ""
@@ -331,15 +335,16 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     }
     
     func fetchPassword() {
-        let credentialsArray = Credentials().retrieve(service: "\(jamfProServer_textfield.stringValue.fqdnFromUrl)")
+        let credentialsArray = Credentials().retrieve(service: jamfProServer_textfield.stringValue.fqdnFromUrl, account: jamfProUsername_textfield.stringValue)
         
-        if credentialsArray.count == 2 {
-            jamfProUsername_textfield.stringValue = credentialsArray[0]
-            jamfProPassword_textfield.stringValue = credentialsArray[1]
+        if accountDict.count == 1 {
+            for (username, password) in accountDict {
+                jamfProUsername_textfield.stringValue = username
+                jamfProPassword_textfield.stringValue = password
+            }
         } else {
             jamfProUsername_textfield.stringValue = ""
             jamfProPassword_textfield.stringValue = ""
-//            setWindowSize(setting: 1)
         }
     }
 
@@ -356,22 +361,35 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     
     func controlTextDidEndEditing(_ obj: Notification) {
         if let textField = obj.object as? NSTextField {
+            jamfProPassword_textfield.stringValue = ""
             switch textField.identifier!.rawValue {
             case "server":
-                let credentialsArray = Credentials().retrieve(service: "\(jamfProServer_textfield.stringValue.fqdnFromUrl)")
+                let accountDict = Credentials().retrieve(service: jamfProServer_textfield.stringValue.fqdnFromUrl, account: jamfProUsername_textfield.stringValue)
                 
-                if credentialsArray.count == 2 {
-                    jamfProUsername_textfield.stringValue = credentialsArray[0]
-                    jamfProPassword_textfield.stringValue = credentialsArray[1]
-                    saveCreds_button.state = NSControl.StateValue(rawValue: 1)
-//                    setWindowSize(setting: 0)
-                } else {
-                    if login_Button.title == "Login" {
-                        setWindowSize(setting: 1)
-                    } else {
-                        setWindowSize(setting: 2)
+                if accountDict.count == 1 {
+                    for (username, password) in accountDict {
+                        jamfProUsername_textfield.stringValue = username
+                        jamfProPassword_textfield.stringValue = password
                     }
-                }
+                } //else {
+//                    if login_Button.title == "Login" {
+//                        setWindowSize(setting: 1)
+//                    } else {
+//                        setWindowSize(setting: 2)
+//                    }
+//                }
+            case "username":
+                let accountDict = Credentials().retrieve(service: "\(jamfProServer_textfield.stringValue.fqdnFromUrl)", account: jamfProUsername_textfield.stringValue)
+                if accountDict.count != 0 {
+                    for (username, password) in accountDict {
+                        if username == jamfProUsername_textfield.stringValue {
+                            jamfProUsername_textfield.stringValue = username
+                            jamfProPassword_textfield.stringValue = password
+                        }
+                    }
+                } //else {
+//                    jamfProUsername_textfield.stringValue = ""
+//                }
             default:
                 break
             }
@@ -379,19 +397,22 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     }
     func controlTextDidChange(_ obj: Notification) {
         if let textField = obj.object as? NSTextField {
+            jamfProPassword_textfield.stringValue = ""
             switch textField.identifier!.rawValue {
             case "server":
                 if jamfProUsername_textfield.stringValue != "" || jamfProPassword_textfield.stringValue != "" {
-                    let credentialsArray = Credentials().retrieve(service: "\(jamfProServer_textfield.stringValue.fqdnFromUrl)")
+                    let accountDict = Credentials().retrieve(service: jamfProServer_textfield.stringValue.fqdnFromUrl, account: jamfProUsername_textfield.stringValue)
                     
-                    if credentialsArray.count == 2 {
-                        jamfProUsername_textfield.stringValue = credentialsArray[0]
-                        jamfProPassword_textfield.stringValue = credentialsArray[1]
+                    if accountDict.count == 1 {
+                        for (username, password) in accountDict {
+                            jamfProUsername_textfield.stringValue = username
+                            jamfProPassword_textfield.stringValue = password
+                        }
 //                        setWindowSize(setting: 0)
                     } else {
                         jamfProUsername_textfield.stringValue = ""
                         jamfProPassword_textfield.stringValue = ""
-                        setWindowSize(setting: 1)
+//                        setWindowSize(setting: 1)
                     }
                 }
             default:
@@ -401,22 +422,27 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     }
     
     func credentialsCheck() {
-        let credentialsArray = Credentials().retrieve(service: "\(jamfProServer_textfield.stringValue.fqdnFromUrl)")
+        let accountDict = Credentials().retrieve(service: jamfProServer_textfield.stringValue.fqdnFromUrl, account: jamfProUsername_textfield.stringValue)
         
-        if credentialsArray.count == 2 {
-            jamfProUsername_textfield.stringValue = credentialsArray[0]
-            jamfProPassword_textfield.stringValue = credentialsArray[1]
-            let windowState = (defaults.integer(forKey: "hideCreds") == 1) ? 1:0
-            hideCreds_button.isHidden = false
-            saveCreds_button.state = NSControl.StateValue(rawValue: 1)
-            defaults.set(1, forKey: "saveCreds")
-            setWindowSize(setting: windowState)
-        } else {
-            if useApiClient == 0 {
-                jamfProUsername_textfield.stringValue = defaults.string(forKey: "username") ?? ""
-            } else {
-                jamfProUsername_textfield.stringValue = ""
+        if accountDict.count != 0 {
+            for (username, password) in accountDict {
+                print("[credentialsCheck] username: \(username)")
+                if username == jamfProUsername_textfield.stringValue || accountDict.count == 1 {
+                    jamfProUsername_textfield.stringValue = username
+                    jamfProPassword_textfield.stringValue = password
+                }
+//                let windowState = (defaults.integer(forKey: "hideCreds") == 1) ? 1:0
+//                hideCreds_button.isHidden = false
+//                saveCreds_button.state = NSControl.StateValue(rawValue: 1)
+//                defaults.set(1, forKey: "saveCreds")
+//                setWindowSize(setting: windowState)
             }
+        } else {
+//            if useApiClient == 0 {
+//                jamfProUsername_textfield.stringValue = defaults.string(forKey: "username") ?? ""
+//            } else {
+//                jamfProUsername_textfield.stringValue = ""
+//            }
             jamfProPassword_textfield.stringValue = ""
             setWindowSize(setting: 1)
         }
@@ -433,6 +459,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     }
     
     func setWindowSize(setting: Int) {
+        print("[setWindowSize] setting: \(setting)")
         if setting == 0 {
             preferredContentSize = CGSize(width: 518, height: 85)
             hideCreds_button.toolTip = "show username/password fields"
@@ -464,9 +491,9 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             password_label.isHidden            = false
             saveCreds_button.isHidden          = false
         }
-        hideCreds_button.state = NSControl.StateValue(rawValue: setting)
-        
-        hideCreds_button.image = (setting == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
+//        hideCreds_button.state = NSControl.StateValue(rawValue: setting)
+//        
+//        hideCreds_button.image = (setting == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
     }
         
     override func viewDidLoad() {
@@ -483,7 +510,10 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
 //        let textFrame = NSTextField(frame: NSRect(x: 0, y: 0, width: 268, height: 1))
 //        header_TextField.frame = textFrame.frame
         
-        setWindowSize(setting: 1)
+        let hideCredsState = defaults.integer(forKey: "hideCreds")
+        hideCreds_button.image = (hideCredsState == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
+        hideCreds_button.state = NSControl.StateValue(rawValue: hideCredsState)
+        setWindowSize(setting: hideCreds_button.state.rawValue)
 
         jamfProServer_textfield.delegate   = self
         jamfProUsername_textfield.delegate = self
@@ -501,10 +531,10 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
 //        print("[viewDidLoad] sharedSettingsPlistUrl: \(sharedSettingsPlistUrl.path)")
         if !FileManager.default.fileExists(atPath: sharedSettingsPlistUrl.path) {
             sharedDefaults!.set(Date(), forKey: "created")
-            sharedDefaults!.set([String:AnyObject](), forKey: "serverDict")
+            sharedDefaults!.set([String:AnyObject](), forKey: "serversDict")
         }
-        if (sharedDefaults!.object(forKey: "serverDict") as? [String:AnyObject] ?? [:]).count == 0 {
-            sharedDefaults!.set(availableServersDict, forKey: "serverDict")
+        if (sharedDefaults!.object(forKey: "serversDict") as? [String:AnyObject] ?? [:]).count == 0 {
+            sharedDefaults!.set(availableServersDict, forKey: "serversDict")
         }
         
         // read list of saved servers

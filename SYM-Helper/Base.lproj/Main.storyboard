@@ -1176,6 +1176,7 @@
                         <outlet property="policyArray_Spinner" destination="gSl-Cc-7Ew" id="abT-6S-upe"/>
                         <outlet property="progressText_TextField" destination="ghf-w9-GxG" id="95o-CU-dm1"/>
                         <outlet property="selectedPolicies_TableView" destination="jw9-A1-vkh" id="DYa-aN-quG"/>
+                        <outlet property="settings_Button" destination="ppd-Nx-iGs" id="0V7-2r-JbX"/>
                         <outlet property="validation_Label" destination="Keu-fD-phk" id="6gb-SA-5O2"/>
                         <outlet property="validation_TextField" destination="hks-HQ-i6u" id="Dh1-ag-hhr"/>
                         <outlet property="version_TextField" destination="TUp-3G-rTw" id="QX5-LX-RDe"/>
@@ -1797,7 +1798,7 @@ DQ
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QbB-H2-nNM">
+                            <textField identifier="server" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QbB-H2-nNM">
                                 <rect key="frame" x="117" y="142" width="367" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="367" id="paX-8u-MuD"/>
@@ -1808,7 +1809,7 @@ DQ
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ubf-eP-2NL">
+                            <textField identifier="username" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ubf-eP-2NL">
                                 <rect key="frame" x="117" y="111" width="367" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="367" id="XaX-mA-8ss"/>

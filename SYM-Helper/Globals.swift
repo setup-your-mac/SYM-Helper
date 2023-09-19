@@ -191,9 +191,9 @@ extension String {
     var fqdnFromUrl: String {
         get {
             var fqdn = ""
-            let nameArray = self.components(separatedBy: "://")
-            if nameArray.count > 1 {
-                fqdn = nameArray[1]
+            let nameArray = self.components(separatedBy: "/")
+            if nameArray.count > 2 {
+                fqdn = nameArray[2]
             } else {
                 fqdn =  self
             }
