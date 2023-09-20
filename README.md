@@ -4,6 +4,6 @@
 
 > A stand-alone macOS app to help MacAdmins more easily deploy [Setup Your Mac](https://snelson.us/sym)
 
-![SYM-Helper Hero](/SYM-Helper/images/SYM-Helper-Hero.png)
+![SYM-Helper Hero](images/SYM-Helper-Hero.png)
 
 [Documentation](https://snelson.us/sym-helper) | [Releases](https://github.com/BIG-RAT/SYM-Helper/releases)
