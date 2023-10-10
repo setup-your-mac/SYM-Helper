@@ -2,8 +2,6 @@
 //  Credentials.swift
 //  SYM-Helper
 //
-//  Created by Leslie Helou on 2/18/23.
-//
 
 
 import Foundation
@@ -110,28 +108,8 @@ class Credentials {
         keychainResult = itemLookup(service: keychainItemName)
         // look for legacy keychain item
         if keychainResult.count == 0 {
-            keychainItemName = "\(prefix) - \(service)"
+            keychainItemName = "\(prefix) - \(theService)"
             keychainResult   = oldItemLookup(service: keychainItemName)
-            if keychainResult.count == 0 {
-                keychainItemName = "\(prefix)-\(service)"
-                keychainResult   = oldItemLookup(service: keychainItemName)
-                if keychainResult.count == 0 {
-                    keychainItemName = "\(prefix)-\(account)-\(service)"
-                    keychainResult   = oldItemLookup(service: keychainItemName)
-                    if keychainResult.count == 0 {
-                        keychainItemName = "JamfProApps-\(theService)"
-                        keychainResult   = itemLookup(service: keychainItemName)
-                        if keychainResult.count == 0 {
-                            keychainItemName = "\(sharedPrefix)-\(service)"
-                            keychainResult   = itemLookup(service: keychainItemName)
-                            if keychainResult.count == 0 {
-                                keychainItemName = "\(sharedPrefix)-\(account)-\(service)"
-                                keychainResult   = itemLookup(service: keychainItemName)
-                            }
-                        }
-                    }
-                }
-            }
         }
         
         return keychainResult

@@ -2,8 +2,6 @@
 //  NewConfigVC.swift
 //  SYM-Helper
 //
-//  Created by Leslie Helou on 2/18/23.
-//
 
 import Cocoa
 import Foundation

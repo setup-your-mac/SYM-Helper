@@ -2,8 +2,6 @@
 //  Globals.swift
 //  SYM-Helper
 //
-//  Created by Leslie Helou on 2/18/23.
-//
 
 import Cocoa
 import Foundation
@@ -24,6 +22,7 @@ let httpSuccess     = 200...299
 let refreshInterval: UInt32 = 25*60 // 25 minutes
 var runComplete     = false
 var symScript       = ""
+var scriptVersion   = (0,0,0)
 var tokenTimeCreated: Date?
 
 var useApiClient    = 0
@@ -32,7 +31,26 @@ let alert: Alert           = Alert()
 let writeToLog: WriteToLog = WriteToLog()
 
 var scriptSource        = ""
+
+// script defaults
 var defaultScriptSource = "https://raw.githubusercontent.com/dan-snelson/Setup-Your-Mac/main/Setup-Your-Mac-via-Dialog.bash"
+
+// brandng defaults
+var defaultBannerImage = "https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg"
+var defaultDisplayText = 1 // true
+var defaultLightIcon   = "https://cdn-icons-png.flaticon.com/512/979/979585.png"
+var defaultDarkIcon    = "https://cdn-icons-png.flaticon.com/512/740/740878.png"
+
+// support defaults
+var defaultTeamName      = "Support Team Name"
+var defaultTeamPhone     = "+1 (801) 555-1212"
+var defaultTeamEmail     = "support@domain.com"
+var defaultTeamWebsite   = "support.domain.com"                                     // added in v1.13.0
+var defaultTeamHyperlink = "[\(defaultTeamWebsite)](https://\(defaultTeamWebsite))" // added in v1.13.0
+var defaultKb            = "KB8675309"
+var defaultErrorKb       = ", and mention [\(defaultKb)](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=\(defaultKb)#Failures)"
+var defaultHelpKb        = "\n- **Knowledge Base Article:** \(defaultKb)"   // dropped in v1.13.0
+
 
 struct AppInfo {
     static let dict    = Bundle.main.infoDictionary!

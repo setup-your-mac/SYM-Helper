@@ -2,8 +2,6 @@
 //  SettingsVC.swift
 //  SYM-Helper
 //
-//  Created by Leslie Helou on 2/18/23.
-//
 
 import Cocoa
 import Foundation
@@ -18,24 +16,64 @@ class SYMSetting: NSObject {
     }
 }
 
-class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
+class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, SendingKbInfoDelegate {
+    
+    func sendKbInfo(KbInfo: (String, String)) {
+        let (whichField, details) = KbInfo
+        switch whichField {
+        case "errorKb":
+            errorKb_TextField.stringValue = details
+            errorKb_Button.toolTip = details
+        default:
+            helpWebsite_TextField.stringValue = details
+            helpHyperlink_Button.toolTip = details
+        }
+        print("[sendKbInfo] KbInfo: \(KbInfo)")
+        cancel_Button.isEnabled = true
+        ok_Button.isEnabled     = true
+    }
     
     var whichTab = ""
     
     @IBOutlet weak var scriptSource_TextField: NSTextField!
     
-    @IBOutlet weak var pfu_Switch: NSPopUpButton!
-    @IBOutlet weak var pu_Switch: NSPopUpButton!
-    @IBOutlet weak var pfrn_Switch: NSPopUpButton!
-    @IBOutlet weak var prn_Switch: NSPopUpButton!
-    @IBOutlet weak var pfe_Switch: NSPopUpButton!
-    @IBOutlet weak var pfcn_Switch: NSPopUpButton!
-    @IBOutlet weak var pfat_Switch: NSPopUpButton!
-    @IBOutlet weak var pfr_Switch: NSPopUpButton!
-    @IBOutlet weak var pfb_Switch: NSPopUpButton!
-    @IBOutlet weak var pfd_Switch: NSPopUpButton!
-    @IBOutlet weak var pfc_Switch: NSPopUpButton!
-    @IBOutlet weak var mip_Switch: NSPopUpButton!
+    // branding
+    @IBOutlet weak var bannerImage_TextField: NSTextField!
+    @IBOutlet weak var displayText_Switch: NSSwitch!
+    @IBOutlet weak var lightIcon_TextField: NSTextField!
+    @IBOutlet weak var darkIcon_TextField: NSTextField!
+    
+    // support
+    @IBOutlet weak var teamName_TextField: NSTextField!
+    @IBOutlet weak var teamPhone_TextField: NSTextField!
+    @IBOutlet weak var teamEmail_TextField: NSTextField!
+    @IBOutlet weak var kb_TextField: NSTextField!
+    @IBOutlet weak var errorKb_TextField: NSTextField!
+    @IBOutlet weak var helpWebsite_Label: NSTextField!
+    @IBOutlet weak var helpWebsite_TextField: NSTextField!
+    
+    @IBOutlet weak var errorKb_Button: NSButton!
+    @IBOutlet weak var helpHyperlink_Button: NSButton!
+    @IBAction func kbDetails_Action(_ sender: NSButton) {
+        
+        let details = ( (sender.identifier?.rawValue ?? "unknown") == "errorKb" ? errorKb_TextField.stringValue:helpWebsite_TextField.stringValue )
+        
+        performSegue(withIdentifier: "KbPopover", sender: ["whichField": sender.identifier?.rawValue ?? "unknown", "details": details])
+    }
+    
+    // prompt for
+    @IBOutlet weak var pfu_Switch: NSSwitch!
+    @IBOutlet weak var pu_Switch: NSSwitch!
+    @IBOutlet weak var pfrn_Switch: NSSwitch!
+    @IBOutlet weak var prn_Switch: NSSwitch!
+    @IBOutlet weak var pfe_Switch: NSSwitch!
+    @IBOutlet weak var pfcn_Switch: NSSwitch!
+    @IBOutlet weak var pfat_Switch: NSSwitch!
+    @IBOutlet weak var pfr_Switch: NSSwitch!
+    @IBOutlet weak var pfb_Switch: NSSwitch!
+    @IBOutlet weak var pfd_Switch: NSSwitch!
+    @IBOutlet weak var pfc_Switch: NSSwitch!
+    @IBOutlet weak var mip_Switch: NSSwitch!
     
     @IBOutlet var buildings_TextField: NSTextView!
     @IBOutlet var departments_TextField: NSTextView!
@@ -92,27 +130,33 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
     @IBOutlet weak var settings_TabView: NSTabView!
     
     var settingsArray = [SYMSetting(name: "Script Source", tab: "scriptSource"),
+                         SYMSetting(name: "Branding", tab: "branding"),
+                         SYMSetting(name: "Support", tab: "support"),
                          SYMSetting(name: "Prompt For...", tab: "promptFor"),
                          SYMSetting(name: "Buildings", tab: "buildings"),
                          SYMSetting(name: "Departments", tab: "departments")]
     
 //    var settingsDict      = [String:Any]()
+    
     var currentConfig     = ""
     var validScriptSource = ""
+    var promptForDict     = [String:Any]()
+    var brandingDict      = [String:Any]()
+    var supportDict       = [String:Any]()
     
-    @IBAction func prompt_Action(_ sender: NSButton) {
-        guard let theIdentifier = sender.identifier?.rawValue else {
-            WriteToLog().message(stringOfText: "Unknown prompt/prefill value")
-            return
-        }
-        Settings.shared.dict[theIdentifier] = sender.title
-    }
+//    @IBAction func prompt_Action(_ sender: NSButton) {
+//        guard let theIdentifier = sender.identifier?.rawValue else {
+//            WriteToLog().message(stringOfText: "Unknown prompt/prefill value")
+//            return
+//        }
+//        Settings.shared.dict[theIdentifier] = sender.title
+//    }
     @IBAction func switchPrompt_Action(_ sender: NSSwitch) {
-        guard let theIdentifier = sender.identifier?.rawValue else {
-            WriteToLog().message(stringOfText: "Unknown prompt/prefill value")
-            return
-        }
-        Settings.shared.dict[theIdentifier] = sender.state.rawValue
+//        guard let theIdentifier = sender.identifier?.rawValue else {
+//            WriteToLog().message(stringOfText: "Unknown prompt/prefill value")
+//            return
+//        }
+//        Settings.shared.dict[theIdentifier] = sender.state.rawValue
     }
     
     
@@ -129,10 +173,64 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         ok_Button.isEnabled = false
         cancel_Button.isEnabled = false
         
-        let theRow = settings_TableView.selectedRow
-        whichTab = settingsArray[theRow].tab
-        let theNotification = Notification(name: Notification.Name(rawValue: "\(whichTab)"), object: NSButton.self)
-        controlTextDidEndEditing(theNotification)
+//        let theRow = settings_TableView.selectedRow
+//        whichTab = settingsArray[theRow].tab
+//        let theNotification = Notification(name: Notification.Name(rawValue: "\(whichTab)"), object: NSButton.self)
+//        controlTextDidEndEditing(theNotification)
+        
+        // set branding
+        brandingDict["bannerImage"] = bannerImage_TextField.stringValue as Any
+        brandingDict["displayText"] = displayText_Switch.state.rawValue as Any
+        brandingDict["lightIcon"]   = lightIcon_TextField.stringValue as Any
+        brandingDict["darkIcon"]    = darkIcon_TextField.stringValue as Any
+
+        // set support
+        supportDict["teamName"]  = teamName_TextField.stringValue as Any
+        supportDict["teamPhone"] = teamPhone_TextField.stringValue as Any
+        supportDict["teamEmail"] = teamEmail_TextField.stringValue as Any
+        supportDict["kb"]        = kb_TextField.stringValue as Any
+        supportDict["errorKb"]   = errorKb_TextField.stringValue as Any
+        if scriptVersion.0 <= 1 && scriptVersion.1 < 13 {
+            supportDict["helpKb"]    = helpWebsite_TextField.stringValue as Any
+        } else {
+            supportDict["teamWebsite"] = helpWebsite_TextField.stringValue as Any
+        }
+        
+        // set prompt for
+        promptForDict["promptForUsername"]      = pfu_Switch.state.rawValue
+        promptForDict["prefillUsername"]        = pu_Switch.state.rawValue
+        promptForDict["promptForComputerName"]  = pfcn_Switch.state.rawValue
+        promptForDict["promptForRealName"]      = pfrn_Switch.state.rawValue
+        promptForDict["prefillRealname"]        = prn_Switch.state.rawValue
+        promptForDict["promptForEmail"]         = pfe_Switch.state.rawValue
+        promptForDict["promptForAssetTag"]      = pfat_Switch.state.rawValue
+        promptForDict["promptForRoom"]          = pfr_Switch.state.rawValue
+        promptForDict["promptForBuilding"]      = pfb_Switch.state.rawValue
+        promptForDict["promptForDepartment"]    = pfd_Switch.state.rawValue
+        promptForDict["promptForConfiguration"] = pfc_Switch.state.rawValue
+        promptForDict["moveableInProduction"]   = mip_Switch.state.rawValue
+        
+        print("promptForDict: \(promptForDict)")
+        // set buildings
+        Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string
+
+        // set departments
+        Settings.shared.dict["departmentListRaw"] = departments_TextField.string
+        
+        print("[viewWillDisappear] settingsDict: \(Settings.shared.dict)")
+        print("[viewWillDisappear] set valid script to: \(validScriptSource)")
+        
+        Settings.shared.dict["scriptSource"] = validScriptSource
+        Settings.shared.dict["branding"]     = brandingDict
+        Settings.shared.dict["support"]      = supportDict
+        Settings.shared.dict["promptFor"]    = promptForDict
+        
+        if validScriptSource != scriptSource_TextField.stringValue {
+            validateScript(notificationName: "ok_Button")
+        } else {
+            ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
+            dismiss(self)
+        }
     }
 
     //  remove?
@@ -151,6 +249,43 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         }
     }
     
+    fileprivate func validateScript(notificationName: String) {
+        SYMScript().get(scriptURL: scriptSource_TextField.stringValue) { [self]
+            (result: String) in
+            symScript = result
+            print("[Settings] getScript: \(symScript)")
+            spinner_Progress.stopAnimation(self)
+            if symScript == "" {
+                let scriptReply = alert.display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "Use Anyway")
+                if scriptReply == "Use Anyway" {
+                    validScriptSource = scriptSource_TextField.stringValue
+                    Settings.shared.dict["scriptSource"] = validScriptSource
+                    if notificationName != "NSControlTextDidEndEditingNotification" {
+                        self.dismiss(self)
+                    }
+                } else {
+                    ok_Button.isEnabled = true
+                    cancel_Button.isEnabled = true
+                    scriptSource_TextField.stringValue = validScriptSource
+                    settings_TableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+                    settings_TabView.selectTabViewItem(withIdentifier: "scriptSource")
+                    return
+                }
+            } else {
+                validScriptSource = scriptSource_TextField.stringValue
+                Settings.shared.dict["scriptSource"] = validScriptSource
+                print("[Settings] set valid script to: \(validScriptSource)")
+//                if notificationName != "NSControlTextDidEndEditingNotification" {
+//                    self.dismiss(self)
+//                }
+                if notificationName == "ok_Button" {
+                    ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
+                    dismiss(self)
+                }
+            }
+        }
+    }
+    
     func controlTextDidEndEditing(_ obj: Notification) {
 //        print("[controlTextDidEndEditing] obj: \(obj)")
 //        print("[controlTextDidEndEditing] obj.name.rawValue: \(obj.name.rawValue)")
@@ -160,76 +295,46 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         } else {
             whichField = obj.name.rawValue
         }
-        
-//        print("[controlTextDidEndEditing] whichField: \(whichField)")
-        switch whichField {
-        case "scriptSource":
-            spinner_Progress.startAnimation(self)
-            SYMScript().get(scriptURL: scriptSource_TextField.stringValue) { [self]
-                (result: String) in
-                symScript = result
-//                        print("[Settings] getScript: \(symScript)")
-                spinner_Progress.stopAnimation(self)
-                if symScript == "" {
-                    let scriptReply = alert.display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "Use Anyway")
-                    if scriptReply == "Use Anyway" {
-                        validScriptSource = scriptSource_TextField.stringValue
-                        Settings.shared.dict["scriptSource"] = validScriptSource
-                        if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
-                            self.dismiss(self)
-                        }
-                    } else {
-                        ok_Button.isEnabled = true
-                        cancel_Button.isEnabled = true
-                        scriptSource_TextField.stringValue = validScriptSource
-                        settings_TableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
-                        settings_TabView.selectTabViewItem(withIdentifier: "scriptSource")
-                        return
-                    }
-                } else {
-                    validScriptSource = scriptSource_TextField.stringValue
-                    Settings.shared.dict["scriptSource"] = validScriptSource
-                    if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
-                        self.dismiss(self)
-                    }
-                }
-            }
-        case "promptFor":
-            if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
-                self.dismiss(self)
-            }
-        case "buildings":
-            if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
-                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string
-//                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
-                self.dismiss(self)
-            }
-        case "departments":
-            if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
-                Settings.shared.dict["departmentListRaw"] = departments_TextField.string
-//                Settings.shared.dict["departmentListRaw"] = departments_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
-                self.dismiss(self)
-            }
+        //
+        print("[controlTextDidEndEditing] obj.name.rawValue: \(obj.name.rawValue)")
+        print("[controlTextDidEndEditing]        whichField: \(whichField)")
 
-        default:
-            break
+        if whichField == "scriptSource" {
+            spinner_Progress.startAnimation(self)
+            validateScript(notificationName: whichField)
         }
+            
+//        if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
+//        }
+//        print("brandingDict: \(brandingDict)")
     }
     
+    
+    
+    // for scrolling text fields
     func textDidEndEditing(_ obj: Notification) {
         if let textView = obj.object as? NSTextView {
             switch textView.identifier!.rawValue {
             case "buildings":
                 Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string
-//                Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
                
             case "departments":
                 Settings.shared.dict["departmentListRaw"] = departments_TextField.string
-//                Settings.shared.dict["departmentListRaw"] = departments_TextField.string.replacingOccurrences(of: "\n", with: ",").listToString
                
             default:
                 break
             }
+        }
+    }
+    
+    override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
+        if segue.identifier == "KbPopover" {
+            let kbPopoverVC: KbPopoverVC = segue.destinationController as! KbPopoverVC
+            kbPopoverVC.delegate = self
+            kbPopoverVC.kbInfo = sender as! [String:String]
+            
+            cancel_Button.isEnabled = false
+            ok_Button.isEnabled     = false
         }
     }
         
@@ -238,29 +343,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         
 //        print("currentConfig: \(currentConfig)")
 //        print("settingsDict: \(Settings.shared.dict)")
-        /*
-        pfu_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForUsername"] as? String ?? "true")")
-        pu_Button.selectItem(withTitle: "\(Settings.shared.dict["prefillUsername"] as? String ?? "true")")
-        pfcn_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForComputerName"] as? String ?? "true")")
-        pfrn_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForRealName"] as? String ?? "true")")
-        prn_Button.selectItem(withTitle: "\(Settings.shared.dict["prefillRealname"] as? String ?? "true")")
-        pfe_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForEmail"] as? String ?? "true")")
-        pfat_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForAssetTag"] as? String ?? "true")")
-        pfr_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForRoom"] as? String ?? "true")")
-        pfb_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForBuilding"] as? String ?? "true")")
-        pfd_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForDepartment"] as? String ?? "true")")
-        pfc_Button.selectItem(withTitle: "\(Settings.shared.dict["promptForConfiguration"] as? String ?? "true")")
-        mip_Button.selectItem(withTitle: "\(Settings.shared.dict["moveableInProduction"] as? String ?? "true")")
-         */
-//        let promptForButtons = ["promptForUsername","prefillUsername","promptForComputerName","promptForRealName","prefillRealname","promptForEmail","promptForAssetTag","promptForRoom","promptForBuilding","promptForDepartment","promptForConfiguration","moveableInProduction"]
-//        for whichButton in promptForButtons {
-//            var buttonState = "true"
-//            if let theState = Settings.shared.dict[whichButton] as? Int {
-//                buttonState = ( theState == 1 ) ? "true":"false"
-//            } else if let theState = Settings.shared.dict[whichButton] as? String {
-//                buttonState = theState
-//            }
-//        }
+        
         func onOff(whichButton: String) -> Int {
             var buttonState = 1
             if let theState = Settings.shared.dict[whichButton] as? Int {
@@ -270,25 +353,57 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
             }
             return buttonState
         }
-        pfu_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForUsername"))
-        pu_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "prefillUsername"))
-        pfcn_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForComputerName"))
-        pfrn_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForRealName"))
-        prn_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "prefillRealname"))
-        pfe_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForEmail"))
-        pfat_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForAssetTag"))
-        pfr_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForRoom"))
-        pfb_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForBuilding"))
-        pfd_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForDepartment"))
-        pfc_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForConfiguration"))
-        mip_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "moveableInProduction"))
+        // branding
+        brandingDict = ((Settings.shared.dict["branding"] as? [String:Any]) != nil) ? Settings.shared.dict["branding"] as! [String:Any]:["bannerImage":defaultBannerImage, "displayText":defaultDisplayText, "lightIcon":defaultLightIcon, "darkIcon":defaultDarkIcon]
         
+        bannerImage_TextField.stringValue = ((brandingDict["bannerImage"] as? String) != nil) ? brandingDict["bannerImage"] as! String:defaultBannerImage
+        displayText_Switch.state = NSControl.StateValue(rawValue: (((brandingDict["displayText"] as? Int) != nil) ? (brandingDict["displayText"] as! Int):1))
+        lightIcon_TextField.stringValue = ((brandingDict["lightIcon"] as? String) != nil) ? brandingDict["lightIcon"] as! String:defaultLightIcon
+        darkIcon_TextField.stringValue = ((brandingDict["darkIcon"] as? String) != nil) ? brandingDict["darkIcon"] as! String:defaultDarkIcon
+        
+        
+        // support
+        supportDict = ((Settings.shared.dict["support"] as? [String:Any]) != nil) ? Settings.shared.dict["support"] as! [String:String]:["teamName":defaultTeamName, "teamPhone":defaultTeamPhone, "teamEmail":defaultTeamEmail, "kb":defaultKb, "errorKb":defaultErrorKb, "helpKb":defaultHelpKb, "teamWebsite": defaultTeamWebsite]
+        
+        teamName_TextField.stringValue  = ((supportDict["teamName"] as? String) != nil) ? supportDict["teamName"] as! String:defaultTeamName
+        teamPhone_TextField.stringValue = ((supportDict["teamPhone"] as? String) != nil) ? supportDict["teamPhone"] as! String:defaultTeamPhone
+        teamEmail_TextField.stringValue = ((supportDict["teamEmail"] as? String) != nil) ? supportDict["teamEmail"] as! String:defaultTeamEmail
+        kb_TextField.stringValue        = ((supportDict["kb"] as? String) != nil) ? supportDict["kb"] as! String:defaultKb
+        errorKb_TextField.stringValue   = ((supportDict["errorKb"] as? String) != nil) ? supportDict["errorKb"] as! String:defaultErrorKb
+
+        // prompt for
+        if (Settings.shared.dict["promptFor"] as? [String:Any]) == nil {
+            pfu_Switch.state  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForUsername"))
+            pu_Switch.state   = NSControl.StateValue(rawValue: onOff(whichButton: "prefillUsername"))
+            pfcn_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForComputerName"))
+            pfrn_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForRealName"))
+            prn_Switch.state  = NSControl.StateValue(rawValue: onOff(whichButton: "prefillRealname"))
+            pfe_Switch.state  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForEmail"))
+            pfat_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForAssetTag"))
+            pfr_Switch.state  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForRoom"))
+            pfb_Switch.state  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForBuilding"))
+            pfd_Switch.state  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForDepartment"))
+            pfc_Switch.state  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForConfiguration"))
+            mip_Switch.state  = NSControl.StateValue(rawValue: onOff(whichButton: "moveableInProduction"))
+        } else {
+            print("use new settings")
+            promptForDict = Settings.shared.dict["promptFor"] as! [String:Any]
+            print("promptForDict: \(promptForDict)")
+            pfu_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForUsername"] as? Int ?? 1)
+            pu_Switch.state = NSControl.StateValue(rawValue:  promptForDict["prefillUsername"] as? Int ?? 1)
+            pfcn_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForComputerName"] as? Int ?? 1)
+            pfrn_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForRealName"] as? Int ?? 1)
+            prn_Switch.state = NSControl.StateValue(rawValue:  promptForDict["prefillRealname"] as? Int ?? 1)
+            pfe_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForEmail"] as? Int ?? 1)
+            pfat_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForAssetTag"] as? Int ?? 1)
+            pfr_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForRoom"] as? Int ?? 1)
+            pfb_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForBuilding"] as? Int ?? 1)
+            pfd_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForDepartment"] as? Int ?? 1)
+            pfc_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForConfiguration"] as? Int ?? 1)
+            mip_Switch.state = NSControl.StateValue(rawValue:  promptForDict["moveableInProduction"] as? Int ?? 1)
+        }
         buildings_TextField.string = Settings.shared.dict["buildingsListRaw"] as? String ?? ""
         departments_TextField.string = Settings.shared.dict["departmentListRaw"] as? String ?? ""
-//        let buildingsList = Settings.shared.dict["buildingsListRaw"] as? String ?? ""
-//        buildings_TextField.string = buildingsList.replacingOccurrences(of: ",", with: "\n")
-//        let departmentsList = Settings.shared.dict["departmentListRaw"] as? String ?? ""
-//        departments_TextField.string = departmentsList.replacingOccurrences(of: ",", with: "\n")
         
         let style = NSMutableParagraphStyle()
         style.alignment = NSTextAlignment.center
@@ -296,10 +411,26 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
             column.headerCell.attributedStringValue = NSAttributedString(string: column.title, attributes: [NSAttributedString.Key.font: NSFont.boldSystemFont(ofSize: 16), .paragraphStyle: style])
         }
         
-        settings_TableView.delegate = self
-        settings_TableView.dataSource = self
+        settings_TableView.delegate     = self
+        settings_TableView.dataSource   = self
         
+        // script
         scriptSource_TextField.delegate = self
+        
+        // branding
+        bannerImage_TextField.delegate  = self
+        lightIcon_TextField.delegate    = self
+        darkIcon_TextField.delegate     = self
+        
+        // support
+        teamName_TextField.delegate     = self
+        teamPhone_TextField.delegate    = self
+        teamEmail_TextField.delegate    = self
+        kb_TextField.delegate           = self
+        errorKb_TextField.delegate      = self
+        helpWebsite_TextField.delegate       = self
+        
+        // location
         buildings_TextField.delegate    = self
         departments_TextField.delegate  = self
         
@@ -309,7 +440,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
         whichTab = settingsArray[0].tab
         settings_TabView.selectTabViewItem(withIdentifier: whichTab)
         validScriptSource = Settings.shared.dict["scriptSource"] as? String ?? defaultScriptSource
-//        validScriptSource = defaults.string(forKey: "scriptSource") ?? defaultScriptSource
+        
         scriptSource_TextField.stringValue = validScriptSource
 
         settings_AC.addObserver(self, forKeyPath: "selectedObjects", options: .new, context: nil)
@@ -319,7 +450,13 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate {
     override func viewWillDisappear() {
         super.viewWillDisappear()
 //        print("[viewWillDisappear] settingsDict: \(Settings.shared.dict)")
-        ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
+//        print("[viewWillDisappear] set valid script to: \(validScriptSource)")
+//
+//        Settings.shared.dict["scriptSource"] = validScriptSource
+//        Settings.shared.dict["branding"]     = brandingDict
+//        Settings.shared.dict["support"]      = supportDict
+//        Settings.shared.dict["promptFor"]    = promptForDict
+//        ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
     }
     
 }
@@ -340,7 +477,22 @@ extension SettingsVC: NSTableViewDataSource, NSTableViewDelegate {
         if settings_TableView.selectedRowIndexes.count > 0 {
             let theRow = settings_TableView.selectedRow
             whichTab = settingsArray[theRow].tab
-//            print("whichTab: \(whichTab)")
+            print("whichTab: \(whichTab)")
+            print("scriptVersion: \(scriptVersion)")
+            
+            if whichTab == "support" {
+                if scriptVersion.0 <= 1 && scriptVersion.1 < 13 {
+                    helpWebsite_Label.stringValue = "Help KB:"
+                    helpWebsite_Label.placeholderString = ""
+                    helpWebsite_TextField.stringValue    = supportDict["helpKb"] as? String ?? defaultHelpKb
+//                    helpWebsite_TextField.stringValue    = ((supportDict["helpKb"] as? String) != nil) ? supportDict["helpKb"] as! String:defaultHelpKb
+                } else {
+                    helpWebsite_Label.stringValue = "Team website:"
+                    helpWebsite_Label.placeholderString = "support.domain.com"
+                    helpWebsite_TextField.stringValue   = supportDict["teamWebsite"] as? String ?? defaultTeamWebsite
+                }
+            }
+            
             settings_TabView.selectTabViewItem(withIdentifier: whichTab)
             
         }

@@ -1,8 +1,6 @@
 //
 //  Alert.swift
-//  Jamf Compliance Editor
-//
-//  Created by Leslie Helou on 8/8/22
+//  SYM-Helper
 //
 
 import Cocoa

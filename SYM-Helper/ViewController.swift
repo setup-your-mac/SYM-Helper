@@ -2,8 +2,6 @@
 //  ViewController.swift
 //  SYM-Helper
 //
-//  Created by Leslie Helou on 2/18/23.
-//
 
 import AppKit
 import Cocoa
@@ -174,6 +172,26 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     
     @IBOutlet weak var policies_TableView: NSTableView!
     @IBOutlet weak var selectedPolicies_TableView: NSTableView!
+    
+    @IBAction func duplicate_Action(_ sender: Any) {
+        let selectedRows = selectedPolicies_TableView.selectedRowIndexes
+        if selectedRows.count == 1 {
+            let selectedRow = selectedPolicies_TableView.selectedRow
+            print("           selected policy: \(selectedPoliciesArray[selectedRow].name)")
+            print("selected enrollmentActions: \(enrollmentActions[selectedRow].name)")
+
+            let thePolicy = selectedPoliciesArray[selectedRow]
+
+            selectedPoliciesArray.append(thePolicy)
+            selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
+
+            selectedPoliciesArray.last!.configs.append(configuration_Button.titleOfSelectedItem!)
+            selectedPolicies_TableView.reloadData()
+        }
+        
+    }
+    
+    
     @IBAction func group_Action(_ sender: Any) {
         let selectedRows = selectedPolicies_TableView.selectedRowIndexes
         if selectedRows.count > 1 {
@@ -380,10 +398,12 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 }
             }
                         
-            configsDict[configuration_Button.titleOfSelectedItem!]![doubleClicked.id] = nil
-
             selectedPoliciesArray.remove(at: doubleClickedRow)
             enrollmentActions.remove(at: doubleClickedRow)
+            if selectedPoliciesArray.firstIndex(where: { $0.id == doubleClicked.id }) == nil {
+                configsDict[configuration_Button.titleOfSelectedItem!]![doubleClicked.id] = nil
+            }
+
             
             progressText_TextField.stringValue = ""
             validation_TextField.stringValue   = ""
@@ -400,11 +420,13 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 //            }
             selectedPolicies_TableView.reloadData()
             if let _ = Int(doubleClicked.id) {
-                policiesArray.append(doubleClicked)
-                policiesDict[configuration_Button.titleOfSelectedItem!] = policiesArray
-                policies_TableView.reloadData()
-//                sortPoliciesTableView(theRow: doubleClickedRow)
-                sortPoliciesTableView(theRow: -1)
+                if selectedPoliciesArray.firstIndex(where: { $0.id == doubleClicked.id }) == nil {
+                    policiesArray.append(doubleClicked)
+                    policiesDict[configuration_Button.titleOfSelectedItem!] = policiesArray
+                    policies_TableView.reloadData()
+                    //                sortPoliciesTableView(theRow: doubleClickedRow)
+                    sortPoliciesTableView(theRow: -1)
+                }
             }
         }
     }
@@ -459,13 +481,15 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             policyName = betweenTags(xmlString: general, startTag: "<name>", endTag: "</name>")
         }
 
+        // just grabs the icon hash
         var icon = betweenTags(xmlString: self_service, startTag: "<uri>", endTag: "</uri>")
         
-        
+        // to use icon full path comment out next two lines and enable iconFix() - ignore this
 //        let icon_regex = try! NSRegularExpression(pattern: "https://.*?/hash_")
 //        icon = (icon_regex.stringByReplacingMatches(in: icon, range: NSRange(0..<icon.utf16.count), withTemplate: ""))
+        
         print("[updatePoliciesDict] icon: \(icon)")
-//        icon = icon.replacingOccurrences(of: "https://ics.services.jamfcloud.com/icon/hash_", with: "")
+
         var progresstext = betweenTags(xmlString: self_service, startTag: "<self_service_description>", endTag: "</self_service_description>")
         progresstext = progresstext.xmlDecode
         if progresstext == "" {
@@ -561,7 +585,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         task.resume()
     }
     
-    private func processPolicies(id: [[String]] = [], whichId: Int, theConfigIndex: Int) {
+    private func processPolicies(whichId: Int, id: [[String]] = [], theConfigIndex: Int) {
         
         // move the default config to the end of the array
         if let index = configurationsArray.firstIndex(of: "Default") {
@@ -691,6 +715,11 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         }   // for theConfig in configurationsArray - end
         var finalScript = ""
         
+        setBranding(whichObject: "bannerImage")
+        setBranding(whichObject: "displayText")
+        setBranding(whichObject: "lightIcon")
+        setBranding(whichObject: "darkIcon")
+        
         setPrompt(whichPrompt: "promptForUsername")
         setPrompt(whichPrompt: "prefillUsername")
         setPrompt(whichPrompt: "promptForRealName")
@@ -703,6 +732,18 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         setPrompt(whichPrompt: "promptForDepartment")
         setPrompt(whichPrompt: "promptForConfiguration")
         setPrompt(whichPrompt: "moveableInProduction")
+        
+        setSupport(whichField: "teamName")
+        setSupport(whichField: "teamPhone")
+        setSupport(whichField: "teamEmail")
+        setSupport(whichField: "kb")
+        setSupport(whichField: "errorKb")
+        if scriptVersion.0 <= 1 && scriptVersion.1 < 13 {
+            setSupport(whichField: "helpKb")
+        } else {
+            setSupport(whichField: "teamWebsite")
+        }
+        
         
         setLocation(type: "buildingsListRaw")
         setLocation(type: "departmentListRaw")
@@ -749,13 +790,77 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         generateScript_Button.isEnabled = true
     }
     
+    private func setBranding(whichObject: String) {
+        var newValue       = "true"
+        var scriptVariable = ""
+
+        let brandingDict = ((Settings.shared.dict["branding"] as? [String:Any]) != nil) ? Settings.shared.dict["branding"] as! [String:Any]:["bannerImage":defaultBannerImage, "displayText":defaultDisplayText, "lightIcon":defaultLightIcon, "darkIcon":defaultDarkIcon]
+        
+        switch whichObject {
+        case "bannerImage":
+            scriptVariable = "brandingBanner"
+        case "displayText":
+            scriptVariable = "brandingBannerDisplayText"
+        case "lightIcon":
+            scriptVariable = "brandingIconLight"
+        case "darkIcon":
+            scriptVariable = "brandingIconDark"
+        default:
+            break
+        }
+        
+        print("[setBranding] whichObject: \(whichObject)    dict value: \(String(describing: brandingDict[whichObject]))")
+        if let settingsRawValue = brandingDict["\(whichObject)"] as? Int {
+            newValue = ( settingsRawValue == 1 ) ? "true":"false"
+        } else if let settingsRawValue = brandingDict["\(whichObject)"] as? String {
+            newValue = settingsRawValue
+        }
+                
+        if scriptVariable != "" {
+            let regex = try! NSRegularExpression(pattern: "\(scriptVariable)=\".*?\"")
+            symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(scriptVariable)=\"\(newValue)\""))
+        }
+    }
+    private func setSupport(whichField: String) {
+
+        let supportDict = ((Settings.shared.dict["support"] as? [String:Any]) != nil) ? Settings.shared.dict["support"] as! [String:String]:["teamName":defaultTeamName, "teamPhone":defaultTeamPhone, "teamEmail":defaultTeamEmail, "kb":defaultKb, "errorKb":defaultErrorKb, "helpKb":defaultHelpKb]
+        
+        var scriptVariable = ""
+        var newValue       = ""
+        switch whichField {
+        case "teamName":
+            scriptVariable = "supportTeamName"
+        case "teamPhone":
+            scriptVariable = "supportTeamPhone"
+        case "teamEmail":
+            scriptVariable = "supportTeamEmail"
+        case "kb":
+            scriptVariable = "supportKB"
+        case "errorKb":
+            scriptVariable = "supportTeamErrorKB"
+        case "helpKb":
+            scriptVariable = "supportTeamHelpKB"
+        case "teamWebsite":
+            scriptVariable = "supportTeamWebsite"
+            
+        default:
+            break
+        }
+        
+        if let settingsRawValue = supportDict["\(whichField)"] {
+            newValue = settingsRawValue
+        }
+        if scriptVariable != "" {
+            let regex = try! NSRegularExpression(pattern: "\(scriptVariable)=\".*?\"")
+            symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(scriptVariable)=\"\(newValue)\""))
+        }
+    }
     private func setPrompt(whichPrompt: String) {
-//        let regex = try! NSRegularExpression(pattern: "\(whichPrompt)=\".*?\"")
-//        symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(whichPrompt)=\"\(Settings.shared.dict["\(whichPrompt)"] ?? "true")\""))
+        let promptForDict = Settings.shared.dict["promptFor"] as! [String:Any]
         var trueFalse = "true"
-        if let settingsRawValue = Settings.shared.dict["\(whichPrompt)"] as? Int {
+        if let settingsRawValue = promptForDict["\(whichPrompt)"] as? Int {
             trueFalse = ( settingsRawValue == 1 ) ? "true":"false"
-        } else if let settingsRawValue = Settings.shared.dict["\(whichPrompt)"] as? String {
+        } else if let settingsRawValue = promptForDict["\(whichPrompt)"] as? String {
             trueFalse = settingsRawValue
         }
         let regex = try! NSRegularExpression(pattern: "\(whichPrompt)=\".*?\"")
@@ -790,7 +895,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         TokenDelegate().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds) { [self]
             authResult in
             let (statusCode,theResult) = authResult
-            print("[sendLoginInfo] statusCode: \(statusCode)  theResult: \(theResult)")
+
             if theResult == "success" {
                 
                 defaults.set(JamfProServer.destination, forKey: "currentServer")
@@ -808,13 +913,48 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 // read settings, if they exist
                 Settings.shared.dict = ConfigsSettings().retrieve(dataType: "settings")
                 
+//                if Settings.shared.dict["branding"] == nil {
+//                    Settings.shared.dict["branding"] = [:]
+//                }
+                var brandingDict = (Settings.shared.dict["branding"] == nil) ? [:]: Settings.shared.dict["branding"] as! [String:Any]
+                if brandingDict["bannerImage"] == nil {
+                    brandingDict["bannerImage"] = defaultBannerImage
+                }
+                if brandingDict["displayText"] == nil {
+                    brandingDict["displayText"] = defaultDisplayText
+                }
+                if brandingDict["lightIcon"] == nil {
+                    brandingDict["lightIcon"] = defaultLightIcon
+                }
+                if brandingDict["darkIcon"] == nil {
+                    brandingDict["darkIcon"] = defaultDarkIcon
+                }
+                Settings.shared.dict["branding"] = brandingDict
+                
+                // migrate old promptFor settings - 230924
+                if Settings.shared.dict["promptFor"] == nil {
+                    print("convert prompt for... settings to new format")
+                    writeToLog.message(stringOfText: "convert prompt for... settings to new format")
+                    var promptForDict = [String:Any]()
+                    
+                    for whichPrompt in ["promptForUsername", "prefillUsername", "promptForRealName", "prefillRealname", "promptForEmail", "promptForComputerName", "promptForAssetTag", "promptForRoom", "promptForBuilding", "promptForDepartment", "promptForConfiguration", "moveableInProduction"] {
+                        if Settings.shared.dict["\(whichPrompt)"] != nil {
+                            promptForDict["\(whichPrompt)"] = Settings.shared.dict["\(whichPrompt)"] as Any
+                            Settings.shared.dict["\(whichPrompt)"] = nil
+                        } else {
+                            promptForDict["\(whichPrompt)"] = 1 as Any
+                        }
+                    }
+                    Settings.shared.dict["promptFor"] = promptForDict
+                }
+                
+                
                 var scriptSource = Settings.shared.dict["scriptSource"] as? String ?? defaultScriptSource
                 if scriptSource == "" { scriptSource = defaultScriptSource }
                 print("fetch script from: \(scriptSource)")
                 SYMScript().get(scriptURL: scriptSource) { [self]
                     (result: String) in
                     symScript = result
-//                    print("getScript: \(symScript)")
                     
                     if !symScript.contains("# Setup Your Mac via swiftDialog") || !symScript.contains("# https://snelson.us/sym") {
                         _ = alert.display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "")
@@ -824,87 +964,90 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                     
                     getAllPolicies() { [self]
                         (result: [String:Any]) in
-                        let allPolicies = result["policies"] as! [[String:Any]]
-                        print("all policies count: \(allPolicies.count)")
-                        if allPolicies.count > 0 {
-                            for i in 0..<allPolicies.count {
-                                let aPolicy = allPolicies[i] as [String:Any]
-//                                print("aPolicy: \(aPolicy)")
-                                
-                                if let policyName = aPolicy["name"] as? String, let policyId = aPolicy["id"] as? Int {
-//                                    print("\(policyName) (\(policyId))")
-                                    // filter out policies created from casper remote - start
-                                    if policyName.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil {
-//                                        print("[sendLoginInfo] add to policiesArray: \(policyName) (\(policyId))")
-                                        policiesArray.append(Policy(name: "\(policyName) (\(policyId))", id: "\(policyId)", configs: [], grouped: false, groupId: ""))
+                        if result.count > 0 {
+                            let allPolicies = result["policies"] as! [[String:Any]]
+                            print("all policies count: \(allPolicies.count)")
+                            if allPolicies.count > 0 {
+                                for i in 0..<allPolicies.count {
+                                    let aPolicy = allPolicies[i] as [String:Any]
+                                    //                                print("aPolicy: \(aPolicy)")
+                                    
+                                    if let policyName = aPolicy["name"] as? String, let policyId = aPolicy["id"] as? Int {
+                                        //                                    print("\(policyName) (\(policyId))")
+                                        // filter out policies created from casper remote - start
+                                        if policyName.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil {
+
+                                            policiesArray.append(Policy(name: "\(policyName) (\(policyId))", id: "\(policyId)", configs: [], grouped: false, groupId: ""))
+                                        }
+                                        // filter out policies created from casper remote - end
+                                        policies_TableView.reloadData()
                                     }
-                                    // filter out policies created from casper remote - end
-                                    policies_TableView.reloadData()
                                 }
-                            }
-                            print("[sendLoginInfo] policies found on server: \(policiesArray.count)")
-                            // sort policies - to do
-//                            policies_ArrayController.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
-                            staticAllPolicies = policiesArray.sorted(by: {$0.name.lowercased() < $1.name.lowercased()})
-                            policies_TableView.reloadData()
-                            allPolicies_Spinner.stopAnimation(self)
-                            
-                            
-                            // create app support path if not present
-                            if !FileManager.default.fileExists(atPath: AppInfo.appSupport) {
-                                do {
-                                    try FileManager.default.createDirectory(atPath: AppInfo.appSupport, withIntermediateDirectories: true)
-                                } catch {
-                                    _ = alert.display(header: "Attention:", message: "Unable to create '\(AppInfo.appSupport)'.  Configurations will not be saved.", secondButton: "")
-                                }
-                            } else {
-                                // look for existing configs
-                                let existingConfigsDict = ConfigsSettings().retrieve(dataType: "configs")
-                                
-                                let cd = existingConfigsDict["configsDict"] as? [String:Any] ?? [:]
-                                let pd = existingConfigsDict["policiesDict"] as? [String:Any] ?? [:]
-                                let spd = existingConfigsDict["selectedPoliciesDict"] as? [String:Any] ?? [:]
-                                
-                                configurationsArray =  existingConfigsDict["configurationsArray"] as? [String] ?? []
-//                                print("available configs: \(configurationsArray)")
+//                                print("[sendLoginInfo] policies found on server: \(policiesArray.count)")
+                                staticAllPolicies = policiesArray.sorted(by: {$0.name.lowercased() < $1.name.lowercased()})
+                                policies_TableView.reloadData()
+                                allPolicies_Spinner.stopAnimation(self)
                                 
                                 
-                                // set the configurations button - start
-                                configuration_Menu.removeAllItems()
-                                var validatedConfigs = [String]()
-                                
-                                // make sure Default configureation is listed
-                                if configurationsArray.firstIndex(of: "Default") == nil { configurationsArray.append("Default") }
-                                
-                                for theConfig in configurationsArray.sorted() {
-//                                    print("spd[\(theConfig)]: \(String(describing: (spd[theConfig] as? [[String:Any]])?.count))")
-//                                    if (spd[theConfig] as? [[String:Any]])?.count ?? 0 > 0 || theConfig == "Default" {
+                                // create app support path if not present
+                                if !FileManager.default.fileExists(atPath: AppInfo.appSupport) {
+                                    do {
+                                        try FileManager.default.createDirectory(atPath: AppInfo.appSupport, withIntermediateDirectories: true)
+                                    } catch {
+                                        _ = alert.display(header: "Attention:", message: "Unable to create '\(AppInfo.appSupport)'.  Configurations will not be saved.", secondButton: "")
+                                    }
+                                } else {
+                                    // look for existing configs
+                                    let existingConfigsDict = ConfigsSettings().retrieve(dataType: "configs")
+                                    
+                                    let cd  = existingConfigsDict["configsDict"] as? [String:Any] ?? [:]
+                                    let pd  = existingConfigsDict["policiesDict"] as? [String:Any] ?? [:]
+                                    let spd = existingConfigsDict["selectedPoliciesDict"] as? [String:Any] ?? [:]
+                                    
+                                    configurationsArray = existingConfigsDict["configurationsArray"] as? [String] ?? []
+                                    //                                print("available configs: \(configurationsArray)")
+                                    
+                                    
+                                    // set the configurations button - start
+                                    configuration_Menu.removeAllItems()
+                                    var validatedConfigs = [String]()
+                                    
+                                    // make sure Default configureation is listed
+                                    if configurationsArray.firstIndex(of: "Default") == nil { configurationsArray.append("Default") }
+                                    
+                                    for theConfig in configurationsArray.sorted() {
+                                        //                                    print("spd[\(theConfig)]: \(String(describing: (spd[theConfig] as? [[String:Any]])?.count))")
+                                        //                                    if (spd[theConfig] as? [[String:Any]])?.count ?? 0 > 0 || theConfig == "Default" {
                                         configuration_Menu.addItem(NSMenuItem(title: theConfig, action: nil, keyEquivalent: ""))
                                         validatedConfigs.append(theConfig)
-//                                    }
-                                }
-                                configurationsArray = validatedConfigs
-                                
-                                let lastWorkingConfig = existingConfigsDict["currentConfig"] ?? "Default"
-                                configuration_Button.selectItem(withTitle: "\(String(describing: lastWorkingConfig))")
-                                configuration_Menu.addItem(.separator())
-                                configuration_Menu.addItem(NSMenuItem(title: "Add New...", action: #selector(addNewSelector), keyEquivalent: ""))
-                                configuration_Menu.addItem(NSMenuItem(title: "Clone Existing...", action: #selector(cloneExistingSelector), keyEquivalent: ""))
-                                // set the configurations button - end
-                                
-                                // reload configurations settings - start
-                                if let _ = existingConfigsDict["configsDict"] {
-                                    configsDict = existingConfigsDict["configsDict"] as! [String:[String:[String:String]]]
+                                        //                                    }
+                                    }
+                                    configurationsArray = validatedConfigs
                                     
-                                    let policiesDictSave         = existingConfigsDict["policiesDict"] as! [String:[[String:Any]]]
-                                    let selectedPoliciesDictSave = existingConfigsDict["selectedPoliciesDict"] as! [String:[[String:Any]]]
+                                    let lastWorkingConfig = existingConfigsDict["currentConfig"] ?? "Default"
+                                    configuration_Button.selectItem(withTitle: "\(String(describing: lastWorkingConfig))")
+                                    configuration_Menu.addItem(.separator())
+                                    configuration_Menu.addItem(NSMenuItem(title: "Add New...", action: #selector(addNewSelector), keyEquivalent: ""))
+                                    configuration_Menu.addItem(NSMenuItem(title: "Clone Existing...", action: #selector(cloneExistingSelector), keyEquivalent: ""))
+                                    // set the configurations button - end
                                     
-                                    policiesDict         = dictToClass(theDict: policiesDictSave)
-                                    selectedPoliciesDict = dictToClass(theDict: selectedPoliciesDictSave)
+                                    // reload configurations settings - start
+                                    if let _ = existingConfigsDict["configsDict"] {
+                                        configsDict = existingConfigsDict["configsDict"] as! [String:[String:[String:String]]]
+                                        
+                                        let policiesDictSave         = existingConfigsDict["policiesDict"] as! [String:[[String:Any]]]
+                                        let selectedPoliciesDictSave = existingConfigsDict["selectedPoliciesDict"] as! [String:[[String:Any]]]
+                                        
+                                        policiesDict         = dictToClass(theDict: policiesDictSave, sortList: true)
+                                        selectedPoliciesDict = dictToClass(theDict: selectedPoliciesDictSave)
+                                    }
+                                    
+                                    config_Action(existingConfigsDict["currentConfig"] ?? "Default")
                                 }
-                                
-                                config_Action(existingConfigsDict["currentConfig"] ?? "Default")
                             }
+                        } else {
+                            _ = Alert().display(header: "", message: "No policies found. Veriry the account has the appropriate permissions to read policies", secondButton: "")
+                            allPolicies_Spinner.stopAnimation(self)
                         }
                     }
                     
@@ -919,7 +1062,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         }
     }
     
-    func dictToClass(theDict: [String:[[String:Any]]]) -> [String:[Policy]] {
+    func dictToClass(theDict: [String:[[String:Any]]], sortList: Bool = false) -> [String:[Policy]] {
         var transformedConfig = [String:[Policy]]()
         var policyArray = [Policy]()
         for (theConfig, configInfo) in theDict {
@@ -927,7 +1070,11 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             for theConfigInfo in configInfo {
                 policyArray.append(Policy(name: theConfigInfo["name"] as! String, id: theConfigInfo["id"] as! String, configs: theConfigInfo["configs"] as! [String], grouped: theConfigInfo["grouped"] as! Bool, groupId: theConfigInfo["groupId"] as! String))
             }
-            transformedConfig[theConfig] = policyArray.sorted(by: {$0.name.lowercased() < $1.name.lowercased()})
+            if sortList {
+                transformedConfig[theConfig] = policyArray.sorted(by: {$0.name.lowercased() < $1.name.lowercased()})
+            } else {
+                transformedConfig[theConfig] = policyArray
+            }
         }
         return transformedConfig
     }
@@ -1263,6 +1410,7 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
                 validation_Label.stringValue = "Command:"
             }
             
+            progressText_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"]))"
             progressText_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"]))"
             validation_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["validation"] ?? ""
 

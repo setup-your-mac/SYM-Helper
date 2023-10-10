@@ -2,8 +2,6 @@
 //  ConfigsSettings.swift
 //  SYM-Helper
 //
-//  Created by Leslie Helou on 6/26/23.
-//
 
 import Foundation
 
@@ -25,7 +23,7 @@ class ConfigsSettings: NSObject {
             }
         }
         
-        // look for existing configs/settingd
+        // look for existing configs/settings
         do {
             if FileManager.default.fileExists(atPath: AppInfo.appSupport + "/\(JamfProServer.destination.fqdnFromUrl).\(dataType).json") {
 //                print("found existing config for \(JamfProServer.destination.fqdnFromUrl)")

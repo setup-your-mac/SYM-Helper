@@ -1,8 +1,6 @@
 //
 //  TokenDelegate.swift
-//  Last Run
-//
-//  Created by Leslie Helou on 11/26/21
+//  SYM-Helper
 //
 
 import Cocoa
@@ -61,11 +59,17 @@ class TokenDelegate: NSObject, URLSessionDelegate {
             let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
             let task = session.dataTask(with: request as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
-                let dataString = String(data: data!, encoding: .utf8)
+                guard let data = data else {
+                       print("[getToken] failed to connect")
+                       JamfProServer.validToken = false
+                       completion((0, "failed"))
+                       return
+                }
+                let dataString = String(data: data, encoding: .utf8)
                 session.finishTasksAndInvalidate()
                 if let httpResponse = response as? HTTPURLResponse {
                     if httpSuccess.contains(httpResponse.statusCode) {
-                        if let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments) {
+                        if let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) {
 //                            print("[getToken] json: \(json)")
                             if let endpointJSON = json as? [String: Any] {
                                 JamfProServer.validToken  = true

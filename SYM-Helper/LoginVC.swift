@@ -1,9 +1,7 @@
 //
 //  LoginVC.swift
-//  Jamf Printer Manager
+//  SYM-Helper
 //
-//  Created by Leslie Helou on 2/18/23.
-
 
 import Cocoa
 import Foundation
@@ -68,12 +66,6 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
                                 availableServersDict[displayName] = nil
                                 selectServer_Button.removeItem(withTitle: selectedServer)
                                 sortedDisplayNames.removeAll(where: {$0 == displayName})
-//                                if displayName == lastServerDN {
-//                                    jamfProServer_textfield.stringValue   = ""
-//                                    jamfProUsername_textfield.stringValue = ""
-//                                    jamfProPassword_textfield.stringValue = ""
-//                                    selectServer_Button.selectItem(withTitle: "")
-//                                }
                             }
                         }
                         if saveServers {
@@ -220,6 +212,11 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             
             login_Button.isEnabled = false
             
+            if JamfProServer.destination.prefix(4) != "http" {
+                jamfProServer_textfield.stringValue = "https://\(JamfProServer.destination)"
+                JamfProServer.destination = jamfProServer_textfield.stringValue
+            }
+            
             let jamfUtf8Creds = "\(JamfProServer.username):\(JamfProServer.userpass)".data(using: String.Encoding.utf8)
             JamfProServer.base64Creds = (jamfUtf8Creds?.base64EncodedString())!
             TokenDelegate().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds) { [self]
@@ -335,7 +332,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     }
     
     func fetchPassword() {
-        let credentialsArray = Credentials().retrieve(service: jamfProServer_textfield.stringValue.fqdnFromUrl, account: jamfProUsername_textfield.stringValue)
+        let accountDict = Credentials().retrieve(service: jamfProServer_textfield.stringValue.fqdnFromUrl, account: jamfProUsername_textfield.stringValue)
         
         if accountDict.count == 1 {
             for (username, password) in accountDict {
@@ -343,7 +340,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
                 jamfProPassword_textfield.stringValue = password
             }
         } else {
-            jamfProUsername_textfield.stringValue = ""
+//            jamfProUsername_textfield.stringValue = ""
             jamfProPassword_textfield.stringValue = ""
         }
     }
@@ -517,7 +514,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
 
         jamfProServer_textfield.delegate   = self
         jamfProUsername_textfield.delegate = self
-        jamfProPassword_textfield.delegate = self
+//        jamfProPassword_textfield.delegate = self
         
         lastServer = defaults.string(forKey: "currentServer") ?? ""
         print("[viewDidLoad] lastServer: \(lastServer)")

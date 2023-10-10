@@ -1,8 +1,6 @@
 //
 //  ClassicAPI.swift
-//  Setup-Your-Mac-Helper
-//
-//  Created by Leslie Helou on 7/12/23.
+//  SYM-Helper
 //
 
 import Foundation
