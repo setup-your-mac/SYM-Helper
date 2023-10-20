@@ -117,40 +117,40 @@ class Credentials {
     
     private func itemLookup(service: String) -> [String:String] {
         
-        //        print("[Credentials.itemLookup] start search for: \(service)")
-           
-                let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPasswordString,
-                                                    kSecAttrService as String: service,
-                                                    kSecAttrAccessGroup as String: accessGroup,
-                                                    kSecUseDataProtectionKeychain as String: true,
-                                                    kSecMatchLimit as String: kSecMatchLimitAll,
-                                                    kSecReturnAttributes as String: true,
-                                                    kSecReturnData as String: true]
-                
-                var items_ref: CFTypeRef?
-                
-                let status = SecItemCopyMatching(keychainQuery as CFDictionary, &items_ref)
-                guard status != errSecItemNotFound else {
-                    print("[Credentials.itemLookup] lookup error occurred for \(service): \(status.description)")
-                    return [:]
-                    
-                }
-                guard status == errSecSuccess else { return [:] }
-                
-                guard let items = items_ref as? [[String: Any]] else {
-                    print("[Credentials.itemLookup] unable to read keychain item: \(service)")
-                    return [:]
-                }
-                for item in items {
-                    if let account = item[kSecAttrAccount as String] as? String, let passwordData = item[kSecValueData as String] as? Data {
-                        let password = String(data: passwordData, encoding: String.Encoding.utf8)
-                        userPassDict[account] = password ?? ""
-                    }
-                }
-
-        //        print("[Credentials.itemLookup] keychain item count: \(userPassDict.count) for \(service)")
-                return userPassDict
+//        print("[Credentials.itemLookup] start search for: \(service)")
+   
+        let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPasswordString,
+                                            kSecAttrService as String: service,
+                                            kSecAttrAccessGroup as String: accessGroup,
+                                            kSecUseDataProtectionKeychain as String: true,
+                                            kSecMatchLimit as String: kSecMatchLimitAll,
+                                            kSecReturnAttributes as String: true,
+                                            kSecReturnData as String: true]
+        
+        var items_ref: CFTypeRef?
+        
+        let status = SecItemCopyMatching(keychainQuery as CFDictionary, &items_ref)
+        guard status != errSecItemNotFound else {
+            print("[Credentials.itemLookup] lookup error occurred for \(service): \(status.description)")
+            return [:]
+            
+        }
+        guard status == errSecSuccess else { return [:] }
+        
+        guard let items = items_ref as? [[String: Any]] else {
+            print("[Credentials.itemLookup] unable to read keychain item: \(service)")
+            return [:]
+        }
+        for item in items {
+            if let account = item[kSecAttrAccount as String] as? String, let passwordData = item[kSecValueData as String] as? Data {
+                let password = String(data: passwordData, encoding: String.Encoding.utf8)
+                userPassDict[account] = password ?? ""
             }
+        }
+
+//        print("[Credentials.itemLookup] keychain item count: \(userPassDict.count) for \(service)")
+        return userPassDict
+    }
     
     private func oldItemLookup(service: String) -> [String:String] {
         

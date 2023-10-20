@@ -67,6 +67,12 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     
     @IBOutlet weak var settings_Button: NSButton!
     
+    @IBAction func viewScript_Action(_ sender: Any) {
+        let scriptSourceString = Settings.shared.dict["scriptSource"] as? String ?? defaultScriptSource
+        if let url = URL(string: scriptSourceString) {
+            NSWorkspace.shared.open(url)
+        }
+    }
     @IBOutlet weak var filter_SearchField: NSSearchField!
 
     @IBAction func filter_action(_ sender: Any) {
@@ -311,6 +317,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     @IBOutlet weak var validation_Label: NSTextField!
     @IBOutlet weak var validation_TextField: NSTextField!
     @IBOutlet weak var version_TextField: NSTextField!
+    @IBOutlet weak var scriptVersion_TextField: NSTextField!
     
     var policiesArray = [Policy]()
     var policiesDict  = [String:[Policy]]()
@@ -328,6 +335,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     var saveCredsState = 0
     
     var saveInfo     = [String:Any]()
+    var scriptSource = ""
 //    var settingsDict = [String:Any]()
     
     @IBOutlet weak var generateScript_Button: NSButton!
@@ -725,6 +733,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         setPrompt(whichPrompt: "promptForRealName")
         setPrompt(whichPrompt: "prefillRealname")
         setPrompt(whichPrompt: "promptForEmail")
+        setPrompt(whichPrompt: "promptForPosition")
         setPrompt(whichPrompt: "promptForComputerName")
         setPrompt(whichPrompt: "promptForAssetTag")
         setPrompt(whichPrompt: "promptForRoom")
@@ -878,6 +887,116 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
     
     // Delegate Method
+    fileprivate func displayScriptVersion() {
+        print("[displayScriptVersion] \(scriptVersion)")
+        scriptVersion_TextField.stringValue = "\(scriptVersion.0).\(scriptVersion.1).\(scriptVersion.2)"
+    }
+    
+    fileprivate func fetchScript() {
+        SYMScript().get(scriptURL: scriptSource) { [self]
+            (result: String) in
+            symScript = result
+            
+            if !symScript.contains("# Setup Your Mac via swiftDialog") || !symScript.contains("# https://snelson.us/sym") {
+                _ = alert.display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "")
+                allPolicies_Spinner.stopAnimation(self)
+                //                        return
+            } else {
+                displayScriptVersion()
+            }
+            
+            getAllPolicies() { [self]
+                (result: [String:Any]) in
+                if result.count > 0 {
+                    let allPolicies = result["policies"] as! [[String:Any]]
+                    print("all policies count: \(allPolicies.count)")
+                    if allPolicies.count > 0 {
+                        for i in 0..<allPolicies.count {
+                            let aPolicy = allPolicies[i] as [String:Any]
+                            //                                print("aPolicy: \(aPolicy)")
+                            
+                            if let policyName = aPolicy["name"] as? String, let policyId = aPolicy["id"] as? Int {
+                                //                                    print("\(policyName) (\(policyId))")
+                                // filter out policies created from casper remote - start
+                                if policyName.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil {
+                                    
+                                    policiesArray.append(Policy(name: "\(policyName) (\(policyId))", id: "\(policyId)", configs: [], grouped: false, groupId: ""))
+                                }
+                                // filter out policies created from casper remote - end
+                                policies_TableView.reloadData()
+                            }
+                        }
+                        //                                print("[sendLoginInfo] policies found on server: \(policiesArray.count)")
+                        staticAllPolicies = policiesArray.sorted(by: {$0.name.lowercased() < $1.name.lowercased()})
+                        policies_TableView.reloadData()
+                        allPolicies_Spinner.stopAnimation(self)
+                        
+                        
+                        // create app support path if not present
+                        if !FileManager.default.fileExists(atPath: AppInfo.appSupport) {
+                            do {
+                                try FileManager.default.createDirectory(atPath: AppInfo.appSupport, withIntermediateDirectories: true)
+                            } catch {
+                                _ = alert.display(header: "Attention:", message: "Unable to create '\(AppInfo.appSupport)'.  Configurations will not be saved.", secondButton: "")
+                            }
+                        } else {
+                            // look for existing configs
+                            let existingConfigsDict = ConfigsSettings().retrieve(dataType: "configs")
+                            
+                            let cd  = existingConfigsDict["configsDict"] as? [String:Any] ?? [:]
+                            let pd  = existingConfigsDict["policiesDict"] as? [String:Any] ?? [:]
+                            let spd = existingConfigsDict["selectedPoliciesDict"] as? [String:Any] ?? [:]
+                            
+                            configurationsArray = existingConfigsDict["configurationsArray"] as? [String] ?? []
+                            //                                print("available configs: \(configurationsArray)")
+                            
+                            
+                            // set the configurations button - start
+                            configuration_Menu.removeAllItems()
+                            var validatedConfigs = [String]()
+                            
+                            // make sure Default configureation is listed
+                            if configurationsArray.firstIndex(of: "Default") == nil { configurationsArray.append("Default") }
+                            
+                            for theConfig in configurationsArray.sorted() {
+                                //                                    print("spd[\(theConfig)]: \(String(describing: (spd[theConfig] as? [[String:Any]])?.count))")
+                                //                                    if (spd[theConfig] as? [[String:Any]])?.count ?? 0 > 0 || theConfig == "Default" {
+                                configuration_Menu.addItem(NSMenuItem(title: theConfig, action: nil, keyEquivalent: ""))
+                                validatedConfigs.append(theConfig)
+                                //                                    }
+                            }
+                            configurationsArray = validatedConfigs
+                            
+                            let lastWorkingConfig = existingConfigsDict["currentConfig"] ?? "Default"
+                            configuration_Button.selectItem(withTitle: "\(String(describing: lastWorkingConfig))")
+                            configuration_Menu.addItem(.separator())
+                            configuration_Menu.addItem(NSMenuItem(title: "Add New...", action: #selector(addNewSelector), keyEquivalent: ""))
+                            configuration_Menu.addItem(NSMenuItem(title: "Clone Existing...", action: #selector(cloneExistingSelector), keyEquivalent: ""))
+                            // set the configurations button - end
+                            
+                            // reload configurations settings - start
+                            if let _ = existingConfigsDict["configsDict"] {
+                                configsDict = existingConfigsDict["configsDict"] as! [String:[String:[String:String]]]
+                                
+                                let policiesDictSave         = existingConfigsDict["policiesDict"] as! [String:[[String:Any]]]
+                                let selectedPoliciesDictSave = existingConfigsDict["selectedPoliciesDict"] as! [String:[[String:Any]]]
+                                
+                                policiesDict         = dictToClass(theDict: policiesDictSave, sortList: true)
+                                selectedPoliciesDict = dictToClass(theDict: selectedPoliciesDictSave)
+                            }
+                            
+                            config_Action(existingConfigsDict["currentConfig"] ?? "Default")
+                        }
+                    }
+                } else {
+                    _ = Alert().display(header: "", message: "No policies found. Veriry the account has the appropriate permissions to read policies", secondButton: "")
+                    allPolicies_Spinner.stopAnimation(self)
+                }
+            }
+            
+        }
+    }
+    
     func sendLoginInfo(loginInfo: (String,String,String,String,Int)) {
         //create log file
         Log.file = getCurrentTime().replacingOccurrences(of: ":", with: "") + "_" + Log.file
@@ -937,7 +1056,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                     writeToLog.message(stringOfText: "convert prompt for... settings to new format")
                     var promptForDict = [String:Any]()
                     
-                    for whichPrompt in ["promptForUsername", "prefillUsername", "promptForRealName", "prefillRealname", "promptForEmail", "promptForComputerName", "promptForAssetTag", "promptForRoom", "promptForBuilding", "promptForDepartment", "promptForConfiguration", "moveableInProduction"] {
+                    for whichPrompt in ["promptForUsername", "prefillUsername", "promptForRealName", "prefillRealname", "promptForEmail", "promptForPosition", "promptForComputerName", "promptForAssetTag", "promptForRoom", "promptForBuilding", "promptForDepartment", "promptForConfiguration", "moveableInProduction"] {
                         if Settings.shared.dict["\(whichPrompt)"] != nil {
                             promptForDict["\(whichPrompt)"] = Settings.shared.dict["\(whichPrompt)"] as Any
                             Settings.shared.dict["\(whichPrompt)"] = nil
@@ -949,109 +1068,10 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 }
                 
                 
-                var scriptSource = Settings.shared.dict["scriptSource"] as? String ?? defaultScriptSource
+                scriptSource = Settings.shared.dict["scriptSource"] as? String ?? defaultScriptSource
                 if scriptSource == "" { scriptSource = defaultScriptSource }
                 print("fetch script from: \(scriptSource)")
-                SYMScript().get(scriptURL: scriptSource) { [self]
-                    (result: String) in
-                    symScript = result
-                    
-                    if !symScript.contains("# Setup Your Mac via swiftDialog") || !symScript.contains("# https://snelson.us/sym") {
-                        _ = alert.display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "")
-                        allPolicies_Spinner.stopAnimation(self)
-//                        return
-                    }
-                    
-                    getAllPolicies() { [self]
-                        (result: [String:Any]) in
-                        if result.count > 0 {
-                            let allPolicies = result["policies"] as! [[String:Any]]
-                            print("all policies count: \(allPolicies.count)")
-                            if allPolicies.count > 0 {
-                                for i in 0..<allPolicies.count {
-                                    let aPolicy = allPolicies[i] as [String:Any]
-                                    //                                print("aPolicy: \(aPolicy)")
-                                    
-                                    if let policyName = aPolicy["name"] as? String, let policyId = aPolicy["id"] as? Int {
-                                        //                                    print("\(policyName) (\(policyId))")
-                                        // filter out policies created from casper remote - start
-                                        if policyName.range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil {
-
-                                            policiesArray.append(Policy(name: "\(policyName) (\(policyId))", id: "\(policyId)", configs: [], grouped: false, groupId: ""))
-                                        }
-                                        // filter out policies created from casper remote - end
-                                        policies_TableView.reloadData()
-                                    }
-                                }
-//                                print("[sendLoginInfo] policies found on server: \(policiesArray.count)")
-                                staticAllPolicies = policiesArray.sorted(by: {$0.name.lowercased() < $1.name.lowercased()})
-                                policies_TableView.reloadData()
-                                allPolicies_Spinner.stopAnimation(self)
-                                
-                                
-                                // create app support path if not present
-                                if !FileManager.default.fileExists(atPath: AppInfo.appSupport) {
-                                    do {
-                                        try FileManager.default.createDirectory(atPath: AppInfo.appSupport, withIntermediateDirectories: true)
-                                    } catch {
-                                        _ = alert.display(header: "Attention:", message: "Unable to create '\(AppInfo.appSupport)'.  Configurations will not be saved.", secondButton: "")
-                                    }
-                                } else {
-                                    // look for existing configs
-                                    let existingConfigsDict = ConfigsSettings().retrieve(dataType: "configs")
-                                    
-                                    let cd  = existingConfigsDict["configsDict"] as? [String:Any] ?? [:]
-                                    let pd  = existingConfigsDict["policiesDict"] as? [String:Any] ?? [:]
-                                    let spd = existingConfigsDict["selectedPoliciesDict"] as? [String:Any] ?? [:]
-                                    
-                                    configurationsArray = existingConfigsDict["configurationsArray"] as? [String] ?? []
-                                    //                                print("available configs: \(configurationsArray)")
-                                    
-                                    
-                                    // set the configurations button - start
-                                    configuration_Menu.removeAllItems()
-                                    var validatedConfigs = [String]()
-                                    
-                                    // make sure Default configureation is listed
-                                    if configurationsArray.firstIndex(of: "Default") == nil { configurationsArray.append("Default") }
-                                    
-                                    for theConfig in configurationsArray.sorted() {
-                                        //                                    print("spd[\(theConfig)]: \(String(describing: (spd[theConfig] as? [[String:Any]])?.count))")
-                                        //                                    if (spd[theConfig] as? [[String:Any]])?.count ?? 0 > 0 || theConfig == "Default" {
-                                        configuration_Menu.addItem(NSMenuItem(title: theConfig, action: nil, keyEquivalent: ""))
-                                        validatedConfigs.append(theConfig)
-                                        //                                    }
-                                    }
-                                    configurationsArray = validatedConfigs
-                                    
-                                    let lastWorkingConfig = existingConfigsDict["currentConfig"] ?? "Default"
-                                    configuration_Button.selectItem(withTitle: "\(String(describing: lastWorkingConfig))")
-                                    configuration_Menu.addItem(.separator())
-                                    configuration_Menu.addItem(NSMenuItem(title: "Add New...", action: #selector(addNewSelector), keyEquivalent: ""))
-                                    configuration_Menu.addItem(NSMenuItem(title: "Clone Existing...", action: #selector(cloneExistingSelector), keyEquivalent: ""))
-                                    // set the configurations button - end
-                                    
-                                    // reload configurations settings - start
-                                    if let _ = existingConfigsDict["configsDict"] {
-                                        configsDict = existingConfigsDict["configsDict"] as! [String:[String:[String:String]]]
-                                        
-                                        let policiesDictSave         = existingConfigsDict["policiesDict"] as! [String:[[String:Any]]]
-                                        let selectedPoliciesDictSave = existingConfigsDict["selectedPoliciesDict"] as! [String:[[String:Any]]]
-                                        
-                                        policiesDict         = dictToClass(theDict: policiesDictSave, sortList: true)
-                                        selectedPoliciesDict = dictToClass(theDict: selectedPoliciesDictSave)
-                                    }
-                                    
-                                    config_Action(existingConfigsDict["currentConfig"] ?? "Default")
-                                }
-                            }
-                        } else {
-                            _ = Alert().display(header: "", message: "No policies found. Veriry the account has the appropriate permissions to read policies", secondButton: "")
-                            allPolicies_Spinner.stopAnimation(self)
-                        }
-                    }
-                    
-                }
+                fetchScript()
             } else {
                 DispatchQueue.main.async { [self] in
                     writeToLog.message(stringOfText: "Failed to authenticate, status code: \(statusCode)")
@@ -1198,11 +1218,18 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         }
     }
     
+    @objc func updateScriptVersion(_ notification: Notification) {
+        displayScriptVersion()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        version_TextField.stringValue = "v\(AppInfo.version)"
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(updateScriptVersion(_:)), name: .updateScriptVersion, object: nil)
+        
+        version_TextField.stringValue = AppInfo.version
         // initialize configDict for each config
         for i in 0..<configuration_Button.numberOfItems {
             configuration_Button.selectItem(at: i)
@@ -1507,3 +1534,7 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
     }
 }
  
+
+extension Notification.Name {
+    public static let updateScriptVersion = Notification.Name("updateScriptVersion")
+}

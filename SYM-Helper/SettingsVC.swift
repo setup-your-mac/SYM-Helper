@@ -67,6 +67,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
     @IBOutlet weak var pfrn_Switch: NSSwitch!
     @IBOutlet weak var prn_Switch: NSSwitch!
     @IBOutlet weak var pfe_Switch: NSSwitch!
+    @IBOutlet weak var pfp_Switch: NSSwitch!
     @IBOutlet weak var pfcn_Switch: NSSwitch!
     @IBOutlet weak var pfat_Switch: NSSwitch!
     @IBOutlet weak var pfr_Switch: NSSwitch!
@@ -203,6 +204,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         promptForDict["promptForRealName"]      = pfrn_Switch.state.rawValue
         promptForDict["prefillRealname"]        = prn_Switch.state.rawValue
         promptForDict["promptForEmail"]         = pfe_Switch.state.rawValue
+        promptForDict["promptForPosition"]      = pfp_Switch.state.rawValue
         promptForDict["promptForAssetTag"]      = pfat_Switch.state.rawValue
         promptForDict["promptForRoom"]          = pfr_Switch.state.rawValue
         promptForDict["promptForBuilding"]      = pfb_Switch.state.rawValue
@@ -379,6 +381,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
             pfrn_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForRealName"))
             prn_Switch.state  = NSControl.StateValue(rawValue: onOff(whichButton: "prefillRealname"))
             pfe_Switch.state  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForEmail"))
+            pfp_Switch.state  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForPosition"))
             pfat_Switch.state = NSControl.StateValue(rawValue: onOff(whichButton: "promptForAssetTag"))
             pfr_Switch.state  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForRoom"))
             pfb_Switch.state  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForBuilding"))
@@ -390,12 +393,13 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
             promptForDict = Settings.shared.dict["promptFor"] as! [String:Any]
             print("promptForDict: \(promptForDict)")
             pfu_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForUsername"] as? Int ?? 1)
-            pu_Switch.state = NSControl.StateValue(rawValue:  promptForDict["prefillUsername"] as? Int ?? 1)
-            pfcn_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForComputerName"] as? Int ?? 1)
-            pfrn_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForRealName"] as? Int ?? 1)
+            pu_Switch.state = NSControl.StateValue(rawValue:   promptForDict["prefillUsername"] as? Int ?? 1)
+            pfcn_Switch.state = NSControl.StateValue(rawValue: promptForDict["promptForComputerName"] as? Int ?? 1)
+            pfrn_Switch.state = NSControl.StateValue(rawValue: promptForDict["promptForRealName"] as? Int ?? 1)
             prn_Switch.state = NSControl.StateValue(rawValue:  promptForDict["prefillRealname"] as? Int ?? 1)
             pfe_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForEmail"] as? Int ?? 1)
-            pfat_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForAssetTag"] as? Int ?? 1)
+            pfp_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForPosition"] as? Int ?? 1)
+            pfat_Switch.state = NSControl.StateValue(rawValue: promptForDict["promptForAssetTag"] as? Int ?? 1)
             pfr_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForRoom"] as? Int ?? 1)
             pfb_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForBuilding"] as? Int ?? 1)
             pfd_Switch.state = NSControl.StateValue(rawValue:  promptForDict["promptForDepartment"] as? Int ?? 1)

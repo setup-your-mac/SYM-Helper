@@ -39,11 +39,11 @@ class SYMScript: NSObject, URLSessionDelegate {
                             let versionLine = responseData[versionLineRange]
 //                            let versionString = versionLine.replacing("#   Version ", with: "").dropLast()
                             let versionString = versionLine.replacing("scriptVersion=\"", with: "").dropLast()
-                            print("scriptVersion: \(String(describing: versionString))")
+                            print("[SYMScript.get] scriptVersion: \(String(describing: versionString))")
                             scriptVersion = toTuple(versionString: String(versionString))
-                            
+                            NotificationCenter.default.post(name: .updateScriptVersion, object: self)
                         } else {
-                            print("versionLine not found")
+                            print("[SYMScript.get] versionLine not found")
                         }
                         
                     } else {
@@ -53,7 +53,7 @@ class SYMScript: NSObject, URLSessionDelegate {
                     return
                 }
             } else {
-                print("could not read response or no response")
+                print("[SYMScript.get] could not read response or no response")
             }
             completion(responseData)
         })

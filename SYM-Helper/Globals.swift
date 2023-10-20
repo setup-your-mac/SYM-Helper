@@ -104,7 +104,7 @@ func cleanup() {
         let logFiles = try FileManager.default.contentsOfDirectory(atPath: Log.path!)
         
         for logFile in logFiles {
-            let filePath: String = Log.path! + logFile //Log.file
+            let filePath: String = Log.path! + logFile
 //            print("filePath: \(filePath)")
             logArray.append(filePath)
         }
