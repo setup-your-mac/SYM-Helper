@@ -44,12 +44,13 @@ var defaultDarkIcon    = "https://cdn-icons-png.flaticon.com/512/740/740878.png"
 // support defaults
 var defaultTeamName      = "Support Team Name"
 var defaultTeamPhone     = "+1 (801) 555-1212"
-var defaultTeamEmail     = "support@domain.com"
-var defaultTeamWebsite   = "support.domain.com"                                     // added in v1.13.0
+var defaultTeamEmail     = "support@domain.com"                                    // added in v1.13.0
 var defaultTeamHyperlink = "[\(defaultTeamWebsite)](https://\(defaultTeamWebsite))" // added in v1.13.0
 var defaultKb            = "KB8675309"
 var defaultErrorKb       = ", and mention [\(defaultKb)](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=\(defaultKb)#Failures)"
+var defaultErrorKb2      = "[\(defaultKb)](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=\(defaultKb)#Failures)"
 var defaultHelpKb        = "\n- **Knowledge Base Article:** \(defaultKb)"   // dropped in v1.13.0
+var defaultTeamWebsite   = "support.domain.com" 
 
 
 struct AppInfo {

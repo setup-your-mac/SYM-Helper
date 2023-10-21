@@ -300,7 +300,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 //            isDir = true
             let settingsFolder = AppInfo.appSupport
             if (FileManager.default.fileExists(atPath: settingsFolder)) {
-//                NSWorkspace.shared.openFile(settingsFolder)
                 NSWorkspace.shared.open(URL(fileURLWithPath: settingsFolder))
             } else {
                 _ = alert.display(header: "Alert", message: "Unable to open \(settingsFolder)", secondButton: "")
@@ -746,13 +745,13 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         setSupport(whichField: "teamPhone")
         setSupport(whichField: "teamEmail")
         setSupport(whichField: "kb")
-        setSupport(whichField: "errorKb")
         if scriptVersion.0 <= 1 && scriptVersion.1 < 13 {
+            setSupport(whichField: "errorKb")
             setSupport(whichField: "helpKb")
         } else {
+            setSupport(whichField: "errorKb2")
             setSupport(whichField: "teamWebsite")
         }
-        
         
         setLocation(type: "buildingsListRaw")
         setLocation(type: "departmentListRaw")
@@ -832,7 +831,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
     private func setSupport(whichField: String) {
 
-        let supportDict = ((Settings.shared.dict["support"] as? [String:Any]) != nil) ? Settings.shared.dict["support"] as! [String:String]:["teamName":defaultTeamName, "teamPhone":defaultTeamPhone, "teamEmail":defaultTeamEmail, "kb":defaultKb, "errorKb":defaultErrorKb, "helpKb":defaultHelpKb]
+        let supportDict = ((Settings.shared.dict["support"] as? [String:Any]) != nil) ? Settings.shared.dict["support"] as! [String:String]:["teamName":defaultTeamName, "teamPhone":defaultTeamPhone, "teamEmail":defaultTeamEmail, "kb":defaultKb, "errorKb":defaultErrorKb, "errorKb2":defaultErrorKb2, "helpKb":defaultHelpKb]
         
         var scriptVariable = ""
         var newValue       = ""
@@ -845,7 +844,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             scriptVariable = "supportTeamEmail"
         case "kb":
             scriptVariable = "supportKB"
-        case "errorKb":
+        case "errorKb","errorKb2":
             scriptVariable = "supportTeamErrorKB"
         case "helpKb":
             scriptVariable = "supportTeamHelpKB"

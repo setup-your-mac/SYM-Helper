@@ -143,10 +143,12 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     }
     
     @IBAction func login_action(_ sender: Any) {
+        
+        
         didRun = true
-        JamfProServer.destination = jamfProServer_textfield.stringValue
-        JamfProServer.username    = jamfProUsername_textfield.stringValue
-        JamfProServer.userpass    = jamfProPassword_textfield.stringValue
+//        JamfProServer.destination = jamfProServer_textfield.stringValue
+//        JamfProServer.username    = jamfProUsername_textfield.stringValue
+//        JamfProServer.userpass    = jamfProPassword_textfield.stringValue
         
         var theSender = ""
 //        var theButton: NSButton?
@@ -155,6 +157,10 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         } else {
             theSender = sender as! String
         }
+//        print("[login_action] sender: \(theSender)")
+//        print("[login_action] destination: \(JamfProServer.destination)")
+//        print("[login_action] username: \(JamfProServer.username)")
+//        print("[login_action] userpass: \(JamfProServer.userpass)")
         
         // check for update/removal of server display name
         if jamfProServer_textfield.stringValue == "" {
@@ -443,6 +449,10 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             jamfProPassword_textfield.stringValue = ""
             setWindowSize(setting: 1)
         }
+        JamfProServer.destination = jamfProServer_textfield.stringValue
+        JamfProServer.username    = jamfProUsername_textfield.stringValue
+        JamfProServer.userpass    = jamfProPassword_textfield.stringValue
+        
     }
     
     func setSelectServerButton(listOfServers: [String]) {

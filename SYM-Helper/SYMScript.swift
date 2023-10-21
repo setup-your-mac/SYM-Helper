@@ -6,7 +6,7 @@
 import Foundation
 
 class SYMScript: NSObject, URLSessionDelegate {
-    func get(scriptURL: String,completion: @escaping (_ authResult: String) -> Void) {
+    func get(scriptURL: String, updateDisplay: Bool = true, completion: @escaping (_ authResult: String) -> Void) {
 //        print("enter getScript")
         print("[SYMScript.get] script source: \(scriptURL)")
         var responseData = ""
@@ -41,7 +41,9 @@ class SYMScript: NSObject, URLSessionDelegate {
                             let versionString = versionLine.replacing("scriptVersion=\"", with: "").dropLast()
                             print("[SYMScript.get] scriptVersion: \(String(describing: versionString))")
                             scriptVersion = toTuple(versionString: String(versionString))
-                            NotificationCenter.default.post(name: .updateScriptVersion, object: self)
+                            if updateDisplay {
+                                NotificationCenter.default.post(name: .updateScriptVersion, object: self)
+                            }
                         } else {
                             print("[SYMScript.get] versionLine not found")
                         }
@@ -61,7 +63,7 @@ class SYMScript: NSObject, URLSessionDelegate {
     }
     
     private func toTuple(versionString: String) -> (Int,Int,Int) {
-        var theArray = [0,0,0]
+//        var theArray = [0,0,0]
         let verionArray = versionString.components(separatedBy: ".")
         
         return((Int(verionArray[0]) ?? 0,Int(verionArray[1]) ?? 0,Int(verionArray[2]) ?? 0))

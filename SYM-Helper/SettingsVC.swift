@@ -141,6 +141,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
     
     var currentConfig     = ""
     var validScriptSource = ""
+    var newScriptSource   = ""
     var promptForDict     = [String:Any]()
     var brandingDict      = [String:Any]()
     var supportDict       = [String:Any]()
@@ -190,10 +191,11 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         supportDict["teamPhone"] = teamPhone_TextField.stringValue as Any
         supportDict["teamEmail"] = teamEmail_TextField.stringValue as Any
         supportDict["kb"]        = kb_TextField.stringValue as Any
-        supportDict["errorKb"]   = errorKb_TextField.stringValue as Any
         if scriptVersion.0 <= 1 && scriptVersion.1 < 13 {
+            supportDict["errorKb"]   = errorKb_TextField.stringValue as Any
             supportDict["helpKb"]    = helpWebsite_TextField.stringValue as Any
         } else {
+            supportDict["errorKb2"]    = errorKb_TextField.stringValue as Any
             supportDict["teamWebsite"] = helpWebsite_TextField.stringValue as Any
         }
         
@@ -211,8 +213,8 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         promptForDict["promptForDepartment"]    = pfd_Switch.state.rawValue
         promptForDict["promptForConfiguration"] = pfc_Switch.state.rawValue
         promptForDict["moveableInProduction"]   = mip_Switch.state.rawValue
-        
         print("promptForDict: \(promptForDict)")
+        
         // set buildings
         Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string
 
@@ -228,8 +230,11 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         Settings.shared.dict["promptFor"]    = promptForDict
         
         if validScriptSource != scriptSource_TextField.stringValue {
-            validateScript(notificationName: "ok_Button")
+            validateScript(notificationName: "ok_Button") {
+                (result: String) in
+            }
         } else {
+            NotificationCenter.default.post(name: .updateScriptVersion, object: self)
             ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
             dismiss(self)
         }
@@ -243,7 +248,6 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
             if settings_TableView.selectedRowIndexes.count > 0 {
                 let theRow = settings_TableView.selectedRow
                 whichTab = settingsArray[theRow].tab
-//                print("whichTab: \(whichTab)")
                 settings_TabView.selectTabViewItem(withIdentifier: whichTab)
             }
         default:
@@ -251,18 +255,25 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         }
     }
     
-    fileprivate func validateScript(notificationName: String) {
-        SYMScript().get(scriptURL: scriptSource_TextField.stringValue) { [self]
+    fileprivate func validateScript(notificationName: String, completion: @escaping (_ result: String) -> Void) {
+        SYMScript().get(scriptURL: scriptSource_TextField.stringValue, updateDisplay: false) { [self]
             (result: String) in
             symScript = result
-            print("[Settings] getScript: \(symScript)")
+//            print("[Settings] getScript: \(symScript)")
             spinner_Progress.stopAnimation(self)
             if symScript == "" {
                 let scriptReply = alert.display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "Use Anyway")
                 if scriptReply == "Use Anyway" {
                     validScriptSource = scriptSource_TextField.stringValue
-                    Settings.shared.dict["scriptSource"] = validScriptSource
+                    newScriptSource = validScriptSource
+                    scriptVersion = (0,0,0)
+                    WriteToLog().message(stringOfText: "Unknown script is selected, setting the version to 0.0.0")
                     if notificationName != "NSControlTextDidEndEditingNotification" {
+                        completion("use unknown script")
+                        if notificationName == "ok_Button" {
+                            completion("saving settings")
+                            ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
+                        }
                         self.dismiss(self)
                     }
                 } else {
@@ -271,18 +282,22 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
                     scriptSource_TextField.stringValue = validScriptSource
                     settings_TableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
                     settings_TabView.selectTabViewItem(withIdentifier: "scriptSource")
+                    completion("cancel")
                     return
                 }
             } else {
                 validScriptSource = scriptSource_TextField.stringValue
-                Settings.shared.dict["scriptSource"] = validScriptSource
+                newScriptSource   = validScriptSource
                 print("[Settings] set valid script to: \(validScriptSource)")
-//                if notificationName != "NSControlTextDidEndEditingNotification" {
-//                    self.dismiss(self)
-//                }
                 if notificationName == "ok_Button" {
+                    print("[Settings] saving settings")
+                    completion("saving settings")
+                    NotificationCenter.default.post(name: .updateScriptVersion, object: self)
                     ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
                     dismiss(self)
+                } else {
+                    // scriptSource
+                    completion("set script source")
                 }
             }
         }
@@ -301,14 +316,6 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         print("[controlTextDidEndEditing] obj.name.rawValue: \(obj.name.rawValue)")
         print("[controlTextDidEndEditing]        whichField: \(whichField)")
 
-        if whichField == "scriptSource" {
-            spinner_Progress.startAnimation(self)
-            validateScript(notificationName: whichField)
-        }
-            
-//        if obj.name.rawValue != "NSControlTextDidEndEditingNotification" {
-//        }
-//        print("brandingDict: \(brandingDict)")
     }
     
     
@@ -371,7 +378,12 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         teamPhone_TextField.stringValue = ((supportDict["teamPhone"] as? String) != nil) ? supportDict["teamPhone"] as! String:defaultTeamPhone
         teamEmail_TextField.stringValue = ((supportDict["teamEmail"] as? String) != nil) ? supportDict["teamEmail"] as! String:defaultTeamEmail
         kb_TextField.stringValue        = ((supportDict["kb"] as? String) != nil) ? supportDict["kb"] as! String:defaultKb
-        errorKb_TextField.stringValue   = ((supportDict["errorKb"] as? String) != nil) ? supportDict["errorKb"] as! String:defaultErrorKb
+        if scriptVersion.0 <= 1 && scriptVersion.1 < 13 {
+            errorKb_TextField.stringValue   = ((supportDict["errorKb"] as? String) != nil) ? supportDict["errorKb"] as! String:defaultErrorKb
+        } else {
+            errorKb_TextField.stringValue   = ((supportDict["errorKb2"] as? String) != nil) ? supportDict["errorKb2"] as! String:defaultErrorKb2
+            helpWebsite_TextField.stringValue = ((supportDict["teamWebsite"] as? String) != nil) ? supportDict["teamWebsite"] as! String:defaultTeamWebsite
+        }
 
         // prompt for
         if (Settings.shared.dict["promptFor"] as? [String:Any]) == nil {
@@ -432,7 +444,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         teamEmail_TextField.delegate    = self
         kb_TextField.delegate           = self
         errorKb_TextField.delegate      = self
-        helpWebsite_TextField.delegate       = self
+        helpWebsite_TextField.delegate  = self
         
         // location
         buildings_TextField.delegate    = self
@@ -444,23 +456,16 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         whichTab = settingsArray[0].tab
         settings_TabView.selectTabViewItem(withIdentifier: whichTab)
         validScriptSource = Settings.shared.dict["scriptSource"] as? String ?? defaultScriptSource
+        newScriptSource   = validScriptSource
         
         scriptSource_TextField.stringValue = validScriptSource
 
         settings_AC.addObserver(self, forKeyPath: "selectedObjects", options: .new, context: nil)
-
     }
     
     override func viewWillDisappear() {
         super.viewWillDisappear()
 //        print("[viewWillDisappear] settingsDict: \(Settings.shared.dict)")
-//        print("[viewWillDisappear] set valid script to: \(validScriptSource)")
-//
-//        Settings.shared.dict["scriptSource"] = validScriptSource
-//        Settings.shared.dict["branding"]     = brandingDict
-//        Settings.shared.dict["support"]      = supportDict
-//        Settings.shared.dict["promptFor"]    = promptForDict
-//        ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
     }
     
 }
@@ -477,27 +482,42 @@ extension SettingsVC: NSTableViewDataSource, NSTableViewDelegate {
             return settingsArray.count
     }
     
+    fileprivate func showSelectedTab(whichTab: String) {
+        if whichTab == "support" {
+            if scriptVersion.0 <= 1 && scriptVersion.1 < 13 {
+                helpWebsite_Label.stringValue = "Help KB:"
+                helpWebsite_Label.placeholderString = ""
+                helpWebsite_TextField.stringValue    = supportDict["helpKb"] as? String ?? defaultHelpKb
+                //                    helpWebsite_TextField.stringValue    = ((supportDict["helpKb"] as? String) != nil) ? supportDict["helpKb"] as! String:defaultHelpKb
+            } else {
+                helpWebsite_Label.stringValue = "Team website:"
+                helpWebsite_Label.placeholderString = "support.domain.com"
+                helpWebsite_TextField.stringValue   = supportDict["teamWebsite"] as? String ?? defaultTeamWebsite
+            }
+        }
+        print("[showSelectedTab] whichTab: \(whichTab)")
+        settings_TabView.selectTabViewItem(withIdentifier: whichTab)
+    }
+    
     func tableViewSelectionDidChange(_ notification: Notification) {
         if settings_TableView.selectedRowIndexes.count > 0 {
             let theRow = settings_TableView.selectedRow
             whichTab = settingsArray[theRow].tab
-            print("whichTab: \(whichTab)")
-            print("scriptVersion: \(scriptVersion)")
             
-            if whichTab == "support" {
-                if scriptVersion.0 <= 1 && scriptVersion.1 < 13 {
-                    helpWebsite_Label.stringValue = "Help KB:"
-                    helpWebsite_Label.placeholderString = ""
-                    helpWebsite_TextField.stringValue    = supportDict["helpKb"] as? String ?? defaultHelpKb
-//                    helpWebsite_TextField.stringValue    = ((supportDict["helpKb"] as? String) != nil) ? supportDict["helpKb"] as! String:defaultHelpKb
-                } else {
-                    helpWebsite_Label.stringValue = "Team website:"
-                    helpWebsite_Label.placeholderString = "support.domain.com"
-                    helpWebsite_TextField.stringValue   = supportDict["teamWebsite"] as? String ?? defaultTeamWebsite
+            if scriptSource_TextField.stringValue != validScriptSource && scriptSource_TextField.stringValue != "https://" {
+                spinner_Progress.startAnimation(self)
+                validateScript(notificationName: "scriptSource") { [self]
+                    (result: String) in
+                    print("[tableViewSelectionDidChange] validateScript-whichTab: \(whichTab)")
+                    showSelectedTab(whichTab: whichTab)
                 }
+            } else {
+                showSelectedTab(whichTab: whichTab)
             }
             
-            settings_TabView.selectTabViewItem(withIdentifier: whichTab)
+            print("[tableViewSelectionDidChange]      whichTab: \(whichTab)")
+            print("[tableViewSelectionDidChange] scriptVersion: \(scriptVersion)")
+            
             
         }
     }
