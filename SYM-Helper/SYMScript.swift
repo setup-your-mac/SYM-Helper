@@ -62,10 +62,17 @@ class SYMScript: NSObject, URLSessionDelegate {
         task.resume()
     }
     
-    private func toTuple(versionString: String) -> (Int,Int,Int) {
+    private func toTuple(versionString: String) -> (Int,Int,Int,String) {
 //        var theArray = [0,0,0]
-        let verionArray = versionString.components(separatedBy: ".")
-        
-        return((Int(verionArray[0]) ?? 0,Int(verionArray[1]) ?? 0,Int(verionArray[2]) ?? 0))
+        var betaVersion = ""
+        var patchVersion = 0
+        let versionArray = versionString.components(separatedBy: ".")
+        let patch = "\(versionArray[2])"
+        let patchArray = patch.components(separatedBy: "-")
+        if patchArray.count == 2 {
+            betaVersion = "-\(patchArray[1])"
+        } 
+        patchVersion = Int(patchArray[0]) ?? 0
+        return((Int(versionArray[0]) ?? 0,Int(versionArray[1]) ?? 0,patchVersion,betaVersion))
     }
 }

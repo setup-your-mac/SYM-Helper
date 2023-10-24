@@ -170,6 +170,15 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         dismiss(self)
     }
     
+    fileprivate func saveSettings() {
+        Settings.shared.dict["scriptSource"] = validScriptSource
+        Settings.shared.dict["branding"]     = brandingDict
+        Settings.shared.dict["support"]      = supportDict
+        Settings.shared.dict["promptFor"]    = promptForDict
+        NotificationCenter.default.post(name: .updateScriptVersion, object: self)
+        ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
+    }
+    
     @IBAction func ok_Button(_ sender: Any) {
         spinner_Progress.startAnimation(self)
         ok_Button.isEnabled = false
@@ -221,21 +230,16 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         // set departments
         Settings.shared.dict["departmentListRaw"] = departments_TextField.string
         
-        print("[viewWillDisappear] settingsDict: \(Settings.shared.dict)")
-        print("[viewWillDisappear] set valid script to: \(validScriptSource)")
-        
-        Settings.shared.dict["scriptSource"] = validScriptSource
-        Settings.shared.dict["branding"]     = brandingDict
-        Settings.shared.dict["support"]      = supportDict
-        Settings.shared.dict["promptFor"]    = promptForDict
         
         if validScriptSource != scriptSource_TextField.stringValue {
             validateScript(notificationName: "ok_Button") {
                 (result: String) in
             }
         } else {
-            NotificationCenter.default.post(name: .updateScriptVersion, object: self)
-            ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
+            print("[viewWillDisappear] settingsDict: \(Settings.shared.dict)")
+            print("[viewWillDisappear] set valid script to: \(validScriptSource)")
+            
+            saveSettings()
             dismiss(self)
         }
     }
@@ -266,13 +270,14 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
                 if scriptReply == "Use Anyway" {
                     validScriptSource = scriptSource_TextField.stringValue
                     newScriptSource = validScriptSource
-                    scriptVersion = (0,0,0)
+                    scriptVersion = (0,0,0,"")
                     WriteToLog().message(stringOfText: "Unknown script is selected, setting the version to 0.0.0")
                     if notificationName != "NSControlTextDidEndEditingNotification" {
                         completion("use unknown script")
                         if notificationName == "ok_Button" {
                             completion("saving settings")
-                            ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
+                            saveSettings()
+//                            ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
                         }
                         self.dismiss(self)
                     }
@@ -288,12 +293,13 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
             } else {
                 validScriptSource = scriptSource_TextField.stringValue
                 newScriptSource   = validScriptSource
-                print("[Settings] set valid script to: \(validScriptSource)")
+                print("[validateScript.Settings] set valid script to: \(validScriptSource)")
                 if notificationName == "ok_Button" {
-                    print("[Settings] saving settings")
+                    print("[validateScript.Settings] saving settings")
                     completion("saving settings")
-                    NotificationCenter.default.post(name: .updateScriptVersion, object: self)
-                    ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
+                    saveSettings()
+//                    NotificationCenter.default.post(name: .updateScriptVersion, object: self)
+//                    ConfigsSettings().save(theServer: "\(JamfProServer.destination.fqdnFromUrl)", dataType: "settings", data: Settings.shared.dict)
                     dismiss(self)
                 } else {
                     // scriptSource

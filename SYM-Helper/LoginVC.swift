@@ -14,6 +14,8 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     
     var delegate: SendingLoginInfoDelegate? = nil
     
+    @IBOutlet weak var spinner_PI: NSProgressIndicator!
+    
 //    @IBOutlet weak var header_TextField: NSTextField!
     @IBOutlet weak var displayName_Label: NSTextField!
     @IBOutlet weak var displayName_TextField: NSTextField!
@@ -143,12 +145,12 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     }
     
     @IBAction func login_action(_ sender: Any) {
-        
-        
+        spinner_PI.isHidden = false
+        spinner_PI.startAnimation(self)
         didRun = true
-//        JamfProServer.destination = jamfProServer_textfield.stringValue
-//        JamfProServer.username    = jamfProUsername_textfield.stringValue
-//        JamfProServer.userpass    = jamfProPassword_textfield.stringValue
+        JamfProServer.destination = jamfProServer_textfield.stringValue
+        JamfProServer.username    = jamfProUsername_textfield.stringValue
+        JamfProServer.userpass    = jamfProPassword_textfield.stringValue
         
         var theSender = ""
 //        var theButton: NSButton?
@@ -183,8 +185,11 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
                     }
                     selectServer_Button.selectItem(withTitle: "")
                 }
+                
+                spinner_PI.stopAnimation(self)
                 return
             } else {
+                spinner_PI.stopAnimation(self)
                 return
             }
         } else if jamfProServer_textfield.stringValue != availableServersDict[selectServer_Button.titleOfSelectedItem!]?["server"] as? String && selectServer_Button.titleOfSelectedItem ?? "" != "Add Server..." {
@@ -204,12 +209,14 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         if theSender == "Login" {
             JamfProServer.validToken = false
             let dataToBeSent = (selectServer_Button.titleOfSelectedItem!, JamfProServer.destination, JamfProServer.username, JamfProServer.userpass, saveCreds_button.state.rawValue)
+            spinner_PI.stopAnimation(self)
             delegate?.sendLoginInfo(loginInfo: dataToBeSent)
             dismiss(self)
         } else {
             if displayName_TextField.stringValue == "" {
                 let nameReply = Alert().display(header: "Attention:", message: "Display name cannot be blank.\nUse \(jamfProServer_textfield.stringValue.fqdnFromUrl)?", secondButton: "Cancel")
                 if nameReply == "Cancel" {
+                    spinner_PI.stopAnimation(self)
                     return
                 } else {
                     displayName_TextField.stringValue = jamfProServer_textfield.stringValue.fqdnFromUrl
@@ -277,11 +284,11 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
                     
                     login_action("Login")
                 } else {
+                    spinner_PI.stopAnimation(self)
                     _ = Alert().display(header: "Attention:", message: "Failed to generate token. HTTP status code: \(statusCode)", secondButton: "")
                 }
             }
         }
-
     }
     
     @IBAction func quit_Action(_ sender: NSButton) {

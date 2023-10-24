@@ -66,6 +66,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
     
     @IBOutlet weak var settings_Button: NSButton!
+    @IBOutlet weak var viewScript_Button: NSButton!
     
     @IBAction func viewScript_Action(_ sender: Any) {
         let scriptSourceString = Settings.shared.dict["scriptSource"] as? String ?? defaultScriptSource
@@ -888,7 +889,10 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     // Delegate Method
     fileprivate func displayScriptVersion() {
         print("[displayScriptVersion] \(scriptVersion)")
-        scriptVersion_TextField.stringValue = "\(scriptVersion.0).\(scriptVersion.1).\(scriptVersion.2)"
+        scriptVersion_TextField.stringValue = "\(scriptVersion.0).\(scriptVersion.1).\(scriptVersion.2)\(scriptVersion.3)"
+        if viewScript_Button.isHidden {
+            viewScript_Button.isHidden = false
+        }
     }
     
     fileprivate func fetchScript() {

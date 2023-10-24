@@ -1113,8 +1113,8 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <button toolTip="View Setup-Your-Mac shell script" translatesAutoresizingMaskIntoConstraints="NO" id="0sG-vY-B0n">
-                                <rect key="frame" x="70" y="23.5" width="31" height="31"/>
+                            <button hidden="YES" toolTip="View Setup-Your-Mac shell script" translatesAutoresizingMaskIntoConstraints="NO" id="0sG-vY-B0n">
+                                <rect key="frame" x="53" y="23.5" width="31" height="31"/>
                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="terminal" catalog="system" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="up9-Gd-E3a">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -1128,7 +1128,7 @@
                                 </connections>
                             </button>
                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="W9K-ff-QTG">
-                                <rect key="frame" x="73" y="10" width="27" height="16"/>
+                                <rect key="frame" x="55" y="10" width="27" height="16"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="16" id="B8V-jj-BFx"/>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="23" id="G0F-Fl-xWG"/>
@@ -1143,12 +1143,13 @@
                         <constraints>
                             <constraint firstItem="sUL-kF-UKS" firstAttribute="leading" secondItem="bnN-hF-Dbi" secondAttribute="leading" id="3rZ-Mb-ID6"/>
                             <constraint firstItem="bnz-ho-X5W" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="60" id="49l-h8-ZZH"/>
+                            <constraint firstItem="W9K-ff-QTG" firstAttribute="leading" secondItem="TUp-3G-rTw" secondAttribute="trailing" constant="10" id="4LV-Ar-6LF"/>
                             <constraint firstItem="ghf-w9-GxG" firstAttribute="top" secondItem="bnN-hF-Dbi" secondAttribute="bottom" constant="47" id="4d9-wr-Cn0"/>
                             <constraint firstItem="xOu-Kv-iS4" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="57" id="5T7-9g-uMJ"/>
                             <constraint firstItem="M4S-aR-ash" firstAttribute="trailing" secondItem="bnN-hF-Dbi" secondAttribute="trailing" id="5j3-GD-CH6"/>
                             <constraint firstItem="TUp-3G-rTw" firstAttribute="top" secondItem="ppd-Nx-iGs" secondAttribute="bottom" constant="1" id="6HE-uo-40n"/>
                             <constraint firstItem="xOu-Kv-iS4" firstAttribute="leading" secondItem="eBn-tj-6wB" secondAttribute="trailing" constant="3" id="6qy-Bj-yDo"/>
-                            <constraint firstItem="W9K-ff-QTG" firstAttribute="centerX" secondItem="0sG-vY-B0n" secondAttribute="centerX" constant="1" id="8jr-Tn-lyE"/>
+                            <constraint firstItem="W9K-ff-QTG" firstAttribute="centerX" secondItem="0sG-vY-B0n" secondAttribute="centerX" id="8jr-Tn-lyE"/>
                             <constraint firstItem="UEH-xf-N24" firstAttribute="trailing" secondItem="bnN-hF-Dbi" secondAttribute="trailing" id="C47-4m-zbp"/>
                             <constraint firstItem="hks-HQ-i6u" firstAttribute="leading" secondItem="Keu-fD-phk" secondAttribute="trailing" constant="8" symbolic="YES" id="CGe-CY-neh"/>
                             <constraint firstItem="yG8-os-7A0" firstAttribute="leading" secondItem="sUL-kF-UKS" secondAttribute="trailing" constant="-1" id="CjR-Go-wBg"/>
@@ -1190,7 +1191,6 @@
                             <constraint firstAttribute="trailing" secondItem="dWB-B7-Yod" secondAttribute="trailing" constant="22" id="gZt-Ba-SHX"/>
                             <constraint firstItem="dWB-B7-Yod" firstAttribute="leading" secondItem="c9T-MM-FuI" secondAttribute="leading" id="hIu-ff-wo6"/>
                             <constraint firstItem="gSl-Cc-7Ew" firstAttribute="centerY" secondItem="bnN-hF-Dbi" secondAttribute="centerY" constant="-19.5" id="sP1-qH-kdx"/>
-                            <constraint firstItem="0sG-vY-B0n" firstAttribute="leading" secondItem="ppd-Nx-iGs" secondAttribute="trailing" constant="22" id="t4d-bc-W9w"/>
                             <constraint firstItem="fPi-9m-bf6" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="24" id="tEr-Cx-RiU"/>
                             <constraint firstItem="c9T-MM-FuI" firstAttribute="centerY" secondItem="hks-HQ-i6u" secondAttribute="centerY" id="tao-5H-ewS"/>
                             <constraint firstItem="69V-ic-1SS" firstAttribute="centerY" secondItem="bnz-ho-X5W" secondAttribute="centerY" id="u0M-kd-oTK"/>
@@ -1216,6 +1216,7 @@
                         <outlet property="validation_Label" destination="Keu-fD-phk" id="6gb-SA-5O2"/>
                         <outlet property="validation_TextField" destination="hks-HQ-i6u" id="Dh1-ag-hhr"/>
                         <outlet property="version_TextField" destination="TUp-3G-rTw" id="QX5-LX-RDe"/>
+                        <outlet property="viewScript_Button" destination="0sG-vY-B0n" id="gq8-D3-PoZ"/>
                         <segue destination="Swf-Yw-mAo" kind="sheet" identifier="loginView" id="OkO-3L-KQ4"/>
                         <segue destination="bSl-lr-Ong" kind="sheet" identifier="addOther" id="Ehs-r6-s39"/>
                         <segue destination="pYm-xb-CiH" kind="modal" identifier="settings" id="bRV-y5-e1v"/>
@@ -2307,12 +2308,17 @@ Gw
                                     <action selector="selectServer_Action:" target="Swf-Yw-mAo" id="OvZ-2Y-yGJ"/>
                                 </connections>
                             </popUpButton>
+                            <progressIndicator hidden="YES" maxValue="100" displayedWhenStopped="NO" indeterminate="YES" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="QYT-8p-rnb">
+                                <rect key="frame" x="243" y="167" width="32" height="32"/>
+                            </progressIndicator>
                         </subviews>
                         <constraints>
                             <constraint firstItem="eMd-vg-vW2" firstAttribute="top" secondItem="ubf-eP-2NL" secondAttribute="bottom" constant="10" symbolic="YES" id="0Me-W0-Xrq"/>
                             <constraint firstItem="WHS-xu-lvg" firstAttribute="centerY" secondItem="huW-ZN-AqL" secondAttribute="centerY" id="0ZF-5d-2UR"/>
                             <constraint firstItem="mbJ-Fv-7Tg" firstAttribute="trailing" secondItem="VKG-8y-LMf" secondAttribute="trailing" id="2c2-vM-W9z"/>
                             <constraint firstItem="VKG-8y-LMf" firstAttribute="trailing" secondItem="huW-ZN-AqL" secondAttribute="trailing" id="3Qm-mt-Fgq"/>
+                            <constraint firstItem="QYT-8p-rnb" firstAttribute="centerY" secondItem="WHS-xu-lvg" secondAttribute="centerY" id="6RB-hE-83S"/>
+                            <constraint firstItem="QYT-8p-rnb" firstAttribute="centerX" secondItem="qG0-Uj-wbO" secondAttribute="centerX" id="8DH-0z-5Z3"/>
                             <constraint firstItem="eMd-vg-vW2" firstAttribute="trailing" secondItem="ubf-eP-2NL" secondAttribute="trailing" id="8o0-H9-Bxu"/>
                             <constraint firstItem="RoW-SV-vIx" firstAttribute="trailing" secondItem="QbB-H2-nNM" secondAttribute="trailing" id="9fO-q7-FHP"/>
                             <constraint firstItem="mbJ-Fv-7Tg" firstAttribute="centerY" secondItem="ubf-eP-2NL" secondAttribute="centerY" id="ABL-iV-CPi"/>
@@ -2357,6 +2363,7 @@ Gw
                         <outlet property="selectServer_Menu" destination="jPj-QQ-wrh" id="ZVl-vP-EHg"/>
                         <outlet property="selectedServer_ButtonCell" destination="Hob-lN-xAq" id="BgC-BT-Ybn"/>
                         <outlet property="serverURL_Label" destination="VKG-8y-LMf" id="Vgd-ED-s4r"/>
+                        <outlet property="spinner_PI" destination="QYT-8p-rnb" id="Wpf-zv-pwW"/>
                         <outlet property="useApiClient_button" destination="eyq-TU-6d4" id="v8Z-ej-quq"/>
                         <outlet property="username_label" destination="mbJ-Fv-7Tg" id="Bok-2L-Yn7"/>
                     </connections>
