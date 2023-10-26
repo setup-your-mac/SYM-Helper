@@ -69,6 +69,10 @@ struct AppInfo {
 }
 
 struct JamfProServer {
+    static var accessToken  = ""
+    static var authExpires  = 30.0
+    static var currentCred  = ""
+    static var tokenCreated = Date()
     static var majorVersion = 0
     static var minorVersion = 0
     static var patchVersion = 0
@@ -78,7 +82,8 @@ struct JamfProServer {
     static var destination  = ""
     static var displayName  = ""
     static var username     = ""
-    static var userpass     = ""
+    static var password     = ""
+//    static var userpass     = ""
     static var authCreds    = ""
     static var base64Creds  = ""        // used if we want to auth with a different account
     static var validToken   = false
@@ -153,6 +158,23 @@ func betweenTags(xmlString:String, startTag:String, endTag:String) -> String {
     return rawValue
 }
 
+public func timeDiff(startTime: Date) -> (Int, Int, Int, Double) {
+    let endTime = Date()
+//                    let components = Calendar.current.dateComponents([.second, .nanosecond], from: startTime, to: endTime)
+//                    let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
+//                    WriteToLog().message(stringOfText: "[ViewController.download] time difference: \(timeDifference) seconds")
+    let components = Calendar.current.dateComponents([
+        .hour, .minute, .second, .nanosecond], from: startTime, to: endTime)
+    var diffInSeconds = Double(components.hour!)*3600 + Double(components.minute!)*60 + Double(components.second!) + Double(components.nanosecond!)/1000000000
+    diffInSeconds = Double(round(diffInSeconds * 1000) / 1000)
+//    let timeDifference = Int(components.second!) //+ Double(components.nanosecond!)/1000000000
+//    let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
+//    let (m,s) = r.quotientAndRemainder(dividingBy: 60)
+//    WriteToLog().message(stringOfText: "[ViewController.download] download time: \(h):\(m):\(s) (h:m:s)")
+    return (Int(components.hour!), Int(components.minute!), Int(components.second!), diffInSeconds)
+//    return (h, m, s)
+}
+/*
 func timeDiff(forWhat: String) -> (Int,Int,Int) {
     var components:DateComponents?
     switch forWhat {
@@ -170,6 +192,7 @@ func timeDiff(forWhat: String) -> (Int,Int,Int) {
     let (m,s) = r.quotientAndRemainder(dividingBy: 60)
     return(h,m,s)
 }
+ */
 
 // get current time
 func getCurrentTime() -> String {

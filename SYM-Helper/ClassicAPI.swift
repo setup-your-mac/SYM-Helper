@@ -18,7 +18,7 @@ class ClassicAPI: NSObject, URLSessionDelegate {
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: endpointUrl!)
         request.httpMethod = "GET"
-        configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType)) \(String(describing: JamfProServer.authCreds))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+        configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType)) \(String(describing: JamfProServer.accessToken))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
            (data, response, error) -> Void in
@@ -42,5 +42,4 @@ class ClassicAPI: NSObject, URLSessionDelegate {
         })
     task.resume()
     }
-    
 }

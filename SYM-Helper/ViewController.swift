@@ -234,32 +234,35 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
     
     @IBAction func refresh_Action(_ sender: Any) {
-        sendLoginInfo(loginInfo: (JamfProServer.displayName, JamfProServer.destination, JamfProServer.username, JamfProServer.userpass,saveCredsState))
+        sendLoginInfo(loginInfo: (JamfProServer.displayName, JamfProServer.destination, JamfProServer.username, JamfProServer.password,saveCredsState))
     }
     
     
     @IBAction func selectValidation_Action(_ sender: Any) {
         
-        let dialog = NSOpenPanel()
+        let theRow = selectedPolicies_TableView.selectedRow
+        if theRow > -1 {
+            let dialog = NSOpenPanel()
 
-        dialog.title                   = "Select an item for the validation criteria";
-        dialog.directoryURL            = URL(string: "/Applications")
-        dialog.showsResizeIndicator    = true
-        dialog.showsHiddenFiles        = false
-        dialog.allowsMultipleSelection = false
-        dialog.canChooseFiles          = true
-        dialog.canChooseDirectories    = true
-        dialog.resolvesAliases         = true
-        dialog.treatsFilePackagesAsDirectories = false
+            dialog.title                   = "Select an item for the validation criteria";
+            dialog.directoryURL            = URL(string: "/Applications")
+            dialog.showsResizeIndicator    = true
+            dialog.showsHiddenFiles        = false
+            dialog.allowsMultipleSelection = false
+            dialog.canChooseFiles          = true
+            dialog.canChooseDirectories    = true
+            dialog.resolvesAliases         = true
+            dialog.treatsFilePackagesAsDirectories = false
 
-        if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
-            let result = dialog.url // Pathname of the file
-            if (result != nil) {
-                if result!.path.suffix(4) == ".app" && NSEvent.modifierFlags.contains(.option) {
-                    viewAppBundle(appBundleURL: result!)
-                } else {
-                    validation_TextField.stringValue = "\(result!.path)"
-                    updateValidation(validationString: validation_TextField.stringValue)
+            if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
+                let result = dialog.url // Pathname of the file
+                if (result != nil) {
+                    if result!.path.suffix(4) == ".app" && NSEvent.modifierFlags.contains(.option) {
+                        viewAppBundle(appBundleURL: result!)
+                    } else {
+                        validation_TextField.stringValue = "\(result!.path)"
+                        updateValidation(validationString: validation_TextField.stringValue)
+                    }
                 }
             }
         }
@@ -287,13 +290,15 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
     func updateValidation(validationString: String) {
         let theRow = selectedPolicies_TableView.selectedRow
-        let policyId = selectedPoliciesArray[theRow].id
-        policy_array_dict[policyId]?.updateValue(validationString, forKey: "validation")
-        configsDict[configuration_Button.titleOfSelectedItem!]![policyId]?.updateValue(validationString, forKey: "validation")
-
-        // needed? todo
-        let selectedPolicyIndex = enrollmentActions.firstIndex(where: { $0.id == policyId })
-        enrollmentActions[selectedPolicyIndex!].command = validationString
+        if theRow > -1 {
+            let policyId = selectedPoliciesArray[theRow].id
+            policy_array_dict[policyId]?.updateValue(validationString, forKey: "validation")
+            configsDict[configuration_Button.titleOfSelectedItem!]![policyId]?.updateValue(validationString, forKey: "validation")
+            
+            // needed? todo
+            let selectedPolicyIndex = enrollmentActions.firstIndex(where: { $0.id == policyId })
+            enrollmentActions[selectedPolicyIndex!].command = validationString
+        }
     }
     
     @IBAction func showSettings(_ sender: Any) {
@@ -571,7 +576,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         request.httpMethod = "PUT"
         request.httpBody   = xml.data(using: String.Encoding.utf8)
 
-        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.authCreds)", "Content-Type" : "application/xml", "Accept" : "application/xml", "User-Agent" : AppInfo.userAgentHeader]
+        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken)", "Content-Type" : "application/xml", "Accept" : "application/xml", "User-Agent" : AppInfo.userAgentHeader]
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
             (data, response, error) -> Void in
@@ -992,7 +997,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                         }
                     }
                 } else {
-                    _ = Alert().display(header: "", message: "No policies found. Veriry the account has the appropriate permissions to read policies", secondButton: "")
+                    _ = Alert().display(header: "", message: "No policies found. Verify the account has the appropriate permissions to read policies", secondButton: "")
                     allPolicies_Spinner.stopAnimation(self)
                 }
             }
@@ -1009,12 +1014,12 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         cleanup()
         
         var saveCredsState: Int?
-        (JamfProServer.displayName, JamfProServer.destination, JamfProServer.username, JamfProServer.userpass,saveCredsState) = loginInfo
-        let jamfUtf8Creds = "\(JamfProServer.username):\(JamfProServer.userpass)".data(using: String.Encoding.utf8)
+        (JamfProServer.displayName, JamfProServer.destination, JamfProServer.username, JamfProServer.password,saveCredsState) = loginInfo
+        let jamfUtf8Creds = "\(JamfProServer.username):\(JamfProServer.password)".data(using: String.Encoding.utf8)
         JamfProServer.base64Creds = (jamfUtf8Creds?.base64EncodedString())!
 
         writeToLog.message(stringOfText: "[ViewController] Running SYM-Helper v\(AppInfo.version)")
-        TokenDelegate().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds) { [self]
+        TokenDelegate().getToken(serverUrl: JamfProServer.destination, whichServer: "destination", base64creds: JamfProServer.base64Creds) { [self]
             authResult in
             let (statusCode,theResult) = authResult
 
@@ -1025,7 +1030,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 defaults.set(JamfProServer.username, forKey: "username")
                 
                 if saveCredsState == 1 {
-                    Credentials().save(service: "\(JamfProServer.destination.fqdnFromUrl)", account: JamfProServer.username, credential: JamfProServer.userpass)
+                    Credentials().save(service: "\(JamfProServer.destination.fqdnFromUrl)", account: JamfProServer.username, credential: JamfProServer.password)
                 }
                 connectTo_Button.title = "Connected to: \(JamfProServer.displayName)"
                 connectTo_Button.toolTip = ( JamfProServer.destination.last == "/" ) ? String("\(JamfProServer.destination)".dropLast()):"\(JamfProServer.destination)"
@@ -1319,7 +1324,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
 
     private func getAllPolicies(completion: @escaping (_ result: [String:Any]) -> Void) {
-        
+        print("[getAllPolicies] enter")
         URLCache.shared.removeAllCachedResponses()
         
         var endpoint = "\(JamfProServer.destination)/JSSResource/policies"
@@ -1329,14 +1334,15 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: endpointUrl!)
         request.httpMethod = "GET"
-        configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType)) \(String(describing: JamfProServer.authCreds))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+        configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType)) \(String(describing: JamfProServer.accessToken))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+        print("[getAllPolicies] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders ?? [:])")
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
            (data, response, error) -> Void in
            session.finishTasksAndInvalidate()
            if let httpResponse = response as? HTTPURLResponse {
+               print("policy statusCode: \(httpResponse.statusCode)")
                if httpSuccess.contains(httpResponse.statusCode) {
-                   print("policy statusCode: \(httpResponse.statusCode)")
                    
                     let responseData = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                        if let endpointJSON = responseData! as? [String: Any] {
@@ -1365,7 +1371,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: endpointUrl!)
         request.httpMethod = "GET"
-        configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType)) \(String(describing: JamfProServer.authCreds))", "Content-Type" : "application/xml", "Accept" : "application/xml", "User-Agent" : AppInfo.userAgentHeader]
+        configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType)) \(String(describing: JamfProServer.accessToken))", "Content-Type" : "application/xml", "Accept" : "application/xml", "User-Agent" : AppInfo.userAgentHeader]
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
            (data, response, error) -> Void in

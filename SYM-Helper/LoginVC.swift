@@ -150,7 +150,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         didRun = true
         JamfProServer.destination = jamfProServer_textfield.stringValue
         JamfProServer.username    = jamfProUsername_textfield.stringValue
-        JamfProServer.userpass    = jamfProPassword_textfield.stringValue
+        JamfProServer.password    = jamfProPassword_textfield.stringValue
         
         var theSender = ""
 //        var theButton: NSButton?
@@ -162,7 +162,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
 //        print("[login_action] sender: \(theSender)")
 //        print("[login_action] destination: \(JamfProServer.destination)")
 //        print("[login_action] username: \(JamfProServer.username)")
-//        print("[login_action] userpass: \(JamfProServer.userpass)")
+//        print("[login_action] userpass: \(JamfProServer.password)")
         
         // check for update/removal of server display name
         if jamfProServer_textfield.stringValue == "" {
@@ -208,7 +208,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         
         if theSender == "Login" {
             JamfProServer.validToken = false
-            let dataToBeSent = (selectServer_Button.titleOfSelectedItem!, JamfProServer.destination, JamfProServer.username, JamfProServer.userpass, saveCreds_button.state.rawValue)
+            let dataToBeSent = (selectServer_Button.titleOfSelectedItem!, JamfProServer.destination, JamfProServer.username, JamfProServer.password, saveCreds_button.state.rawValue)
             spinner_PI.stopAnimation(self)
             delegate?.sendLoginInfo(loginInfo: dataToBeSent)
             dismiss(self)
@@ -230,9 +230,9 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
                 JamfProServer.destination = jamfProServer_textfield.stringValue
             }
             
-            let jamfUtf8Creds = "\(JamfProServer.username):\(JamfProServer.userpass)".data(using: String.Encoding.utf8)
+            let jamfUtf8Creds = "\(JamfProServer.username):\(JamfProServer.password)".data(using: String.Encoding.utf8)
             JamfProServer.base64Creds = (jamfUtf8Creds?.base64EncodedString())!
-            TokenDelegate().getToken(whichServer: "destination", serverUrl: JamfProServer.destination, base64creds: JamfProServer.base64Creds) { [self]
+            TokenDelegate().getToken(serverUrl: JamfProServer.destination, whichServer: "destination", base64creds: JamfProServer.base64Creds) { [self]
                 authResult in
                 
                 login_Button.isEnabled = true
@@ -458,7 +458,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         }
         JamfProServer.destination = jamfProServer_textfield.stringValue
         JamfProServer.username    = jamfProUsername_textfield.stringValue
-        JamfProServer.userpass    = jamfProPassword_textfield.stringValue
+        JamfProServer.password    = jamfProPassword_textfield.stringValue
         
     }
     
