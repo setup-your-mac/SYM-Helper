@@ -1324,7 +1324,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
 
     private func getAllPolicies(completion: @escaping (_ result: [String:Any]) -> Void) {
-        print("[getAllPolicies] enter")
         URLCache.shared.removeAllCachedResponses()
         
         var endpoint = "\(JamfProServer.destination)/JSSResource/policies"
@@ -1335,7 +1334,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         var request        = URLRequest(url: endpointUrl!)
         request.httpMethod = "GET"
         configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType)) \(String(describing: JamfProServer.accessToken))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-        print("[getAllPolicies] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders ?? [:])")
+//        print("[getAllPolicies] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders ?? [:])")
         let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request as URLRequest, completionHandler: {
            (data, response, error) -> Void in
