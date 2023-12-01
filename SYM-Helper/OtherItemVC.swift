@@ -16,14 +16,18 @@ class OtherItemVC: NSViewController {
     
     @IBOutlet weak var otherItem_TabView: NSTabView!
     
-    @IBOutlet weak var icon_TextField: NSTextField!
+    @IBOutlet weak var listitem_TextField: NSTextField!
+    @IBOutlet weak var commandIcon_TextField: NSTextField!
     @IBOutlet weak var label_TextField: NSTextField!
+    
+    @IBOutlet weak var commandOrProgressText_Label: NSTextField!
+    
     @IBOutlet weak var command_TextField: NSTextField!
     @IBOutlet weak var trigger_TextField: NSTextField!
     
-    @IBOutlet weak var commandOrValidation: NSTextField!
-    @IBOutlet weak var timeout_Label: NSTextField!
-    @IBOutlet weak var timeout_TextField: NSTextField!
+    @IBOutlet weak var commandOrProgressText_TextField: NSTextField!
+    @IBOutlet weak var icon_Label: NSTextField!
+    @IBOutlet weak var validationIcon_TextField: NSTextField!
     
     @IBAction func cancel_Action(_ sender: Any) {
         dismiss(self)
@@ -34,15 +38,17 @@ class OtherItemVC: NSViewController {
     @IBAction func add_Action(_ sender: Any) {
         let commandAsArray = command_TextField.stringValue.components(separatedBy: " ")
         let theBinary = URL(string: commandAsArray[0])?.lastPathComponent ?? ""
-        let validation = ( itemType == "Validation" ) ? "Local":""
+        let validation = ( itemType == "validation" ) ? "Local":""
+        let icon = ( itemType == "validation" ) ? validationIcon_TextField.stringValue:commandIcon_TextField.stringValue
         let commandDict = ["itemType": itemType,
-                           "icon": icon_TextField.stringValue,
-                           "label": trigger_TextField.stringValue,
+                           "icon": icon,
+                           "listitem": listitem_TextField.stringValue,
+                           "progressText": commandOrProgressText_TextField.stringValue,
                            "theBinary": theBinary,
                            "command":command_TextField.stringValue,
                            "trigger":trigger_TextField.stringValue,
                            "validation":validation]
-        if itemType == "Validation" && trigger_TextField.stringValue == "" {
+        if itemType == "validation" && trigger_TextField.stringValue == "" {
             _ = alert.display(header: "", message: "A trigger must be specified for local validation", secondButton: "")
             return
         } else {
@@ -54,8 +60,13 @@ class OtherItemVC: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         print("[OtherItemVC.viewDidLoad] itemType: \(itemType)")
-        if itemType == "Validation" {
+        if itemType == "validation" {
             otherItem_TabView.selectTabViewItem(withIdentifier: "local_validation")
+            commandOrProgressText_Label.isHidden     = false
+            commandOrProgressText_Label.stringValue  = "progress text:"
+            commandOrProgressText_TextField.isHidden = false
+            icon_Label.isHidden                      = false
+            validationIcon_TextField.isHidden        = false
         } else {
             otherItem_TabView.selectTabViewItem(withIdentifier: "command")
         }

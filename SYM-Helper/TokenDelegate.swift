@@ -80,8 +80,8 @@ class TokenDelegate: NSObject, URLSessionDelegate {
                 configuration.httpAdditionalHeaders = ["Authorization" : "Basic \(base64creds)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
                 JamfProServer.currentCred = base64creds
             }
-            print("[getToken] tokenUrlString: \(tokenUrlString)")
-            print("[getToken] configuration.httpAdditionalHeaders: \(String(describing: configuration.httpAdditionalHeaders))")
+//            print("[getToken] tokenUrlString: \(tokenUrlString)")
+//            print("[getToken] configuration.httpAdditionalHeaders: \(String(describing: configuration.httpAdditionalHeaders))")
             
 //            print("[getToken] \(whichServer) tokenUrlString: \(tokenUrlString)")
 //            print("[getToken]    \(whichServer) base64creds: \(base64creds)")

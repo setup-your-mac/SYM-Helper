@@ -32,6 +32,9 @@ let writeToLog: WriteToLog = WriteToLog()
 
 var scriptSource        = ""
 
+// icon default
+var defaultIcon = ""
+
 // script defaults
 var defaultScriptSource = "https://raw.githubusercontent.com/dan-snelson/Setup-Your-Mac/main/Setup-Your-Mac-via-Dialog.bash"
 
