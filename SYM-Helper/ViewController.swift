@@ -6,6 +6,7 @@
 import AppKit
 import Cocoa
 import Foundation
+import WebKit
 
 
  class Policy: NSObject {
@@ -28,23 +29,25 @@ class EnrollmentActions: NSObject {
     @objc var name: String
     @objc var id: String
     @objc var icon: String?
-    @objc var label: String?
+    @objc var listitem: String?
+    @objc var progressText: String?
     @objc var trigger: String?
     @objc var command: String?
     @objc var arguments: [String]?
     @objc var objectType: String // policy or command
     @objc var timeout: String?
     
-    init(name: String, id: String, icon: String?, label: String?, trigger: String?, command: String?, arguments: [String]?, objectType: String, timeout: String?) {
-        self.name = name
-        self.id = id
-        self.icon = icon
-        self.label = label
-        self.trigger = trigger
-        self.command = command
-        self.arguments = arguments
-        self.objectType = objectType // policy or command
-        self.timeout = timeout
+    init(name: String, id: String, icon: String?, listitem: String?, progressText: String?, trigger: String?, command: String?, arguments: [String]?, objectType: String, timeout: String?) {
+        self.name         = name
+        self.id           = id
+        self.icon         = icon
+        self.listitem     = listitem
+        self.progressText = progressText
+        self.trigger      = trigger
+        self.command      = command
+        self.arguments    = arguments
+        self.objectType   = objectType // policy or command
+        self.timeout      = timeout
     }
 }
 
@@ -127,6 +130,15 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         }
         clearRemove_Button.selectItem(at: 0)
     }
+    
+    fileprivate func clearTextFields() {
+        listitemDisplayText_TextField.stringValue = ""
+        iconPath_TextField.stringValue            = ""
+        progressText_TextField.stringValue        = ""
+        trigger_TextField.stringValue             = ""
+        validation_TextField.stringValue          = ""
+    }
+    
     private func clearSelected(currentConfig: String) {
         for i in (0..<selectedPoliciesArray.count).reversed() {
             let thePolicy = selectedPoliciesArray[i]
@@ -143,10 +155,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         }
             
         configsDict[currentConfig] = [:]
-        selectedPoliciesDict[currentConfig] = []
-        progressText_TextField.stringValue = ""
-        iconPath_TextField.stringValue     = ""
-        validation_TextField.stringValue   = ""
+        selectedPoliciesDict[currentConfig]       = []
+        clearTextFields()
     }
     
     
@@ -165,16 +175,14 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         policiesArray = staticAllPolicies
         
         for (policyId, policyInfo) in currentPolicies {
-            enrollmentActions.append(EnrollmentActions(name: policyInfo["listitem"]!, id: policyId, icon: policyInfo["icon"]!, label: policyInfo["progresstext"]!, trigger: policyInfo["trigger"]!, command: policyInfo["command"]!, arguments: [], objectType: policyInfo["objectType"]!, timeout: policyInfo["timeout"]!))
+            enrollmentActions.append(EnrollmentActions(name: policyInfo["listitem"]!, id: policyId, icon: policyInfo["icon"]!, listitem: policyInfo["listitem"]!, progressText: policyInfo["progresstext"]!, trigger: policyInfo["trigger"]!, command: policyInfo["command"]!, arguments: [], objectType: policyInfo["objectType"]!, timeout: policyInfo["timeout"]!))
             policiesArray.removeAll(where: { $0.id == policyId })
         }
         // build enrollmentActions - end
 //        policiesArray = policiesDict[selectedConfiguration] ?? staticAllPolicies
         selectedPoliciesArray = selectedPoliciesDict[selectedConfiguration] ?? []
         selectedPolicies_TableView.deselectAll(self)
-        progressText_TextField.stringValue = ""
-        iconPath_TextField.stringValue     = ""
-        validation_TextField.stringValue   = ""
+        clearTextFields()
         policies_TableView.reloadData()
         selectedPolicies_TableView.reloadData()
     }
@@ -320,17 +328,22 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     @IBOutlet weak var allPolicies_Spinner: NSProgressIndicator!
     @IBOutlet weak var policyArray_Spinner: NSProgressIndicator!
     
-    @IBOutlet weak var progressText_TextField: NSTextField!
+    @IBOutlet weak var listitemDisplayText_TextField: NSTextField!
     @IBOutlet weak var iconPath_TextField: NSTextField!
+    
+    @IBOutlet weak var iconPreview_WebView: WKWebView!
+    
+    @IBOutlet weak var progressText_TextField: NSTextField!
+    @IBOutlet weak var trigger_TextField: NSTextField!
     
     @IBOutlet weak var validation_Label: NSTextField!
     @IBOutlet weak var validation_TextField: NSTextField!
     @IBOutlet weak var version_TextField: NSTextField!
     @IBOutlet weak var scriptVersion_TextField: NSTextField!
     
-    var policiesArray = [Policy]()
-    var policiesDict  = [String:[Policy]]()
-    var staticAllPolicies = [Policy]()
+    var policiesArray         = [Policy]()
+    var policiesDict          = [String:[Policy]]()
+    var staticAllPolicies     = [Policy]()
     var selectedPoliciesArray = [Policy]()
     var selectedPoliciesDict  = [String:[Policy]]()
     
@@ -369,6 +382,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         if rowClicked < policiesArray.count && rowClicked != -1 {
 //            print("[addToPolicyArray] policiesArray: \(policiesArray[rowClicked].name)")
             let doubleClicked = policiesArray[rowClicked]
+            print("[addToPolicyArray] doubleClicked: \(doubleClicked)")
 
             selectedPoliciesArray.append(doubleClicked)
             selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
@@ -385,9 +399,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 selectedPolicies_TableView.reloadData()
             }
             
-            progressText_TextField.stringValue = ""
-            iconPath_TextField.stringValue     = ""
-            validation_TextField.stringValue   = ""
+            clearTextFields()
             selectedPolicies_TableView.selectRowIndexes(IndexSet(integer: selectedPoliciesArray.count-1), byExtendingSelection: false)
         }
     }
@@ -423,10 +435,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 configsDict[configuration_Button.titleOfSelectedItem!]![doubleClicked.id] = nil
             }
 
-            
-            progressText_TextField.stringValue = ""
-            iconPath_TextField.stringValue     = ""
-            validation_TextField.stringValue   = ""
+            clearTextFields()
             
             selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
 
@@ -527,7 +536,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             configsDict[configuration_Button.titleOfSelectedItem!]![policyId] = ["listitem": policyName, "id": policyId, "icon": icon, "progresstext": progresstext, "trigger": customTrigger, "validation": validation, "command": "", "arguments": "", "objectType": "policy", "timeout": "", "grouped": "\(grouped)", "groupId": "\(groupId)"]
             
             // command same as validation? todo
-            enrollmentActions.append(EnrollmentActions(name: policyName, id: policyId, icon: icon, label: progresstext, trigger: customTrigger, command: "", arguments: [], objectType: "policy", timeout: ""))
+            enrollmentActions.append(EnrollmentActions(name: policyName, id: policyId, icon: icon, listitem: policyName, progressText: progresstext, trigger: customTrigger, command: "", arguments: [], objectType: "policy", timeout: ""))
             }
 //        let trigger = (customTrigger == "recon") ? customTrigger:policyId
         
@@ -540,12 +549,16 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             if theRow != -1 {
                 let selectedPolicyId = selectedPoliciesArray[theRow].id
                 switch whichField.identifier!.rawValue {
+                case "listitemDisplayText_TextField":
+                    configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"] = listitemDisplayText_TextField.stringValue
+                    enrollmentActions[theRow].listitem = listitemDisplayText_TextField.stringValue
                 case "progressText_TextField":
                     configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] = progressText_TextField.stringValue
-                    enrollmentActions[theRow].label = progressText_TextField.stringValue
+                    enrollmentActions[theRow].progressText = progressText_TextField.stringValue
                 case "iconPath_TextField":
                     configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["icon"] = iconPath_TextField.stringValue
                     enrollmentActions[theRow].icon = iconPath_TextField.stringValue
+                    previewIcon()
                 case "validation_TextField":
                     configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["validation"] = validation_TextField.stringValue
                     enrollmentActions[theRow].command = validation_TextField.stringValue
@@ -635,15 +648,15 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 //                   print("[processPolicies] result: \(result)")
                     
                     
-                    let policyName = result["listitem"]
-                    let icon = result["icon"]
-                    let progresstext = result["progresstext"]
+                    let icon          = result["icon"]
+                    let policyName    = result["listitem"]
+                    let progresstext  = result["progresstext"]
                     var customTrigger = result["trigger"]
-                    var validation = result["validation"] ?? ""
+                    var validation    = result["validation"] ?? ""
                     
-                    var isGrouped = result["grouped"]
-                    let theGroupId = result["groupId"]
-                    var newGroupId = theGroupId
+                    var isGrouped     = result["grouped"]
+                    let theGroupId    = result["groupId"]
+                    var newGroupId    = theGroupId
                     
                     var triggerListArray = """
              {
@@ -663,10 +676,10 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 //                        print("[processPolicies-group] result: \(result)")
                         
                         customTrigger = result["trigger"]
-                        validation = result["validation"] ?? ""
+                        validation    = result["validation"] ?? ""
                         
-                        isGrouped = result["grouped"]
-                        newGroupId = result["groupId"]
+                        isGrouped     = result["grouped"]
+                        newGroupId    = result["groupId"]
                         
                         if theGroupId == newGroupId {
                             triggerListArray.append("""
@@ -738,6 +751,9 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         setPrompt(whichPrompt: "promptForPosition")
         setPrompt(whichPrompt: "promptForComputerName")
         setPrompt(whichPrompt: "promptForAssetTag")
+        
+        setPrompt(whichPrompt: "disableAssetTagRegex")
+        
         setPrompt(whichPrompt: "promptForRoom")
         setPrompt(whichPrompt: "promptForBuilding")
         setPrompt(whichPrompt: "promptForDepartment")
@@ -868,6 +884,18 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     }
     private func setPrompt(whichPrompt: String) {
         let promptForDict = Settings.shared.dict["promptFor"] as! [String:Any]
+        
+        if whichPrompt == "disableAssetTagRegex" {
+            guard let disable = promptForDict["\(whichPrompt)"] as? Int else {
+                return
+            }
+            if disable == 1 {
+                let disableATRegex = try! NSRegularExpression(pattern: "\"prompt\" : \"Please enter(.|\n|\r)*?AP, IP or CD.\"", options:.caseInsensitive)
+                symScript = (disableATRegex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\"prompt\" : \"Enter the Asset Tag\",\n\t\t\"regex\" : \"^.*\",\n\t\t\"regexerror\" : \"An Asset Tag is required.\""))
+            }
+            return
+        }
+        
         var trueFalse = "true"
         if let settingsRawValue = promptForDict["\(whichPrompt)"] as? Int {
             trueFalse = ( settingsRawValue == 1 ) ? "true":"false"
@@ -890,7 +918,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     
     // Delegate Method
     fileprivate func displayScriptVersion() {
-        print("[displayScriptVersion] \(scriptVersion)")
+//        print("[displayScriptVersion] \(scriptVersion)")
         scriptVersion_TextField.stringValue = "\(scriptVersion.0).\(scriptVersion.1).\(scriptVersion.2)\(scriptVersion.3)"
         if viewScript_Button.isHidden {
             viewScript_Button.isHidden = false
@@ -1023,7 +1051,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             if theResult == "success" {
                 
                 defaults.set(JamfProServer.destination, forKey: "currentServer")
-//                defaults.set(JamfProServer.destination, forKey: "server")
                 defaults.set(JamfProServer.username, forKey: "username")
                 
                 if saveCredsState == 1 {
@@ -1158,7 +1185,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             
             configsDict[configuration_Button.titleOfSelectedItem!]![theId] = ["listitem": newItem["listitem"]!, "id": theId, "icon": newItem["icon"]!, "progresstext": newItem["progressText"]!, "trigger": newItem["trigger"]!, "validation": "Local", "command": "", "arguments": "", "objectType": "Local Validation", "timeout": "", "grouped": "false", "groupId": ""]
             
-            enrollmentActions.append(EnrollmentActions(name: theName, id: theId, icon: newItem["icon"]!, label: theName, trigger: "", command: "", arguments: [], objectType: "Local Validation", timeout: ""))
+            enrollmentActions.append(EnrollmentActions(name: theName, id: theId, icon: newItem["icon"]!, listitem: theName, progressText: theName, trigger: "", command: "", arguments: [], objectType: "Local Validation", timeout: ""))
 
             selectedPoliciesArray.last!.configs.append(configuration_Button.titleOfSelectedItem!)
             selectedPolicies_TableView.reloadData()
@@ -1188,7 +1215,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 
                 configsDict[configuration_Button.titleOfSelectedItem!]![theId] = ["listitem": theLabel, "id": theId, "icon": icon, "progresstext": theLabel, "trigger": "", "validation": "None", "command": newItem["command"]!, "objectType": "command", "timeout": "", "grouped": "", "groupId": ""]
                 
-                enrollmentActions.append(EnrollmentActions(name: theLabel, id: theId, icon: icon, label: theLabel, trigger: "", command: commandToArray[0], arguments: argumentArray, objectType: "command", timeout: ""))
+                enrollmentActions.append(EnrollmentActions(name: theLabel, id: theId, icon: icon, listitem: theLabel, progressText: theLabel, trigger: "", command: commandToArray[0], arguments: argumentArray, objectType: "command", timeout: ""))
                  
                 selectedPolicies_TableView.reloadData()
                 usleep(1000)
@@ -1250,6 +1277,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             }
         }
         
+        listitemDisplayText_TextField.delegate     = self
         progressText_TextField.delegate = self
         iconPath_TextField.delegate     = self
         validation_TextField.delegate   = self
@@ -1403,9 +1431,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             iconPath_TextField.stringValue = "\(configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["icon"] ?? defaultIcon)"
             validation_TextField.stringValue = "\(configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicy]!["thePath"] ?? "")"
         } else if selectedPoliciesArray.count == 0 {
-            progressText_TextField.stringValue = ""
-            iconPath_TextField.stringValue     = ""
-            validation_TextField.stringValue   = ""
+            clearTextFields()
         }
         let isAscending = policies_TableView.sortDescriptors.first?.ascending ?? true
     //        let isAscending = sortDescriptor.ascending
@@ -1437,26 +1463,53 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
         }
     }
     
+    fileprivate func previewIcon() {
+        // preview icon, if available
+        if iconPath_TextField.stringValue.prefix(4).lowercased() != "http" {
+            if !FileManager.default.fileExists(atPath: iconPath_TextField.stringValue) {
+                iconPreview_WebView.isHidden = true
+                return
+            }
+        }
+        if let url = URL(string: iconPath_TextField.stringValue) {
+            let request = URLRequest(url: url)
+            iconPreview_WebView?.load(request)
+            iconPreview_WebView.isHidden = false
+        } else {
+            iconPreview_WebView.isHidden = true
+        }
+    }
+    
     func tableViewSelectionDidChange(_ notification: Notification) {
         if selectedPolicies_TableView.selectedRowIndexes.count > 0 {
             let theRow = selectedPolicies_TableView.selectedRow
             let selectedPolicyId = selectedPoliciesArray[theRow].id
             
-            if let _ = Int(selectedPolicyId) {
+            let theObjectType = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["objectType"] ?? ""
+            if theObjectType != "command" {
                 validation_Label.stringValue = "validation:"
             } else {
                 validation_Label.stringValue = "command:"
             }
             
-            progressText_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"]))"
+            listitemDisplayText_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"] ?? ""
             iconPath_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["icon"] ?? defaultIcon
+            previewIcon()
+            
+            progressText_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] ?? "Processing policy \(String(describing: configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"]))"
+            if theObjectType == "policy" {
+                trigger_TextField.isEditable = false
+            } else {
+                trigger_TextField.isEditable = true
+            }
+            trigger_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["trigger"] ?? ""
             validation_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["validation"] ?? ""
 
+            
         }
     }
     
-    func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any?
-    {
+    func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
         //        print("tableView: \(tableView)\t\ttableColumn: \(tableColumn)\t\trow: \(row)")
         var newString:String = ""
             if (tableView == policies_TableView) {
@@ -1534,13 +1587,11 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
                     selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
                     selectedPolicies_TableView.reloadData()
                 }
-                
                 return true
             } else {
                 return false
             }
         }
-        
         return false
     }
 }

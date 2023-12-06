@@ -24,12 +24,12 @@ class SYMScript: NSObject, URLSessionDelegate {
             session.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
                 if httpSuccess.contains(httpResponse.statusCode) {
-                    print("statusCode: \(httpResponse.statusCode)")
+                    print("[SYMScript] statusCode: \(httpResponse.statusCode)")
                     
                     if let _ = String(data: data!, encoding: .utf8) {
                         responseData = String(data: data!, encoding: .utf8)!
 //                        writeToLog.message(stringOfText: "[CreateEndpoints] \n\nfull response from create:\n\(responseData)") }
-                        print("[SYMScript] done fetching script")
+//                        print("[SYMScript] done fetching script")
 //                        print("[SYMScript] script: \(responseData)")
                         
     //                    print("getScript: \(symScript)")   (.|\n|\r)
@@ -39,7 +39,7 @@ class SYMScript: NSObject, URLSessionDelegate {
                             let versionLine = responseData[versionLineRange]
 //                            let versionString = versionLine.replacing("#   Version ", with: "").dropLast()
                             let versionString = versionLine.replacing("scriptVersion=\"", with: "").dropLast()
-                            print("[SYMScript.get] scriptVersion: \(String(describing: versionString))")
+//                            print("[SYMScript.get] scriptVersion: \(String(describing: versionString))")
                             scriptVersion = toTuple(versionString: String(versionString))
                             if updateDisplay {
                                 NotificationCenter.default.post(name: .updateScriptVersion, object: self)

@@ -40,20 +40,21 @@ class Credentials {
                     
                     
                     // see if credentials already exist for server
-                    let accountCheck = retrieve(service: keychainItemName, account: account)
+                    let accountCheck = retrieve(service: service, account: account)
+//                    let accountCheck = retrieve(service: keychainItemName, account: account)
                     if accountCheck.count == 0 {
                         // try to add new credentials, if account exists we'll try updating it
                         let addStatus = SecItemAdd(keychainQuery as CFDictionary, nil)
                         if (addStatus != errSecSuccess) {
                             if let addErr = SecCopyErrorMessageString(addStatus, nil) {
-                                print("[addStatus] Write failed for new credentials: \(addErr)")
+                                print("[addStatus] New credentials write failed for \(account): \(addErr)")
                                 let deleteStatus = SecItemDelete(keychainQuery as CFDictionary)
                                 print("[Credentials.save] the deleteStatus: \(deleteStatus)")
                                 sleep(1)
                                 let addStatus = SecItemAdd(keychainQuery as CFDictionary, nil)
                                 if (addStatus != errSecSuccess) {
                                     if let addErr = SecCopyErrorMessageString(addStatus, nil) {
-                                        print("[addStatus] Write failed for new credentials after deleting: \(addErr)")
+                                        print("[addStatus] New credentials write failed for \(account) after deleting: \(addErr)")
                                     }
                                 }
                             }
@@ -66,20 +67,20 @@ class Credentials {
                                          kSecReturnAttributes as String: true]
                         
                         for (username, password) in accountCheck {
-                            if account != username || credential != password {
-                                // credentials already exist, try to update
-                                if account == username {
+                            if account == username && credential != password {
+                                // credentials already exist, try to update if necessary
+//                                if account == username {
                                     let updateStatus = SecItemUpdate(keychainQuery as CFDictionary, [kSecValueDataString:password] as [NSString : Any] as CFDictionary)
 //                                    print("[Credentials.save] updateStatus result: \(updateStatus)")
-                                } else {
-//                                    print("[addStatus] save password for: \(account)")
-                                    let addStatus = SecItemAdd(keychainQuery as CFDictionary, nil)
-                                    if (addStatus != errSecSuccess) {
-                                        if let addErr = SecCopyErrorMessageString(addStatus, nil) {
-                                            print("[addStatus] Write failed for new credentials: \(addErr)")
-                                        }
-                                    }
-                                }
+//                                } else {
+////                                    print("[addStatus] save password for: \(account)")
+//                                    let addStatus = SecItemAdd(keychainQuery as CFDictionary, nil)
+//                                    if (addStatus != errSecSuccess) {
+//                                        if let addErr = SecCopyErrorMessageString(addStatus, nil) {
+//                                            print("[addStatus] Update credentials write failed for \(account): \(addErr)")
+//                                        }
+//                                    }
+//                                }
                             }
                         }
                     }
