@@ -1061,6 +1061,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 connectTo_Button.isHidden = false
                 scriptSource = defaults.string(forKey: "scriptSource") ?? defaultScriptSource
                 
+                scriptSource = scriptSource.replacingOccurrences(of: "/dan-snelson/", with: "/setup-your-mac/")
+                
                 // read settings, if they exist
                 Settings.shared.dict = ConfigsSettings().retrieve(dataType: "settings")
                 
@@ -1261,8 +1263,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
         
         NotificationCenter.default.addObserver(self, selector: #selector(updateScriptVersion(_:)), name: .updateScriptVersion, object: nil)
         
@@ -1277,14 +1277,14 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             }
         }
         
-        listitemDisplayText_TextField.delegate     = self
-        progressText_TextField.delegate = self
-        iconPath_TextField.delegate     = self
-        validation_TextField.delegate   = self
+        listitemDisplayText_TextField.delegate = self
+        progressText_TextField.delegate        = self
+        iconPath_TextField.delegate            = self
+        validation_TextField.delegate          = self
         
         allPolicies_Spinner.startAnimation(self)
-        policies_TableView.delegate = self
-        policies_TableView.dataSource = self
+        policies_TableView.delegate     = self
+        policies_TableView.dataSource   = self
         policies_TableView.doubleAction = #selector(addToPolicyArray)
         
         // set columg headers
@@ -1294,8 +1294,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         let descriptorName = NSSortDescriptor(key: "name", ascending: true)
         policies_TableView.tableColumns[0].sortDescriptorPrototype = descriptorName
         
-        selectedPolicies_TableView.delegate = self
-        selectedPolicies_TableView.dataSource = self
+        selectedPolicies_TableView.delegate     = self
+        selectedPolicies_TableView.dataSource   = self
         selectedPolicies_TableView.doubleAction = #selector(removeFromPolicyArray)
         
         selectedPolicies_TableView.tableColumns.forEach { (column) in
@@ -1305,7 +1305,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         selectedPolicies_TableView.registerForDraggedTypes([.string])
         
         configuration_Button.selectItem(at: 0)
-
     }
     
     override func viewDidAppear() {
