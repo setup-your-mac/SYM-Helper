@@ -483,6 +483,9 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         whichTab = settingsArray[0].tab
         settings_TabView.selectTabViewItem(withIdentifier: whichTab)
         validScriptSource = Settings.shared.dict["scriptSource"] as? String ?? defaultScriptSource
+        
+        validScriptSource = validScriptSource.replacingOccurrences(of: "/dan-snelson/", with: "/setup-your-mac/")
+        
         newScriptSource   = validScriptSource
         
         scriptSource_TextField.stringValue = validScriptSource

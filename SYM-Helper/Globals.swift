@@ -30,13 +30,14 @@ var useApiClient    = 0
 let alert: Alert           = Alert()
 let writeToLog: WriteToLog = WriteToLog()
 
-var scriptSource        = ""
+var scriptSource           = ""
 
 // icon default
 var defaultIcon = ""
 
 // script defaults
-var defaultScriptSource = "https://raw.githubusercontent.com/dan-snelson/Setup-Your-Mac/main/Setup-Your-Mac-via-Dialog.bash"
+//old defaultScriptSource: https://raw.githubusercontent.com/dan-snelson/Setup-Your-Mac/main/Setup-Your-Mac-via-Dialog.bash
+var defaultScriptSource = "https://raw.githubusercontent.com/setup-your-mac/Setup-Your-Mac/main/Setup-Your-Mac-via-Dialog.bash"
 
 // brandng defaults
 var defaultBannerImage = "https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg"
