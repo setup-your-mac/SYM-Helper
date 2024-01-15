@@ -736,57 +736,67 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 }   // if configDetails.count > 0 - end
             }
         }   // for theConfig in configurationsArray - end
+        
         var finalScript = ""
+        var exportTitle = ""
         
-        setBranding(whichObject: "bannerImage")
-        setBranding(whichObject: "displayText")
-        setBranding(whichObject: "lightIcon")
-        setBranding(whichObject: "darkIcon")
-        
-        setPrompt(whichPrompt: "promptForUsername")
-        setPrompt(whichPrompt: "prefillUsername")
-        setPrompt(whichPrompt: "promptForRealName")
-        setPrompt(whichPrompt: "prefillRealname")
-        setPrompt(whichPrompt: "promptForEmail")
-        setPrompt(whichPrompt: "promptForPosition")
-        setPrompt(whichPrompt: "promptForComputerName")
-        setPrompt(whichPrompt: "promptForAssetTag")
-        
-        setPrompt(whichPrompt: "disableAssetTagRegex")
-        
-        setPrompt(whichPrompt: "promptForRoom")
-        setPrompt(whichPrompt: "promptForBuilding")
-        setPrompt(whichPrompt: "promptForDepartment")
-        setPrompt(whichPrompt: "promptForConfiguration")
-        setPrompt(whichPrompt: "moveableInProduction")
-        
-        setSupport(whichField: "teamName")
-        setSupport(whichField: "teamPhone")
-        setSupport(whichField: "teamEmail")
-        setSupport(whichField: "kb")
-        if scriptVersion.0 <= 1 && scriptVersion.1 < 13 {
-            setSupport(whichField: "errorKb")
-            setSupport(whichField: "helpKb")
+        if NSEvent.modifierFlags.contains(.option) {
+            exportTitle = "SYM-policy.json"
+            finalScript = configCases
         } else {
-            setSupport(whichField: "errorKb2")
-            setSupport(whichField: "teamWebsite")
+            exportTitle = "Setup-Your-Mac.bash"
+            setBranding(whichObject: "bannerImage")
+            setBranding(whichObject: "displayText")
+            setBranding(whichObject: "lightIcon")
+            setBranding(whichObject: "darkIcon")
+            
+            setPrompt(whichPrompt: "promptForUsername")
+            setPrompt(whichPrompt: "prefillUsername")
+            setPrompt(whichPrompt: "promptForRealName")
+            setPrompt(whichPrompt: "prefillRealname")
+            setPrompt(whichPrompt: "promptForEmail")
+            setPrompt(whichPrompt: "promptForPosition")
+            setPrompt(whichPrompt: "promptForComputerName")
+            setPrompt(whichPrompt: "promptForAssetTag")
+            
+            setPrompt(whichPrompt: "disableAssetTagRegex")
+            
+            setPrompt(whichPrompt: "promptForRoom")
+            setPrompt(whichPrompt: "promptForBuilding")
+            setPrompt(whichPrompt: "promptForDepartment")
+            setPrompt(whichPrompt: "promptForConfiguration")
+            setPrompt(whichPrompt: "moveableInProduction")
+            
+            setSupport(whichField: "teamName")
+            setSupport(whichField: "teamPhone")
+            setSupport(whichField: "teamEmail")
+            setSupport(whichField: "kb")
+            if scriptVersion.0 <= 1 && scriptVersion.1 < 13 {
+                setSupport(whichField: "errorKb")
+                setSupport(whichField: "helpKb")
+            } else {
+                setSupport(whichField: "errorKb2")
+                setSupport(whichField: "teamWebsite")
+            }
+            
+            setLocation(type: "buildingsListRaw")
+            setLocation(type: "departmentListRaw")
+            
+            iconFix()
+            
+            // write out configurations
+            let policy_array_regex = try! NSRegularExpression(pattern: "case \\$\\{symConfiguration\\} in(.|\n|\r)*?esac", options:.caseInsensitive)
+            finalScript = policy_array_regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "case \\$\\{symConfiguration\\} in\n\n    \(configCases)    esac")
+            
         }
-        
-        setLocation(type: "buildingsListRaw")
-        setLocation(type: "departmentListRaw")
-        
-        iconFix()
-        
-        // write out configurations
-        let policy_array_regex = try! NSRegularExpression(pattern: "case \\$\\{symConfiguration\\} in(.|\n|\r)*?esac", options:.caseInsensitive)
-        finalScript = policy_array_regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "case \\$\\{symConfiguration\\} in\n\n    \(configCases)    esac")
+
         
         policyArray_Spinner.isHidden = true
         
         // fix - don't save until we've hit all configs
         let saveDialog = NSSavePanel()
         saveDialog.canCreateDirectories = true
-        saveDialog.nameFieldStringValue = "Setup-Your-Mac.bash"
+        saveDialog.nameFieldStringValue = exportTitle
         saveDialog.beginSheetModal(for: self.view.window!){ result in
             if result == .OK {
                 let scriptName = saveDialog.nameFieldStringValue
