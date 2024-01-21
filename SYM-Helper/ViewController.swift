@@ -30,6 +30,7 @@ class EnrollmentActions: NSObject {
     @objc var id: String
     @objc var icon: String?
     @objc var listitem: String?
+    @objc var subtitle: String?
     @objc var progressText: String?
     @objc var trigger: String?
     @objc var command: String?
@@ -37,11 +38,12 @@ class EnrollmentActions: NSObject {
     @objc var objectType: String // policy or command
     @objc var timeout: String?
     
-    init(name: String, id: String, icon: String?, listitem: String?, progressText: String?, trigger: String?, command: String?, arguments: [String]?, objectType: String, timeout: String?) {
+    init(name: String, id: String, icon: String?, listitem: String?, subtitle: String?, progressText: String?, trigger: String?, command: String?, arguments: [String]?, objectType: String, timeout: String?) {
         self.name         = name
         self.id           = id
         self.icon         = icon
         self.listitem     = listitem
+        self.subtitle     = subtitle
         self.progressText = progressText
         self.trigger      = trigger
         self.command      = command
@@ -133,6 +135,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     
     fileprivate func clearTextFields() {
         listitemDisplayText_TextField.stringValue = ""
+        subtitle_TextField.stringValue            = ""
         iconPath_TextField.stringValue            = ""
         progressText_TextField.stringValue        = ""
         trigger_TextField.stringValue             = ""
@@ -175,7 +178,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         policiesArray = staticAllPolicies
         
         for (policyId, policyInfo) in currentPolicies {
-            enrollmentActions.append(EnrollmentActions(name: policyInfo["listitem"]!, id: policyId, icon: policyInfo["icon"]!, listitem: policyInfo["listitem"]!, progressText: policyInfo["progresstext"]!, trigger: policyInfo["trigger"]!, command: policyInfo["command"]!, arguments: [], objectType: policyInfo["objectType"]!, timeout: policyInfo["timeout"]!))
+            enrollmentActions.append(EnrollmentActions(name: policyInfo["listitem"]!, id: policyId, icon: policyInfo["icon"]!, listitem: policyInfo["listitem"]!, subtitle: policyInfo["subtitle"]!, progressText: policyInfo["progresstext"]!, trigger: policyInfo["trigger"]!, command: policyInfo["command"]!, arguments: [], objectType: policyInfo["objectType"]!, timeout: policyInfo["timeout"]!))
             policiesArray.removeAll(where: { $0.id == policyId })
         }
         // build enrollmentActions - end
@@ -329,6 +332,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     @IBOutlet weak var policyArray_Spinner: NSProgressIndicator!
     
     @IBOutlet weak var listitemDisplayText_TextField: NSTextField!
+    @IBOutlet weak var subtitle_TextField: NSTextField!
     @IBOutlet weak var iconPath_TextField: NSTextField!
     
     @IBOutlet weak var iconPreview_WebView: WKWebView!
@@ -536,7 +540,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             configsDict[configuration_Button.titleOfSelectedItem!]![policyId] = ["listitem": policyName, "id": policyId, "icon": icon, "progresstext": progresstext, "trigger": customTrigger, "validation": validation, "command": "", "arguments": "", "objectType": "policy", "timeout": "", "grouped": "\(grouped)", "groupId": "\(groupId)"]
             
             // command same as validation? todo
-            enrollmentActions.append(EnrollmentActions(name: policyName, id: policyId, icon: icon, listitem: policyName, progressText: progresstext, trigger: customTrigger, command: "", arguments: [], objectType: "policy", timeout: ""))
+            enrollmentActions.append(EnrollmentActions(name: policyName, id: policyId, icon: icon, listitem: policyName, subtitle: "", progressText: progresstext, trigger: customTrigger, command: "", arguments: [], objectType: "policy", timeout: ""))
             }
 //        let trigger = (customTrigger == "recon") ? customTrigger:policyId
         
@@ -552,6 +556,9 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 case "listitemDisplayText_TextField":
                     configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"] = listitemDisplayText_TextField.stringValue
                     enrollmentActions[theRow].listitem = listitemDisplayText_TextField.stringValue
+                case "subtitle_TextField":
+                    configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["subtitle"] = subtitle_TextField.stringValue
+                    enrollmentActions[theRow].subtitle = subtitle_TextField.stringValue
                 case "progressText_TextField":
                     configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["progresstext"] = progressText_TextField.stringValue
                     enrollmentActions[theRow].progressText = progressText_TextField.stringValue
@@ -650,6 +657,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                     
                     let icon          = result["icon"]
                     let policyName    = result["listitem"]
+                    let subtitle      = result["subtitle"] ?? ""
                     let progresstext  = result["progresstext"]
                     var customTrigger = result["trigger"]
                     var validation    = result["validation"] ?? ""
@@ -707,6 +715,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                     policy_array.append("""
                         {
                             "listitem": "\(String(describing: policyName!))",
+                            "subtitle": "\(String(describing: subtitle))",
                             "icon": "\(String(describing: icon!))",
                             "progresstext": "\(progresstext ?? "Processing policy \(String(describing: policyName!))")",
                             "trigger_list": [
@@ -1195,9 +1204,9 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             selectedPoliciesArray.append(Policy(name: theName, id: "\(theId)", configs: [configuration_Button.titleOfSelectedItem!], grouped: false, groupId: ""))
             selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
             
-            configsDict[configuration_Button.titleOfSelectedItem!]![theId] = ["listitem": newItem["listitem"]!, "id": theId, "icon": newItem["icon"]!, "progresstext": newItem["progressText"]!, "trigger": newItem["trigger"]!, "validation": "Local", "command": "", "arguments": "", "objectType": "Local Validation", "timeout": "", "grouped": "false", "groupId": ""]
+            configsDict[configuration_Button.titleOfSelectedItem!]![theId] = ["listitem": newItem["listitem"]!, "subtitle": "", "id": theId, "icon": newItem["icon"]!, "progresstext": newItem["progressText"]!, "trigger": newItem["trigger"]!, "validation": "Local", "command": "", "arguments": "", "objectType": "Local Validation", "timeout": "", "grouped": "false", "groupId": ""]
             
-            enrollmentActions.append(EnrollmentActions(name: theName, id: theId, icon: newItem["icon"]!, listitem: theName, progressText: theName, trigger: "", command: "", arguments: [], objectType: "Local Validation", timeout: ""))
+            enrollmentActions.append(EnrollmentActions(name: theName, id: theId, icon: newItem["icon"]!, listitem: theName, subtitle: "", progressText: theName, trigger: "", command: "", arguments: [], objectType: "Local Validation", timeout: ""))
 
             selectedPoliciesArray.last!.configs.append(configuration_Button.titleOfSelectedItem!)
             selectedPolicies_TableView.reloadData()
@@ -1223,11 +1232,11 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
                 selectedPoliciesArray.last!.configs.append(configuration_Button.titleOfSelectedItem!)
                 
-                policy_array_dict[theId] = ["listitem": theLabel, "icon": icon, "progresstext": theLabel, "trigger": "", "thePath": newItem["command"] ?? ""]
+                policy_array_dict[theId] = ["listitem": theLabel, "subtitle": "", "icon": icon, "progresstext": theLabel, "trigger": "", "thePath": newItem["command"] ?? ""]
                 
-                configsDict[configuration_Button.titleOfSelectedItem!]![theId] = ["listitem": theLabel, "id": theId, "icon": icon, "progresstext": theLabel, "trigger": "", "validation": "None", "command": newItem["command"]!, "objectType": "command", "timeout": "", "grouped": "", "groupId": ""]
+                configsDict[configuration_Button.titleOfSelectedItem!]![theId] = ["listitem": theLabel, "subtitle": "", "id": theId, "icon": icon, "progresstext": theLabel, "trigger": "", "validation": "None", "command": newItem["command"]!, "objectType": "command", "timeout": "", "grouped": "", "groupId": ""]
                 
-                enrollmentActions.append(EnrollmentActions(name: theLabel, id: theId, icon: icon, listitem: theLabel, progressText: theLabel, trigger: "", command: commandToArray[0], arguments: argumentArray, objectType: "command", timeout: ""))
+                enrollmentActions.append(EnrollmentActions(name: theLabel, id: theId, icon: icon, listitem: theLabel, subtitle: "", progressText: theLabel, trigger: "", command: commandToArray[0], arguments: argumentArray, objectType: "command", timeout: ""))
                  
                 selectedPolicies_TableView.reloadData()
                 usleep(1000)
@@ -1288,6 +1297,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         }
         
         listitemDisplayText_TextField.delegate = self
+        subtitle_TextField.delegate            = self
         progressText_TextField.delegate        = self
         iconPath_TextField.delegate            = self
         validation_TextField.delegate          = self
@@ -1502,6 +1512,7 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
             }
             
             listitemDisplayText_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["listitem"] ?? ""
+            subtitle_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["subtitle"] ?? ""
             iconPath_TextField.stringValue = configsDict[configuration_Button.titleOfSelectedItem!]![selectedPolicyId]!["icon"] ?? defaultIcon
             previewIcon()
             
