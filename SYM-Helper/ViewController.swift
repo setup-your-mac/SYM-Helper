@@ -178,7 +178,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         policiesArray = staticAllPolicies
         
         for (policyId, policyInfo) in currentPolicies {
-            enrollmentActions.append(EnrollmentActions(name: policyInfo["listitem"]!, id: policyId, icon: policyInfo["icon"]!, listitem: policyInfo["listitem"]!, subtitle: policyInfo["subtitle"]!, progressText: policyInfo["progresstext"]!, trigger: policyInfo["trigger"]!, command: policyInfo["command"]!, arguments: [], objectType: policyInfo["objectType"]!, timeout: policyInfo["timeout"]!))
+            enrollmentActions.append(EnrollmentActions(name: policyInfo["listitem"]!, id: policyId, icon: policyInfo["icon"]!, listitem: policyInfo["listitem"]!, subtitle: policyInfo["subtitle"] ?? "", progressText: policyInfo["progresstext"]!, trigger: policyInfo["trigger"]!, command: policyInfo["command"]!, arguments: [], objectType: policyInfo["objectType"]!, timeout: policyInfo["timeout"]!))
             policiesArray.removeAll(where: { $0.id == policyId })
         }
         // build enrollmentActions - end

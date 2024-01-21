@@ -786,7 +786,7 @@
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="387" id="n1X-fV-3EF"/>
                                 </constraints>
                                 <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="a4J-g6-Olf">
-                                    <rect key="frame" x="1" y="371" width="414" height="16"/>
+                                    <rect key="frame" x="1" y="371" width="439" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="z5d-MN-D7k">
@@ -848,7 +848,7 @@
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="387" id="yyG-0a-AE8"/>
                                 </constraints>
                                 <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="w48-zE-NFN">
-                                    <rect key="frame" x="1" y="350" width="389" height="16"/>
+                                    <rect key="frame" x="1" y="371" width="439" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="5yR-dj-aOz">
