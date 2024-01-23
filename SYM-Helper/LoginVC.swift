@@ -159,7 +159,12 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         } else {
             theSender = sender as! String
         }
-//        print("[login_action] sender: \(theSender)")
+        print("[login_action] sender: \(theSender)")
+        if theSender == "Add" {
+            JamfProServer.destination = jamfProServer_textfield.stringValue
+            JamfProServer.username    = jamfProUsername_textfield.stringValue
+            JamfProServer.password    = jamfProPassword_textfield.stringValue
+        }
 //        print("[login_action] destination: \(JamfProServer.destination)")
 //        print("[login_action] username: \(JamfProServer.username)")
 //        print("[login_action] userpass: \(JamfProServer.password)")
