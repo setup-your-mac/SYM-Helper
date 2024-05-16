@@ -23,7 +23,7 @@ class Credentials {
         if service != "" && account != "" && service.first != "/" {
             var theService = service
         
-            print("[Credentials.save] useApiClient: \(useApiClient)")
+//            print("[Credentials.save] useApiClient: \(useApiClient)")
             if useApiClient == 1 {
                 theService = "apiClient-" + theService
             }

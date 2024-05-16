@@ -68,7 +68,7 @@ class OtherItemVC: NSViewController {
             icon_Label.isHidden                      = false
             validationIcon_TextField.isHidden        = false
         } else {
-            otherItem_TabView.selectTabViewItem(withIdentifier: "command")
+            otherItem_TabView.selectTabViewItem(withIdentifier: "commandTab")
         }
     }
     

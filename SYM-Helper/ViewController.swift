@@ -1072,7 +1072,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 defaults.set(JamfProServer.destination, forKey: "currentServer")
                 defaults.set(JamfProServer.username, forKey: "username")
                 
-                print("[sendLoginInfo] saveCredsState: \(saveCredsState)")
+//                print("[sendLoginInfo] saveCredsState: \(saveCredsState)")
                 if saveCredsState == 1 {
                     Credentials().save(service: "\(JamfProServer.destination.fqdnFromUrl)", account: JamfProServer.username, credential: JamfProServer.password)
                 }
@@ -1106,7 +1106,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 
                 // migrate old promptFor settings - 230924
                 if Settings.shared.dict["promptFor"] == nil {
-                    print("convert prompt for... settings to new format")
                     writeToLog.message(stringOfText: "convert prompt for... settings to new format")
                     var promptForDict = [String:Any]()
                     
