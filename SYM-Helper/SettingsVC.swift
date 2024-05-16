@@ -56,7 +56,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
     @IBOutlet weak var helpHyperlink_Button: NSButton!
     @IBAction func kbDetails_Action(_ sender: NSButton) {
         
-        let details = ( (sender.identifier?.rawValue ?? "unknown") == "errorKb" ? errorKb_TextField.stringValue:helpWebsite_TextField.stringValue )
+        let details = ( (sender.identifier?.rawValue ?? "unknown") == "errorKb_button" ? errorKb_TextField.stringValue:helpWebsite_TextField.stringValue )
         
         performSegue(withIdentifier: "KbPopover", sender: ["whichField": sender.identifier?.rawValue ?? "unknown", "details": details])
     }

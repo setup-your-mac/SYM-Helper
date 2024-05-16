@@ -1141,7 +1141,7 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <textField identifier="iconPath_TextField" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CNx-d7-mUx">
+                            <textField identifier="trigger_TextField" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CNx-d7-mUx">
                                 <rect key="frame" x="124" y="102" width="712" height="21"/>
                                 <textFieldCell key="cell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="tMs-eI-F36">
                                     <font key="font" usesAppearanceFont="YES"/>
@@ -1693,7 +1693,7 @@ DQ
                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
-                                                <button identifier="errorKb" translatesAutoresizingMaskIntoConstraints="NO" id="GGt-D2-jDe">
+                                                <button identifier="errorKb_button" translatesAutoresizingMaskIntoConstraints="NO" id="GGt-D2-jDe">
                                                     <rect key="frame" x="27" y="64" width="637" height="24"/>
                                                     <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" alignment="left" borderStyle="border" transparent="YES" imageScaling="proportionallyDown" inset="2" id="Bdg-qr-BbF">
                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1707,7 +1707,7 @@ DQ
                                                         <action selector="kbDetails_Action:" target="pYm-xb-CiH" id="wzc-hM-2AI"/>
                                                     </connections>
                                                 </button>
-                                                <button identifier="helpKb" translatesAutoresizingMaskIntoConstraints="NO" id="h8z-x4-IIK">
+                                                <button identifier="helpKb_button" translatesAutoresizingMaskIntoConstraints="NO" id="h8z-x4-IIK">
                                                     <rect key="frame" x="27" y="11" width="637" height="24"/>
                                                     <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" alignment="left" borderStyle="border" transparent="YES" imageScaling="proportionallyDown" inset="2" id="7WF-PX-s0i">
                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2684,7 +2684,7 @@ Gw
                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
-                                                <textField identifier="command" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JIx-xM-c6V">
+                                                <textField identifier="commandOther" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JIx-xM-c6V">
                                                     <rect key="frame" x="115" y="54" width="658" height="23"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="658" id="Ghx-dp-jCp"/>
@@ -2747,7 +2747,7 @@ Gw
                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
-                                                <textField identifier="command" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="3Qv-Ql-PUE">
+                                                <textField identifier="validationOther" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="3Qv-Ql-PUE">
                                                     <rect key="frame" x="96" y="48" width="676" height="21"/>
                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="Z2H-rZ-gUC">
                                                         <font key="font" metaFont="system"/>
