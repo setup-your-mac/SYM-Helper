@@ -212,7 +212,6 @@ func getCurrentTime() -> String {
     let stringDate = "\(dateTime.year!)\(currentMonth)\(currentDay)_\(currentHour)\(currentMinute)\(currentSecond)"
     return stringDate
 }
-
 // add leading zero to single digit integers
 func leadingZero(value: Int) -> String {
     var formattedValue = ""

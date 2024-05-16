@@ -23,6 +23,7 @@ class Credentials {
         if service != "" && account != "" && service.first != "/" {
             var theService = service
         
+            print("[Credentials.save] useApiClient: \(useApiClient)")
             if useApiClient == 1 {
                 theService = "apiClient-" + theService
             }
@@ -41,6 +42,7 @@ class Credentials {
                     
                     // see if credentials already exist for server
                     let accountCheck = retrieve(service: service, account: account)
+                    print("[addStatus] accountCheck for service \(service) with account \(account): \(accountCheck)")
 //                    let accountCheck = retrieve(service: keychainItemName, account: account)
                     if accountCheck.count == 0 {
                         // try to add new credentials, if account exists we'll try updating it
@@ -61,17 +63,24 @@ class Credentials {
                         }
                     } else {
                         // credentials already exist, try to update
+                        print("[addStatus] update credentials if need be")
+//                        print("[addStatus] current password: \(String(data: password, encoding: .utf8) ?? "")")
+                        //                        print("[addStatus]     new password: \(credential)")
+                        print("[addStatus] keychainItemName: \(keychainItemName)")
                         keychainQuery = [kSecClass as String: kSecClassGenericPasswordString,
                                          kSecAttrService as String: keychainItemName,
                                          kSecMatchLimit as String: kSecMatchLimitOne,
                                          kSecReturnAttributes as String: true]
                         
-                        for (username, password) in accountCheck {
-                            if account == username && credential != password {
+                        for (username, storedPassword) in accountCheck {
+                            print("[addStatus] current password: \(storedPassword)")
+                            print("[addStatus]     new password: \(credential)")
+//                            let password = String(data: passwordData, encoding: .utf8) ?? ""
+                            if account == username && credential != storedPassword {
                                 // credentials already exist, try to update if necessary
 //                                if account == username {
-                                    let updateStatus = SecItemUpdate(keychainQuery as CFDictionary, [kSecValueDataString:password] as [NSString : Any] as CFDictionary)
-//                                    print("[Credentials.save] updateStatus result: \(updateStatus)")
+                                    let updateStatus = SecItemUpdate(keychainQuery as CFDictionary, [kSecValueDataString:storedPassword] as [NSString : Any] as CFDictionary)
+                                    print("[Credentials.save] updateStatus result: \(updateStatus)")
 //                                } else {
 ////                                    print("[addStatus] save password for: \(account)")
 //                                    let addStatus = SecItemAdd(keychainQuery as CFDictionary, nil)

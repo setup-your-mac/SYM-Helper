@@ -98,9 +98,9 @@ class TokenDelegate: NSObject, URLSessionDelegate {
 
                                 JamfProServer.base64Creds = base64creds
                                 if apiClient {
-                                    JamfProServer.authExpires = 30 //(endpointJSON["expires_in"] as? String ?? "")!
+                                    JamfProServer.authExpires = 20 //(endpointJSON["expires_in"] as? String ?? "")!
                                 } else {
-                                    JamfProServer.authExpires = (endpointJSON["expires"] as? Double ?? 30)!
+                                    JamfProServer.authExpires = (endpointJSON["expires"] as? Double ?? 20)!
                                 }
                                 JamfProServer.tokenCreated = Date()
                                 JamfProServer.validToken   = true
@@ -276,25 +276,5 @@ class TokenDelegate: NSObject, URLSessionDelegate {
         task.resume()
         
     }   // func getVersion - end
-    
-    /*
-    func refresh(server: String, whichServer: String, b64Creds: String) {
-        DispatchQueue.main.async { [self] in
-            if runComplete {
-                JamfProServer.validToken = false
-                writeToLog.message(stringOfText: "[TokenDelegate.refresh] terminated token refresh")
-                return
-            }
-            writeToLog.message(stringOfText: "[TokenDelegate.refresh] queue token refresh for \(server)")
-            renewQ.async { [self] in
-                sleep(refreshInterval)
-                JamfProServer.validToken = false
-                getToken(whichServer: whichServer, serverUrl: server, base64creds: JamfProServer.base64Creds) {
-                    (result: (Int, String)) in
-//                    print("[JamfPro.refresh] returned: \(result)")
-                }
-            }
-        }
-    }
-    */
+
 }

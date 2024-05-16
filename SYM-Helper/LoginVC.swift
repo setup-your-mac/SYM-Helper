@@ -148,9 +148,6 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         spinner_PI.isHidden = false
         spinner_PI.startAnimation(self)
         didRun = true
-//        JamfProServer.destination = jamfProServer_textfield.stringValue
-//        JamfProServer.username    = jamfProUsername_textfield.stringValue
-//        JamfProServer.password    = jamfProPassword_textfield.stringValue
         
         var theSender = ""
 //        var theButton: NSButton?
@@ -160,14 +157,14 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             theSender = sender as! String
         }
         print("[login_action] sender: \(theSender)")
-        if theSender == "Add" {
+//        if theSender == "Add" {
             JamfProServer.destination = jamfProServer_textfield.stringValue
             JamfProServer.username    = jamfProUsername_textfield.stringValue
             JamfProServer.password    = jamfProPassword_textfield.stringValue
-        }
-//        print("[login_action] destination: \(JamfProServer.destination)")
-//        print("[login_action] username: \(JamfProServer.username)")
-//        print("[login_action] userpass: \(JamfProServer.password)")
+//        }
+        print("[login_action] destination: \(JamfProServer.destination)")
+        print("[login_action] username: \(JamfProServer.username)")
+        print("[login_action] userpass: \(JamfProServer.password)")
         
         // check for update/removal of server display name
         if jamfProServer_textfield.stringValue == "" {
@@ -230,7 +227,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             
             login_Button.isEnabled = false
             
-            if JamfProServer.destination.prefix(4) != "http" {
+            if JamfProServer.destination.lowercased().prefix(4) != "http" {
                 jamfProServer_textfield.stringValue = "https://\(JamfProServer.destination)"
                 JamfProServer.destination = jamfProServer_textfield.stringValue
             }

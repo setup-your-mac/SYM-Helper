@@ -320,8 +320,6 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
     }
     
     func controlTextDidEndEditing(_ obj: Notification) {
-//        print("[controlTextDidEndEditing] obj: \(obj)")
-//        print("[controlTextDidEndEditing] obj.name.rawValue: \(obj.name.rawValue)")
         var whichField = ""
         if let textField = obj.object as? NSTextField {
             whichField = textField.identifier!.rawValue
@@ -333,8 +331,6 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         print("[controlTextDidEndEditing]        whichField: \(whichField)")
 
     }
-    
-    
     
     // for scrolling text fields
     func textDidEndEditing(_ obj: Notification) {

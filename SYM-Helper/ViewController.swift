@@ -1072,6 +1072,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 defaults.set(JamfProServer.destination, forKey: "currentServer")
                 defaults.set(JamfProServer.username, forKey: "username")
                 
+                print("[sendLoginInfo] saveCredsState: \(saveCredsState)")
                 if saveCredsState == 1 {
                     Credentials().save(service: "\(JamfProServer.destination.fqdnFromUrl)", account: JamfProServer.username, credential: JamfProServer.password)
                 }
@@ -1465,7 +1466,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
 }
 
 extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
-    
     
     fileprivate enum CellIdentifiers {
         static let NameCell    = "policyName"
