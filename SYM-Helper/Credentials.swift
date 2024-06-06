@@ -94,10 +94,7 @@ class Credentials {
         
         var keychainResult = [String:String]()
         var theService = service
-        
-//        if account != "" {
-//            theService = account + "-" + theService
-//        }
+
 //        print("[credentials] JamfProServer.sourceApiClient: \(JamfProServer.sourceUseApiClient)")
         
         if useApiClient == 1 {

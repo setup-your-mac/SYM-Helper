@@ -764,8 +764,10 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             setPrompt(whichPrompt: "promptForRealName")
             setPrompt(whichPrompt: "prefillRealname")
             setPrompt(whichPrompt: "promptForEmail")
+            setPrompt(whichPrompt: "prefillEmail")
             setPrompt(whichPrompt: "promptForPosition")
             setPrompt(whichPrompt: "promptForComputerName")
+            setPrompt(whichPrompt: "prefillComputerName")
             setPrompt(whichPrompt: "promptForAssetTag")
             
             setPrompt(whichPrompt: "disableAssetTagRegex")
@@ -1109,7 +1111,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                     writeToLog.message(stringOfText: "convert prompt for... settings to new format")
                     var promptForDict = [String:Any]()
                     
-                    for whichPrompt in ["promptForUsername", "prefillUsername", "promptForRealName", "prefillRealname", "promptForEmail", "promptForPosition", "promptForComputerName", "promptForAssetTag", "promptForRoom", "promptForBuilding", "promptForDepartment", "promptForConfiguration", "moveableInProduction"] {
+                    for whichPrompt in ["promptForUsername", "prefillUsername", "promptForRealName", "prefillRealname", "promptForEmail", "prefillEmail", "promptForPosition", "promptForComputerName", "prefillComputerName", "promptForAssetTag", "promptForRoom", "promptForBuilding", "promptForDepartment", "promptForConfiguration", "moveableInProduction"] {
                         if Settings.shared.dict["\(whichPrompt)"] != nil {
                             promptForDict["\(whichPrompt)"] = Settings.shared.dict["\(whichPrompt)"] as Any
                             Settings.shared.dict["\(whichPrompt)"] = nil

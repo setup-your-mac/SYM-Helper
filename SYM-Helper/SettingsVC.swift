@@ -67,13 +67,15 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
     @IBOutlet weak var pfrn_Switch: NSSwitch!
     @IBOutlet weak var prn_Switch: NSSwitch!
     @IBOutlet weak var pfe_Switch: NSSwitch!
-    @IBOutlet weak var pfp_Switch: NSSwitch!
+    @IBOutlet weak var pe_Switch: NSSwitch!
     @IBOutlet weak var pfcn_Switch: NSSwitch!
+    @IBOutlet weak var pcn_Switch: NSSwitch!
     @IBOutlet weak var pfat_Switch: NSSwitch!
     @IBOutlet weak var disableAssetTagRegex_Button: NSButton!
     @IBOutlet weak var pfr_Switch: NSSwitch!
     @IBOutlet weak var pfb_Switch: NSSwitch!
     @IBOutlet weak var pfd_Switch: NSSwitch!
+    @IBOutlet weak var pfp_Switch: NSSwitch!
     @IBOutlet weak var pfc_Switch: NSSwitch!
     @IBOutlet weak var mip_Switch: NSSwitch!
     
@@ -221,9 +223,11 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         promptForDict["promptForUsername"]      = pfu_Switch.state.rawValue
         promptForDict["prefillUsername"]        = pu_Switch.state.rawValue
         promptForDict["promptForComputerName"]  = pfcn_Switch.state.rawValue
+        promptForDict["prefillComputerName"]    = pcn_Switch.state.rawValue
         promptForDict["promptForRealName"]      = pfrn_Switch.state.rawValue
         promptForDict["prefillRealname"]        = prn_Switch.state.rawValue
         promptForDict["promptForEmail"]         = pfe_Switch.state.rawValue
+        promptForDict["prefillEmail"]           = pe_Switch.state.rawValue
         promptForDict["promptForPosition"]      = pfp_Switch.state.rawValue
         promptForDict["promptForAssetTag"]      = pfat_Switch.state.rawValue
         promptForDict["disableAssetTagRegex"]   = disableAssetTagRegex_Button.state.rawValue
@@ -399,12 +403,14 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
 
         // prompt for
         if (Settings.shared.dict["promptFor"] as? [String:Any]) == nil {
-            pfu_Switch.state  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForUsername"))
+            pfu_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForUsername"))
             pu_Switch.state                   = NSControl.StateValue(rawValue: onOff(whichButton: "prefillUsername"))
             pfcn_Switch.state                 = NSControl.StateValue(rawValue: onOff(whichButton: "promptForComputerName"))
+            pcn_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "prefillComputerName"))
             pfrn_Switch.state                 = NSControl.StateValue(rawValue: onOff(whichButton: "promptForRealName"))
             prn_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "prefillRealname"))
             pfe_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForEmail"))
+            pe_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "prefillEmail"))
             pfp_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForPosition"))
             pfat_Switch.state                 = NSControl.StateValue(rawValue: onOff(whichButton: "promptForAssetTag"))
             disableAssetTagRegex_Button.state = .off
@@ -420,9 +426,11 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
             pfu_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["promptForUsername"] as? Int ?? 1)
             pu_Switch.state                   = NSControl.StateValue(rawValue: promptForDict["prefillUsername"] as? Int ?? 1)
             pfcn_Switch.state                 = NSControl.StateValue(rawValue: promptForDict["promptForComputerName"] as? Int ?? 1)
+            pcn_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["prefillComputerName"] as? Int ?? 1)
             pfrn_Switch.state                 = NSControl.StateValue(rawValue: promptForDict["promptForRealName"] as? Int ?? 1)
             prn_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["prefillRealname"] as? Int ?? 1)
             pfe_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["promptForEmail"] as? Int ?? 1)
+            pe_Switch.state                   = NSControl.StateValue(rawValue: promptForDict["prefillEmail"] as? Int ?? 1)
             pfp_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["promptForPosition"] as? Int ?? 1)
             pfat_Switch.state                 = NSControl.StateValue(rawValue: promptForDict["promptForAssetTag"] as? Int ?? 1)
             disableAssetTagRegex_Button.state = NSControl.StateValue(rawValue: promptForDict["disableAssetTagRegex"] as? Int ?? 1)

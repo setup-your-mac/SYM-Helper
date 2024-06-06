@@ -24,20 +24,17 @@ class SYMScript: NSObject, URLSessionDelegate {
             session.finishTasksAndInvalidate()
             if let httpResponse = response as? HTTPURLResponse {
                 if httpSuccess.contains(httpResponse.statusCode) {
-                    print("[SYMScript] statusCode: \(httpResponse.statusCode)")
+                    print("[SYMScript] get script statusCode: \(httpResponse.statusCode)")
                     
                     if let _ = String(data: data!, encoding: .utf8) {
                         responseData = String(data: data!, encoding: .utf8)!
-//                        writeToLog.message(stringOfText: "[CreateEndpoints] \n\nfull response from create:\n\(responseData)") }
 //                        print("[SYMScript] done fetching script")
 //                        print("[SYMScript] script: \(responseData)")
                         
-    //                    print("getScript: \(symScript)")   (.|\n|\r)
-    //                    if let versionLineRange = responseData.range(of:"#   Version [0-9](.*?)[0-9],(.*?)\\)", options: .regularExpression) {
+//                        print("getScript: \(responseData)")   //(.|\n|\r)
+
                         if let versionLineRange = responseData.range(of:"scriptVersion=\"[0-9](.*?)\"", options: .regularExpression) {
-//                        if let versionLineRange = responseData.range(of:"#   Version [0-9](.|[0-9]|\\.).[0-9](.|[0-9]|\\.).[0-9](.|[0-9]|\\,)", options: .regularExpression) {
                             let versionLine = responseData[versionLineRange]
-//                            let versionString = versionLine.replacing("#   Version ", with: "").dropLast()
                             let versionString = versionLine.replacing("scriptVersion=\"", with: "").dropLast()
 //                            print("[SYMScript.get] scriptVersion: \(String(describing: versionString))")
                             scriptVersion = toTuple(versionString: String(versionString))
