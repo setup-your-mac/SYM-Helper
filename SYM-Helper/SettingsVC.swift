@@ -68,6 +68,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
     @IBOutlet weak var prn_Switch: NSSwitch!
     @IBOutlet weak var pfe_Switch: NSSwitch!
     @IBOutlet weak var pe_Switch: NSSwitch!
+    @IBOutlet weak var emailEnding_Textfield: NSTextField!
     @IBOutlet weak var pfcn_Switch: NSSwitch!
     @IBOutlet weak var pcn_Switch: NSSwitch!
     @IBOutlet weak var pfat_Switch: NSSwitch!
@@ -107,7 +108,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
                     Settings.shared.dict["departmentListRaw"] = departments_TextField.string
                 }
             } else {
-                _ = Alert().display(header: "", message: "Unable to fetch \(whichTab), verify the account has permissions to read \(whichTab)", secondButton: "")
+                _ = Alert.shared.display(header: "", message: "Unable to fetch \(whichTab), verify the account has permissions to read \(whichTab)", secondButton: "")
             }
             
             sender.isEnabled = true
@@ -161,15 +162,32 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
             WriteToLog().message(stringOfText: "Unknown prompt/prefill value")
             return
         }
-        if theIdentifier == "promptForAssetTag" {
+        switch theIdentifier {
+        case "promptForAssetTag":
             if pfat_Switch.state == .off {
                 disableAssetTagRegex_Button.isEnabled = false
             } else {
                 disableAssetTagRegex_Button.isEnabled = true
             }
             disableAssetTagRegex_Button.state     = .off
+        case "prefillEmail":
+            if pe_Switch.state == .on {
+                emailEnding_Textfield.isHidden = false
+            } else {
+                emailEnding_Textfield.isHidden = true
+            }
+//            disableAssetTagRegex_Button.state     = .off
+        default:
+            break
         }
-//        Settings.shared.dict[theIdentifier] = sender.state.rawValue
+//        if theIdentifier == "promptForAssetTag" {
+//            if pfat_Switch.state == .off {
+//                disableAssetTagRegex_Button.isEnabled = false
+//            } else {
+//                disableAssetTagRegex_Button.isEnabled = true
+//            }
+//            disableAssetTagRegex_Button.state     = .off
+//        }
     }
     
     
@@ -228,6 +246,16 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         promptForDict["prefillRealname"]        = prn_Switch.state.rawValue
         promptForDict["promptForEmail"]         = pfe_Switch.state.rawValue
         promptForDict["prefillEmail"]           = pe_Switch.state.rawValue
+        if pe_Switch.state == .on {
+            if emailEnding_Textfield.stringValue.first != "@" {
+                _ = Alert.shared.display(header: "", message: "Prefill email entry must start with a @", secondButton: "")
+                emailEnding_Textfield.becomeFirstResponder()
+                spinner_Progress.stopAnimation(self)
+                ok_Button.isEnabled = true
+                return
+            }
+            promptForDict["emailEnding"] = emailEnding_Textfield.stringValue
+        }
         promptForDict["promptForPosition"]      = pfp_Switch.state.rawValue
         promptForDict["promptForAssetTag"]      = pfat_Switch.state.rawValue
         promptForDict["disableAssetTagRegex"]   = disableAssetTagRegex_Button.state.rawValue
@@ -280,7 +308,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
 //            print("[Settings] getScript: \(symScript)")
             spinner_Progress.stopAnimation(self)
             if symScript == "" {
-                let scriptReply = alert.display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "Use Anyway")
+                let scriptReply = Alert.shared.display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "Use Anyway")
                 if scriptReply == "Use Anyway" {
                     validScriptSource = scriptSource_TextField.stringValue
                     newScriptSource = validScriptSource
@@ -410,7 +438,8 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
             pfrn_Switch.state                 = NSControl.StateValue(rawValue: onOff(whichButton: "promptForRealName"))
             prn_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "prefillRealname"))
             pfe_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForEmail"))
-            pe_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "prefillEmail"))
+            pe_Switch.state                   = NSControl.StateValue(rawValue: onOff(whichButton: "prefillEmail"))
+            emailEnding_Textfield.stringValue = ""
             pfp_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForPosition"))
             pfat_Switch.state                 = NSControl.StateValue(rawValue: onOff(whichButton: "promptForAssetTag"))
             disableAssetTagRegex_Button.state = .off
@@ -431,6 +460,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
             prn_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["prefillRealname"] as? Int ?? 1)
             pfe_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["promptForEmail"] as? Int ?? 1)
             pe_Switch.state                   = NSControl.StateValue(rawValue: promptForDict["prefillEmail"] as? Int ?? 1)
+            emailEnding_Textfield.stringValue = promptForDict["emailEnding"] as? String ?? ""
             pfp_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["promptForPosition"] as? Int ?? 1)
             pfat_Switch.state                 = NSControl.StateValue(rawValue: promptForDict["promptForAssetTag"] as? Int ?? 1)
             disableAssetTagRegex_Button.state = NSControl.StateValue(rawValue: promptForDict["disableAssetTagRegex"] as? Int ?? 1)
@@ -446,6 +476,12 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
             disableAssetTagRegex_Button.state     = .off
         } else {
             disableAssetTagRegex_Button.isEnabled = true
+        }
+        emailEnding_Textfield.placeholderString = Bool.random() ? "@company.com":"@school.edu"
+        if pe_Switch.state == .on {
+            emailEnding_Textfield.isHidden = false
+        } else {
+            emailEnding_Textfield.isHidden = true
         }
         
         

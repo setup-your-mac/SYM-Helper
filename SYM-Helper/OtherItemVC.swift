@@ -49,7 +49,7 @@ class OtherItemVC: NSViewController {
                            "trigger":trigger_TextField.stringValue,
                            "validation":validation]
         if itemType == "validation" && trigger_TextField.stringValue == "" {
-            _ = alert.display(header: "", message: "A trigger must be specified for local validation", secondButton: "")
+            _ = Alert.shared.display(header: "", message: "A trigger must be specified for local validation", secondButton: "")
             return
         } else {
             delegate?.sendOtherItem(newItem: commandDict)

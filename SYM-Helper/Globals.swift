@@ -27,7 +27,7 @@ var tokenTimeCreated: Date?
 
 var useApiClient    = 0
 
-let alert: Alert           = Alert()
+//let alert: Alert           = Alert()
 let writeToLog: WriteToLog = WriteToLog()
 
 var scriptSource           = ""

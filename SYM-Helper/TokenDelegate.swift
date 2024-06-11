@@ -163,21 +163,21 @@ class TokenDelegate: NSObject, URLSessionDelegate {
                             }
                         } else {
                             // server down?
-                            _ = Alert().display(header: "", message: "Failed to get an expected response from \(String(describing: serverUrl)).", secondButton: "")
+                            _ = Alert.shared.display(header: "", message: "Failed to get an expected response from \(String(describing: serverUrl)).", secondButton: "")
                             writeToLog.message(stringOfText: "[TokenDelegate.getToken] Failed to get an expected response from \(String(describing: serverUrl)).  Status Code: \(httpResponse.statusCode)")
                             JamfProServer.validToken = false
                             completion((httpResponse.statusCode, "failed"))
                             return
                         }
                     } else {    // if httpResponse.statusCode <200 or >299
-                        _ = Alert().display(header: "\(serverUrl)", message: "Failed to authenticate to \(serverUrl). \nStatus Code: \(httpResponse.statusCode)", secondButton: "")
+                        _ = Alert.shared.display(header: "\(serverUrl)", message: "Failed to authenticate to \(serverUrl). \nStatus Code: \(httpResponse.statusCode)", secondButton: "")
                         writeToLog.message(stringOfText: "[getToken] Failed to authenticate to \(serverUrl).  Response error: \(httpResponse.statusCode)")
                         JamfProServer.validToken = false
                         completion((httpResponse.statusCode, "failed"))
                         return
                     }
                 } else {
-                    _ = Alert().display(header: "\(serverUrl)", message: "Failed to connect. \nUnknown error, verify url and port.", secondButton: "")
+                    _ = Alert.shared.display(header: "\(serverUrl)", message: "Failed to connect. \nUnknown error, verify url and port.", secondButton: "")
                     writeToLog.message(stringOfText: "[getToken] token response error from \(serverUrl).  Verify url and port")
                     JamfProServer.validToken = false
                     completion((0, "failed"))

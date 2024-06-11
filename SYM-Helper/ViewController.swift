@@ -110,15 +110,16 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     @IBAction func clearRemove_Action(_ sender: NSButton) {
         let currentConfig = configuration_Button.titleOfSelectedItem!
         if clearRemove_Button.titleOfSelectedItem == "Clear" {
-            let reply = alert.display(header: "", message: "Are you sure you want to remove all items from \(currentConfig)?", secondButton: "Cancel")
+            let reply = Alert.shared.display(header: "", message: "Are you sure you want to remove all items from \(currentConfig)?", secondButton: "Cancel")
             if reply == "OK" {
                 clearSelected(currentConfig: currentConfig)
+                previewIcon()
             }
         } else {
             if configuration_Button.titleOfSelectedItem! == "Default" {
-                _ = alert.display(header: "", message: "Cannot remove the default configuration", secondButton: "")
+                _ = Alert.shared.display(header: "", message: "Cannot remove the default configuration", secondButton: "")
             } else {
-                let reply = alert.display(header: "", message: "Are you sure you want to remove \(currentConfig)?", secondButton: "Cancel")
+                let reply = Alert.shared.display(header: "", message: "Are you sure you want to remove \(currentConfig)?", secondButton: "Cancel")
                 if reply == "OK" {
                     clearSelected(currentConfig: currentConfig)
                     configuration_Button.removeItem(withTitle: currentConfig)
@@ -127,6 +128,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                     selectedPoliciesDict[currentConfig] = nil
                     configurationsArray.removeAll(where: { $0 == currentConfig })
                     config_Action("Default")
+                    previewIcon()
                 }
             }
         }
@@ -242,7 +244,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             selectedPolicies_TableView.reloadData()
             selectedPolicies_TableView.selectRowIndexes(IndexSet(integer: firstRow!), byExtendingSelection: false)
         } else {
-            _ = alert.display(header: "Attention:", message: "At least 2 policies must be selected", secondButton: "")
+            _ = Alert.shared.display(header: "Attention:", message: "At least 2 policies must be selected", secondButton: "")
         }
     }
     
@@ -321,7 +323,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             if (FileManager.default.fileExists(atPath: settingsFolder)) {
                 NSWorkspace.shared.open(URL(fileURLWithPath: settingsFolder))
             } else {
-                _ = alert.display(header: "Alert", message: "Unable to open \(settingsFolder)", secondButton: "")
+                _ = Alert.shared.display(header: "Alert", message: "Unable to open \(settingsFolder)", secondButton: "")
             }
         } else {
             performSegue(withIdentifier: "settings", sender: nil)
@@ -440,6 +442,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             }
 
             clearTextFields()
+            previewIcon()
             
             selectedPoliciesDict[configuration_Button.titleOfSelectedItem!] = selectedPoliciesArray
 
@@ -492,6 +495,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             policyArray_Spinner.isHidden = false
             processPolicies(whichId: 0, theConfigIndex: 0)
         } else {
+            _ = Alert.shared.display(header: "", message: "No policies were selected, nothing generated.", secondButton: "")
             generateScript_Button.isEnabled = true
         }
     }
@@ -622,7 +626,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             configurationsArray.remove(at: index)
             configurationsArray.append("Default")
         } else {
-            _ = alert.display(header: "Attention:", message: "'Default' configuration must be defined.", secondButton: "")
+            _ = Alert.shared.display(header: "Attention:", message: "'Default' configuration must be defined.", secondButton: "")
             policyArray_Spinner.isHidden = true
             generateScript_Button.isEnabled = true
             return
@@ -633,7 +637,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         for theConfig in configurationsArray {
             let configDetails = configsDict[theConfig]!
             if theConfig == "Default" && configDetails.count == 0 {
-                _ = alert.display(header: "Attention:", message: "'Default' configuration must be defined.", secondButton: "")
+                _ = Alert.shared.display(header: "Attention:", message: "'Default' configuration must be defined.", secondButton: "")
                 policyArray_Spinner.isHidden = true
                 generateScript_Button.isEnabled = true
                 return
@@ -765,6 +769,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             setPrompt(whichPrompt: "prefillRealname")
             setPrompt(whichPrompt: "promptForEmail")
             setPrompt(whichPrompt: "prefillEmail")
+            setPrompt(whichPrompt: "emailEnding")
             setPrompt(whichPrompt: "promptForPosition")
             setPrompt(whichPrompt: "promptForComputerName")
             setPrompt(whichPrompt: "prefillComputerName")
@@ -906,7 +911,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     private func setPrompt(whichPrompt: String) {
         let promptForDict = Settings.shared.dict["promptFor"] as! [String:Any]
         
-        if whichPrompt == "disableAssetTagRegex" {
+        switch whichPrompt {
+        case "disableAssetTagRegex":
             guard let disable = promptForDict["\(whichPrompt)"] as? Int else {
                 return
             }
@@ -914,22 +920,48 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 let disableATRegex = try! NSRegularExpression(pattern: "\"prompt\" : \"Please enter(.|\n|\r)*?AP, IP or CD.\"", options:.caseInsensitive)
                 symScript = (disableATRegex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\"prompt\" : \"Enter the Asset Tag\",\n\t\t\"regex\" : \"^.*\",\n\t\t\"regexerror\" : \"An Asset Tag is required.\""))
             }
-            return
+        case "emdingEmail":
+            if let settingsRawValue = promptForDict["\(whichPrompt)"] as? String {
+                let regex = try! NSRegularExpression(pattern: "\(whichPrompt)=\".*?\"")
+                symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(whichPrompt)=\"\(settingsRawValue)\""))
+            }
+        default:
+            var trueFalse = "true"
+            if let settingsRawValue = promptForDict["\(whichPrompt)"] as? Int {
+                trueFalse = ( settingsRawValue == 1 ) ? "true":"false"
+            } else if let settingsRawValue = promptForDict["\(whichPrompt)"] as? String {
+                trueFalse = settingsRawValue
+            }
+            let regex = try! NSRegularExpression(pattern: "\(whichPrompt)=\".*?\"")
+            symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(whichPrompt)=\"\(trueFalse)\""))
         }
         
-        var trueFalse = "true"
-        if let settingsRawValue = promptForDict["\(whichPrompt)"] as? Int {
-            trueFalse = ( settingsRawValue == 1 ) ? "true":"false"
-        } else if let settingsRawValue = promptForDict["\(whichPrompt)"] as? String {
-            trueFalse = settingsRawValue
-        }
-        let regex = try! NSRegularExpression(pattern: "\(whichPrompt)=\".*?\"")
-        symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(whichPrompt)=\"\(trueFalse)\""))
+//        if whichPrompt == "disableAssetTagRegex" {
+//            guard let disable = promptForDict["\(whichPrompt)"] as? Int else {
+//                return
+//            }
+//            if disable == 1 {
+//                let disableATRegex = try! NSRegularExpression(pattern: "\"prompt\" : \"Please enter(.|\n|\r)*?AP, IP or CD.\"", options:.caseInsensitive)
+//                symScript = (disableATRegex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\"prompt\" : \"Enter the Asset Tag\",\n\t\t\"regex\" : \"^.*\",\n\t\t\"regexerror\" : \"An Asset Tag is required.\""))
+//            }
+//            return
+//        }
+//        
+//        var trueFalse = "true"
+//        if let settingsRawValue = promptForDict["\(whichPrompt)"] as? Int {
+//            trueFalse = ( settingsRawValue == 1 ) ? "true":"false"
+//        } else if let settingsRawValue = promptForDict["\(whichPrompt)"] as? String {
+//            trueFalse = settingsRawValue
+//        }
+//        let regex = try! NSRegularExpression(pattern: "\(whichPrompt)=\".*?\"")
+//        symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(whichPrompt)=\"\(trueFalse)\""))
     }
+    
     private func setLocation(type: String) {
         let regex = try! NSRegularExpression(pattern: "\(type)=\".*?\"", options:.caseInsensitive)
         symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(type)=\"\(Settings.shared.dict["\(type)"] ?? "")\""))
     }
+    
     private func iconFix() {
         let regex1 = try! NSRegularExpression(pattern: "setupYourMacPolicyArrayIconPrefixUrl=", options:.caseInsensitive)
         symScript = (regex1.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "## setupYourMacPolicyArrayIconPrefixUrl="))
@@ -952,7 +984,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             symScript = result
             
             if !symScript.contains("# Setup Your Mac via swiftDialog") || !symScript.contains("# https://snelson.us/sym") {
-                _ = alert.display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "")
+                _ = Alert.shared.display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "")
                 allPolicies_Spinner.stopAnimation(self)
                 //                        return
             } else {
@@ -980,7 +1012,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                 policies_TableView.reloadData()
                             }
                         }
-                        //                                print("[sendLoginInfo] policies found on server: \(policiesArray.count)")
                         staticAllPolicies = policiesArray.sorted(by: {$0.name.lowercased() < $1.name.lowercased()})
                         policies_TableView.reloadData()
                         allPolicies_Spinner.stopAnimation(self)
@@ -991,7 +1022,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                             do {
                                 try FileManager.default.createDirectory(atPath: AppInfo.appSupport, withIntermediateDirectories: true)
                             } catch {
-                                _ = alert.display(header: "Attention:", message: "Unable to create '\(AppInfo.appSupport)'.  Configurations will not be saved.", secondButton: "")
+                                _ = Alert.shared.display(header: "Attention:", message: "Unable to create '\(AppInfo.appSupport)'.  Configurations will not be saved.", secondButton: "")
                             }
                         } else {
                             // look for existing configs
@@ -1043,7 +1074,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                         }
                     }
                 } else {
-                    _ = Alert().display(header: "", message: "No policies found. Verify the account has the appropriate permissions to read policies", secondButton: "")
+                    _ = Alert.shared.display(header: "", message: "No policies found. Verify the account has the appropriate permissions to read policies", secondButton: "")
                     allPolicies_Spinner.stopAnimation(self)
                 }
             }
@@ -1074,7 +1105,6 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 defaults.set(JamfProServer.destination, forKey: "currentServer")
                 defaults.set(JamfProServer.username, forKey: "username")
                 
-//                print("[sendLoginInfo] saveCredsState: \(saveCredsState)")
                 if saveCredsState == 1 {
                     Credentials().save(service: "\(JamfProServer.destination.fqdnFromUrl)", account: JamfProServer.username, credential: JamfProServer.password)
                 }
@@ -1119,6 +1149,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                             promptForDict["\(whichPrompt)"] = 1 as Any
                         }
                     }
+                    promptForDict["emailEnding"] = (Settings.shared.dict["emailEnding"] ?? "") as Any
+                    Settings.shared.dict["emailEnding"] = nil
                     Settings.shared.dict["promptFor"] = promptForDict
                 }
                 

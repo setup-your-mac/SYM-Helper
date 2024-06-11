@@ -52,14 +52,14 @@ class ConfigsSettings: NSObject {
             try JSONSerialization.data(withJSONObject: data)
                 .write(to: saveURL)
         } catch {
-            _ = alert.display(header: "Attention:", message: "Current configurations could not be saved.\n\(error)", secondButton: "")
+            _ = Alert.shared.display(header: "Attention:", message: "Current configurations could not be saved.\n\(error)", secondButton: "")
         }
         
         do {
             let saveData = try PropertyListSerialization.data(fromPropertyList: data, format: .xml, options: 0)
             try saveData.write(to: URL(fileURLWithPath: AppInfo.appSupport + "/\(theServer).\(dataType).plist"))
         } catch {
-            _ = alert.display(header: "Attention:", message: "Current configurations could not be saved.", secondButton: "")
+            _ = Alert.shared.display(header: "Attention:", message: "Current configurations could not be saved.", secondButton: "")
         }
     }
 }

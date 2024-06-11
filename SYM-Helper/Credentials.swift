@@ -117,7 +117,7 @@ class Credentials {
     private func itemLookup(service: String) -> [String:String] {
         
 //        print("[Credentials.itemLookup] start search for: \(service)")
-   
+        userPassDict.removeAll()
         let keychainQuery: [String: Any] = [kSecClass as String: kSecClassGenericPasswordString,
                                             kSecAttrService as String: service,
                                             kSecAttrAccessGroup as String: accessGroup,
