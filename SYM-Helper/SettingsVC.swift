@@ -305,7 +305,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         SYMScript().get(scriptURL: scriptSource_TextField.stringValue, updateDisplay: false) { [self]
             (result: String) in
             symScript = result
-//            print("[Settings] getScript: \(symScript)")
+            print("[Settings] getScript: \(symScript)")
             spinner_Progress.stopAnimation(self)
             if symScript == "" {
                 let scriptReply = Alert.shared.display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "Use Anyway")

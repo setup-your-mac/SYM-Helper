@@ -10,6 +10,32 @@ class SYMScript: NSObject, URLSessionDelegate {
 //        print("enter getScript")
         print("[SYMScript.get] script source: \(scriptURL)")
         var responseData = ""
+        if scriptURL.range(of: "^/", options: [.regularExpression, .caseInsensitive]) != nil {
+            if let responseData = try? String(contentsOf: URL(filePath: scriptURL)) {
+                //                        print("[SYMScript] done fetching script")
+//                print("[SYMScript] script: \(responseData)")
+                
+                //                        print("getScript: \(responseData)")   //(.|\n|\r)
+                
+                if let versionLineRange = responseData.range(of:"scriptVersion=\"[0-9](.*?)\"", options: .regularExpression) {
+                    let versionLine = responseData[versionLineRange]
+                    let versionString = versionLine.replacing("scriptVersion=\"", with: "").dropLast()
+                    //                            print("[SYMScript.get] scriptVersion: \(String(describing: versionString))")
+                    scriptVersion = toTuple(versionString: String(versionString))
+                    if updateDisplay {
+                        NotificationCenter.default.post(name: .updateScriptVersion, object: self)
+                    }
+                    completion(responseData)
+                    return
+                } else {
+                    print("[SYMScript.get] versionLine not found")
+                }
+            } else {
+                print("[SYMScript.get] versionLine not found")
+            }
+            completion(responseData)
+            return
+        }
         URLCache.shared.removeAllCachedResponses()
         //        let scriptUrl      = URL(string: "\(scriptSource)")
         let scriptUrl      = URL(string: "\(scriptURL)")
