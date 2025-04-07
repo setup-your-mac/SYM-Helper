@@ -9,7 +9,7 @@ class TokenDelegate: NSObject, URLSessionDelegate {
     
     let userDefaults = UserDefaults.standard
     var components   = DateComponents()
-    var renewQ       = DispatchQueue(label: "com.token_refreshQ", qos: DispatchQoS.background)   // running background process for refreshing token
+//    var renewQ       = DispatchQueue(label: "com.token_refreshQ", qos: DispatchQoS.background)   // running background process for refreshing token
     
     func getToken(serverUrl: String, whichServer: String = "source", base64creds: String, completion: @escaping (_ authResult: (Int,String)) -> Void) {
 

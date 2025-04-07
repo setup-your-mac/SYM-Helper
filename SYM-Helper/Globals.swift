@@ -9,7 +9,7 @@ import Foundation
 // for saving servers, shared settings - LoginVC
 var saveServers            = true
 var maxServerList          = 40
-var appsGroupId            = "group.PS2F6S478M.jamfie.SharedJPMA"
+var appsGroupId            = "PS2F6S478M.jamfie.SharedJPMA"
 let sharedDefaults         = UserDefaults(suiteName: appsGroupId)
 let sharedContainerUrl     = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appsGroupId)
 let sharedSettingsPlistUrl = (sharedContainerUrl?.appendingPathComponent("Library/Preferences/\(appsGroupId).plist"))!
@@ -19,7 +19,7 @@ var showLoginWindow = true
 let defaults        = UserDefaults.standard
 var groupNumber     = 0
 let httpSuccess     = 200...299
-let refreshInterval: UInt32 = 25*60 // 25 minutes
+let refreshInterval: UInt32 = 20*60 // 20 minutes
 var runComplete     = false
 var symScript       = ""
 var scriptVersion   = (0,0,0,"")
