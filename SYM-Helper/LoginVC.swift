@@ -639,5 +639,57 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         displayName_TextField.abortEditing()
     }
     
+    @MainActor private func migrateSettings() {
+        let _sharedContainerUrl     = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.\(appsGroupId)")
+        let _sharedSettingsPlistUrl = (_sharedContainerUrl?.appendingPathComponent("Library/Preferences/group.\(appsGroupId).plist"))!
+        print("[migrateSettings] sharedSettingsPlistUrl: \(sharedSettingsPlistUrl.path(percentEncoded: false))")
+        print("[migrateSettings] _sharedSettingsPlistUrl: \(_sharedSettingsPlistUrl.path(percentEncoded: false))")
+        
+        if !FileManager.default.fileExists(atPath: sharedSettingsPlistUrl.path(percentEncoded: false)) {
+    //        print("[migrateSettings] creating settings file")
+            sharedDefaults!.set(Date(), forKey: "created")
+            sharedDefaults!.set(false, forKey: "migrated")
+            sharedDefaults!.set([String:AnyObject](), forKey: "serversDict")
+        }
+        let settingsMigrated = sharedDefaults!.object(forKey: "migrated") as? Bool ?? false
+    //    print("[migrateSettings] settingsMigrated: \(settingsMigrated)")
+        if !settingsMigrated {
+            if FileManager.default.fileExists(atPath: _sharedSettingsPlistUrl.path(percentEncoded: false)) {
+    //            print("[migrateSettings] file exists")
+                if FileManager.default.isReadableFile(atPath: _sharedSettingsPlistUrl.path(percentEncoded: false)) {
+    //                print("[migrateSettings] file is readable")
+                    do {
+                        let data = try Data(contentsOf: _sharedSettingsPlistUrl)
+    //                    print("[migrateSettings] file settings to data")
+                        
+                        let plist = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any]
+    //                    print("[migrateSettings] converted to dictionary")
+                        for (key, value) in plist ?? [:] {
+                            //                            print("[migrateSettings] setting value for key: \(key)")
+                            sharedDefaults!.set(value, forKey: key)
+                        }
+                        sharedDefaults!.set(true as AnyObject, forKey: "migrated")
+                        WriteToLog.shared.message(stringOfText: "[migrateSettings] migrated settings")
+                    } catch {
+    //                    print("[migrateSettings] failed to migrate settings")
+    //                    print("[migrateSettings] error: \(error.localizedDescription)\n")
+                        NSApplication.shared.terminate(nil)
+                    }
+                } else {
+    //                print("[migrateSettings] file is not readable")
+                    WriteToLog.shared.message(stringOfText: "[migrateSettings] file is not readable")
+                    NSApplication.shared.terminate(nil)
+                }
+            } else {
+    //            do {
+                    sharedDefaults!.set(true as AnyObject, forKey: "migrated")
+    //                try FileManager.default.copyItem(atPath: sharedSettingsPlistUrl.path(percentEncoded: false), toPath: _sharedSettingsPlistUrl.path(percentEncoded: false))
+    //            } catch {
+    //
+    //            }
+            }
+        }
+    }
+    
 }
 

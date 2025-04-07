@@ -596,27 +596,38 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         var request        = URLRequest(url: policyUrl!)
         request.httpMethod = "PUT"
         request.httpBody   = xml.data(using: String.Encoding.utf8)
-
-        configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken)", "Content-Type" : "application/xml", "Accept" : "application/xml", "User-Agent" : AppInfo.userAgentHeader]
-        let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-        let task = session.dataTask(with: request as URLRequest, completionHandler: {
-            (data, response, error) -> Void in
-            session.finishTasksAndInvalidate()
-            if let httpResponse = response as? HTTPURLResponse {
-                writeToLog.message(stringOfText: "[updatePolicy] A custom trigger of \"\(id)\" has been added to policy id \(id).")
-                if httpSuccess.contains(httpResponse.statusCode) {
+        
+        TokenDelegate().getToken(serverUrl: JamfProServer.destination, whichServer: "destination", base64creds: JamfProServer.base64Creds) { [self]
+            authResult in
+            
+            let (statusCode,theResult) = authResult
+            if theResult == "success" {
+                
+                configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(JamfProServer.accessToken)", "Content-Type" : "application/xml", "Accept" : "application/xml", "User-Agent" : AppInfo.userAgentHeader]
+                let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+            
+                let task = session.dataTask(with: request as URLRequest, completionHandler: {
+                    (data, response, error) -> Void in
+                    session.finishTasksAndInvalidate()
+                    if let httpResponse = response as? HTTPURLResponse {
+                        WriteToLog.shared.message(stringOfText: "[updatePolicy] status code: \(httpResponse.statusCode)")
+                        if httpSuccess.contains(httpResponse.statusCode) {
+                            WriteToLog.shared.message(stringOfText: "[updatePolicy] A custom trigger of \"\(id)\" has been added to policy id \(id)")
+                            completion(id)
+                            return
+                        } else {
+                            WriteToLog.shared.message(stringOfText: "[updatePolicy] No data was returned trying to set the custom trigger.  Verify/edit the custome trigger \"\(id)\" on the server manually")
+                        }
+                    } else {
+                        print("could not read response or no response")
+                    }
+                    WriteToLog.shared.message(stringOfText: "[updatePolicy] No data was returned trying to set the custom trigger.  Verify/edit the custome trigger \"\(id)\" on the server manually")
                     completion(id)
-                    return
-                } else {
-                    writeToLog.message(stringOfText: "[updatePolicy] No data was returned trying to set the custom trigger.  Verify/edit the custome trigger \"\(id)\" on the server manually.")
-                }
-            } else {
-                print("could not read response or no response")
+                })
+                task.resume()
             }
-            writeToLog.message(stringOfText: "[updatePolicy] No data was returned trying to set the custom trigger.  Verify/edit the custome trigger \"\(id)\" on the server manually.")
-            completion(id)
-        })
-        task.resume()
+        }
+        
     }
     
     private func processPolicies(whichId: Int, id: [[String]] = [], theConfigIndex: Int) {
@@ -1095,7 +1106,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         let jamfUtf8Creds = "\(JamfProServer.username):\(JamfProServer.password)".data(using: String.Encoding.utf8)
         JamfProServer.base64Creds = (jamfUtf8Creds?.base64EncodedString())!
 
-        writeToLog.message(stringOfText: "[ViewController] Running SYM-Helper v\(AppInfo.version)")
+        WriteToLog.shared.message(stringOfText: "[ViewController] Running SYM-Helper v\(AppInfo.version)")
         TokenDelegate().getToken(serverUrl: JamfProServer.destination, whichServer: "destination", base64creds: JamfProServer.base64Creds) { [self]
             authResult in
             let (statusCode,theResult) = authResult
@@ -1138,7 +1149,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 
                 // migrate old promptFor settings - 230924
                 if Settings.shared.dict["promptFor"] == nil {
-                    writeToLog.message(stringOfText: "convert prompt for... settings to new format")
+                    WriteToLog.shared.message(stringOfText: "convert prompt for... settings to new format")
                     var promptForDict = [String:Any]()
                     
                     for whichPrompt in ["promptForUsername", "prefillUsername", "promptForRealName", "prefillRealname", "promptForEmail", "prefillEmail", "promptForPosition", "promptForComputerName", "prefillComputerName", "promptForAssetTag", "promptForRoom", "promptForBuilding", "promptForDepartment", "promptForConfiguration", "moveableInProduction"] {
@@ -1161,7 +1172,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 fetchScript()
             } else {
                 DispatchQueue.main.async { [self] in
-                    writeToLog.message(stringOfText: "Failed to authenticate, status code: \(statusCode)")
+                    WriteToLog.shared.message(stringOfText: "Failed to authenticate, status code: \(statusCode)")
                     performSegue(withIdentifier: "loginView", sender: nil)
 //                        working(isWorking: false)
                 }
@@ -1278,7 +1289,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 selectedPolicies_TableView.selectRowIndexes(IndexSet(integer: selectedPoliciesArray.count-1), byExtendingSelection: false)
                  
              } else {
-                 writeToLog.message(stringOfText: "[sendCommand] Unable to add command: \(newItem).")
+                 WriteToLog.shared.message(stringOfText: "[sendCommand] Unable to add command: \(newItem).")
              }
         }
 
@@ -1416,30 +1427,39 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: endpointUrl!)
         request.httpMethod = "GET"
-        configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType)) \(String(describing: JamfProServer.accessToken))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-//        print("[getAllPolicies] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders ?? [:])")
-        let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-        let task = session.dataTask(with: request as URLRequest, completionHandler: {
-           (data, response, error) -> Void in
-           session.finishTasksAndInvalidate()
-           if let httpResponse = response as? HTTPURLResponse {
-               print("policy statusCode: \(httpResponse.statusCode)")
-               if httpSuccess.contains(httpResponse.statusCode) {
-                   
-                    let responseData = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                       if let endpointJSON = responseData! as? [String: Any] {
-                           completion(endpointJSON)
-                           return
-                       } else {
-                           writeToLog.message(stringOfText: "\n[getScript] No data was returned from post/put.")
-                       }
-               }
-           } else {
-               print("could not read response or no response")
-           }
-           completion([:])
-        })
-    task.resume()
+        
+        TokenDelegate().getToken(serverUrl: JamfProServer.destination, whichServer: "destination", base64creds: JamfProServer.base64Creds) { [self]
+            authResult in
+            
+            let (statusCode,theResult) = authResult
+            if theResult == "success" {
+                
+                configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType)) \(String(describing: JamfProServer.accessToken))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+                //        print("[getAllPolicies] configuration.httpAdditionalHeaders: \(configuration.httpAdditionalHeaders ?? [:])")
+                let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+                let task = session.dataTask(with: request as URLRequest, completionHandler: {
+                    (data, response, error) -> Void in
+                    session.finishTasksAndInvalidate()
+                    if let httpResponse = response as? HTTPURLResponse {
+                        print("policy statusCode: \(httpResponse.statusCode)")
+                        if httpSuccess.contains(httpResponse.statusCode) {
+                            
+                            let responseData = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+                            if let endpointJSON = responseData! as? [String: Any] {
+                                completion(endpointJSON)
+                                return
+                            } else {
+                                WriteToLog.shared.message(stringOfText: "\n[getScript] No data was returned from post/put.")
+                            }
+                        }
+                    } else {
+                        print("could not read response or no response")
+                    }
+                    completion([:])
+                })
+                task.resume()
+            }
+        }
     }
     
     private func getPolicy(id: String, completion: @escaping (_ result: String) -> Void) {
@@ -1453,26 +1473,36 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: endpointUrl!)
         request.httpMethod = "GET"
-        configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType)) \(String(describing: JamfProServer.accessToken))", "Content-Type" : "application/xml", "Accept" : "application/xml", "User-Agent" : AppInfo.userAgentHeader]
-        let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
-        let task = session.dataTask(with: request as URLRequest, completionHandler: {
-           (data, response, error) -> Void in
-           session.finishTasksAndInvalidate()
-           if let httpResponse = response as? HTTPURLResponse {
-               if httpSuccess.contains(httpResponse.statusCode) {
-                   if let _ = String(data: data!, encoding: .utf8) {
-                       completion(String(data: data!, encoding: .utf8)!)
-                       return
+        
+        
+        TokenDelegate().getToken(serverUrl: JamfProServer.destination, whichServer: "destination", base64creds: JamfProServer.base64Creds) { [self]
+            authResult in
+            
+            let (statusCode,theResult) = authResult
+            if theResult == "success" {
+                
+                configuration.httpAdditionalHeaders = ["Authorization" : "\(String(describing: JamfProServer.authType)) \(String(describing: JamfProServer.accessToken))", "Content-Type" : "application/xml", "Accept" : "application/xml", "User-Agent" : AppInfo.userAgentHeader]
+                let session = Foundation.URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+                let task = session.dataTask(with: request as URLRequest, completionHandler: {
+                    (data, response, error) -> Void in
+                    session.finishTasksAndInvalidate()
+                    if let httpResponse = response as? HTTPURLResponse {
+                        if httpSuccess.contains(httpResponse.statusCode) {
+                            if let _ = String(data: data!, encoding: .utf8) {
+                                completion(String(data: data!, encoding: .utf8)!)
+                                return
+                            } else {
+                                WriteToLog.shared.message(stringOfText: "\n[getScript] No data was returned from post/put.")
+                            }
+                        }
                     } else {
-                        writeToLog.message(stringOfText: "\n[getScript] No data was returned from post/put.")
+                        print("could not read response or no response")
                     }
-               }
-           } else {
-               print("could not read response or no response")
-           }
-           completion("")
-        })
-    task.resume()
+                    completion("")
+                })
+                task.resume()
+            }
+        }
     }
     
     

@@ -72,7 +72,7 @@ class SYMScript: NSObject, URLSessionDelegate {
                         }
                         
                     } else {
-                        writeToLog.message(stringOfText: "\n[getScript] No data was returned from post/put.")
+                        WriteToLog.shared.message(stringOfText: "\n[getScript] No data was returned from post/put.")
                     }
                     completion(responseData)
                     return
