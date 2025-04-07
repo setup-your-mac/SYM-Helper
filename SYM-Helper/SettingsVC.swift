@@ -152,14 +152,14 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
     
 //    @IBAction func prompt_Action(_ sender: NSButton) {
 //        guard let theIdentifier = sender.identifier?.rawValue else {
-//            WriteToLog().message(stringOfText: "Unknown prompt/prefill value")
+//            WriteToLog.shared.message(stringOfText: "Unknown prompt/prefill value")
 //            return
 //        }
 //        Settings.shared.dict[theIdentifier] = sender.title
 //    }
     @IBAction func switchPrompt_Action(_ sender: NSSwitch) {
         guard let theIdentifier = sender.identifier?.rawValue else {
-            WriteToLog().message(stringOfText: "Unknown prompt/prefill value")
+            WriteToLog.shared.message(stringOfText: "Unknown prompt/prefill value")
             return
         }
         switch theIdentifier {
@@ -313,7 +313,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
                     validScriptSource = scriptSource_TextField.stringValue
                     newScriptSource = validScriptSource
                     scriptVersion = (0,0,0,"")
-                    WriteToLog().message(stringOfText: "Unknown script is selected, setting the version to 0.0.0")
+                    WriteToLog.shared.message(stringOfText: "Unknown script is selected, setting the version to 0.0.0")
                     if notificationName != "NSControlTextDidEndEditingNotification" {
                         completion("use unknown script")
                         if notificationName == "ok_Button" {

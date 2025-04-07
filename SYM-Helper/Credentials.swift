@@ -90,7 +90,7 @@ class Credentials {
         }
     }   // func save - end
     
-    func retrieve(service: String, account: String, whichServer: String = "") -> [String:String] {
+    func retrieve(service: String, account: String = "", whichServer: String = "") -> [String:String] {
         
         var keychainResult = [String:String]()
         var theService = service
@@ -109,6 +109,14 @@ class Credentials {
         if keychainResult.count == 0 {
             keychainItemName = "\(prefix) - \(theService)"
             keychainResult   = oldItemLookup(service: keychainItemName)
+        }
+        
+        if keychainResult.count > 1 && !account.isEmpty {
+            for (username, password) in keychainResult {
+                if username.lowercased() == account.lowercased() {
+                    return [username:password]
+                }
+            }
         }
         
         return keychainResult
