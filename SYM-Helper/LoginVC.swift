@@ -144,6 +144,10 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     }
     
     @IBAction func login_action(_ sender: Any) {
+        if selectServer_Button.titleOfSelectedItem == nil {
+            print("no server selected")
+            return
+        }
         spinner_PI.isHidden = false
         spinner_PI.startAnimation(self)
         didRun = true
@@ -514,6 +518,8 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+//        migrateSettings()
+        
         // to clear saved list of servers
 //        defaults.set([:] as [String:[String:AnyObject]], forKey: "serversDict")
 //        sharedDefaults!.set([:] as [String:[String:AnyObject]], forKey: "serversDict")
@@ -539,7 +545,6 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         
         useApiClient = defaults.integer(forKey: "useApiClient")
         useApiClient_button.state = NSControl.StateValue(rawValue: useApiClient)
-        setLabels()
                 
         // check shared settings
 //        print("[viewDidLoad] sharedSettingsPlistUrl: \(sharedSettingsPlistUrl.path)")
@@ -604,15 +609,25 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         
         if sortedDisplayNames.firstIndex(of: lastServerDN) != nil {
             selectServer_Button.selectItem(withTitle: lastServerDN)
+            jamfProServer_textfield.stringValue = lastServer
+            saveCreds_button.state = NSControl.StateValue(defaults.integer(forKey: "saveCreds"))
         } else {
+            lastServer = ""
             selectServer_Button.selectItem(withTitle: "")
+            jamfProServer_textfield.stringValue = ""
+            jamfProUsername_textfield.stringValue = ""
+            jamfProPassword_textfield.stringValue = ""
+            saveCreds_button.state = .off
+            useApiClient_button.state = .off
+            
+            defaults.set(0, forKey: "saveCreds")
+            defaults.set(0, forKey: "useApiClient")
         }
         
-        jamfProServer_textfield.stringValue = lastServer
         if lastServer != "" {
             jamfProUsername_textfield.stringValue = defaults.string(forKey: "username") ?? ""
         }
-        saveCreds_button.state = NSControl.StateValue(defaults.integer(forKey: "saveCreds"))
+        setLabels()
         
 //        print("[LoginVC.viewDidLoad] availableServersDict: \(availableServersDict)")
         if availableServersDict.count != 0 {
@@ -642,8 +657,8 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     @MainActor private func migrateSettings() {
         let _sharedContainerUrl     = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.\(appsGroupId)")
         let _sharedSettingsPlistUrl = (_sharedContainerUrl?.appendingPathComponent("Library/Preferences/group.\(appsGroupId).plist"))!
-        print("[migrateSettings] sharedSettingsPlistUrl: \(sharedSettingsPlistUrl.path(percentEncoded: false))")
-        print("[migrateSettings] _sharedSettingsPlistUrl: \(_sharedSettingsPlistUrl.path(percentEncoded: false))")
+//        print("[migrateSettings] sharedSettingsPlistUrl: \(sharedSettingsPlistUrl.path(percentEncoded: false))")
+//        print("[migrateSettings] _sharedSettingsPlistUrl: \(_sharedSettingsPlistUrl.path(percentEncoded: false))")
         
         if !FileManager.default.fileExists(atPath: sharedSettingsPlistUrl.path(percentEncoded: false)) {
     //        print("[migrateSettings] creating settings file")
@@ -652,7 +667,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             sharedDefaults!.set([String:AnyObject](), forKey: "serversDict")
         }
         let settingsMigrated = sharedDefaults!.object(forKey: "migrated") as? Bool ?? false
-    //    print("[migrateSettings] settingsMigrated: \(settingsMigrated)")
+//        print("[migrateSettings] settingsMigrated: \(settingsMigrated)")
         if !settingsMigrated {
             if FileManager.default.fileExists(atPath: _sharedSettingsPlistUrl.path(percentEncoded: false)) {
     //            print("[migrateSettings] file exists")
@@ -681,12 +696,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
                     NSApplication.shared.terminate(nil)
                 }
             } else {
-    //            do {
-                    sharedDefaults!.set(true as AnyObject, forKey: "migrated")
-    //                try FileManager.default.copyItem(atPath: sharedSettingsPlistUrl.path(percentEncoded: false), toPath: _sharedSettingsPlistUrl.path(percentEncoded: false))
-    //            } catch {
-    //
-    //            }
+                sharedDefaults!.set(true as AnyObject, forKey: "migrated")
             }
         }
     }
