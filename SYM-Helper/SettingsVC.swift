@@ -82,6 +82,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
     
     @IBOutlet var buildings_TextField: NSTextView!
     @IBOutlet var departments_TextField: NSTextView!
+    @IBOutlet var positions_TextField: NSTextView!
     
     @IBAction func fetch_Action(_ sender: NSButton) {
         spinner_Progress.startAnimation(self)
@@ -139,7 +140,8 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
                          SYMSetting(name: "Support", tab: "support"),
                          SYMSetting(name: "Prompt For...", tab: "promptFor"),
                          SYMSetting(name: "Buildings", tab: "buildings"),
-                         SYMSetting(name: "Departments", tab: "departments")]
+                         SYMSetting(name: "Departments", tab: "departments"),
+                         SYMSetting(name: "Positions", tab: "positions")]
     
 //    var settingsDict      = [String:Any]()
     
@@ -249,6 +251,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         if pe_Switch.state == .on {
             if emailEnding_Textfield.stringValue.first != "@" {
                 _ = Alert.shared.display(header: "", message: "Prefill email entry must start with a @", secondButton: "")
+                settings_TabView.selectTabViewItem(withIdentifier: "promptFor")
                 emailEnding_Textfield.becomeFirstResponder()
                 spinner_Progress.stopAnimation(self)
                 ok_Button.isEnabled = true
@@ -264,13 +267,16 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         promptForDict["promptForDepartment"]    = pfd_Switch.state.rawValue
         promptForDict["promptForConfiguration"] = pfc_Switch.state.rawValue
         promptForDict["moveableInProduction"]   = mip_Switch.state.rawValue
-        print("promptForDict: \(promptForDict)")
+//        print("promptForDict: \(promptForDict)")
         
         // set buildings
         Settings.shared.dict["buildingsListRaw"] = buildings_TextField.string
 
         // set departments
         Settings.shared.dict["departmentListRaw"] = departments_TextField.string
+        
+        // set positions
+        Settings.shared.dict["positionListRaw"] = positions_TextField.string
         
         
         if validScriptSource != scriptSource_TextField.stringValue {
@@ -373,6 +379,9 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
                
             case "departments":
                 Settings.shared.dict["departmentListRaw"] = departments_TextField.string
+                
+            case "positions":
+                Settings.shared.dict["positionListRaw"] = positions_TextField.string
                
             default:
                 break
@@ -438,7 +447,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
             pfrn_Switch.state                 = NSControl.StateValue(rawValue: onOff(whichButton: "promptForRealName"))
             prn_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "prefillRealname"))
             pfe_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForEmail"))
-            pe_Switch.state                   = NSControl.StateValue(rawValue: onOff(whichButton: "prefillEmail"))
+            pe_Switch.state                   = .off
             emailEnding_Textfield.stringValue = ""
             pfp_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForPosition"))
             pfat_Switch.state                 = NSControl.StateValue(rawValue: onOff(whichButton: "promptForAssetTag"))
@@ -449,9 +458,9 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
             pfc_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForConfiguration"))
             mip_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "moveableInProduction"))
         } else {
-            print("use new settings")
+//            print("use new settings")
             promptForDict = Settings.shared.dict["promptFor"] as! [String:Any]
-            print("promptForDict: \(promptForDict)")
+//            print("promptForDict: \(promptForDict)")
             pfu_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["promptForUsername"] as? Int ?? 1)
             pu_Switch.state                   = NSControl.StateValue(rawValue: promptForDict["prefillUsername"] as? Int ?? 1)
             pfcn_Switch.state                 = NSControl.StateValue(rawValue: promptForDict["promptForComputerName"] as? Int ?? 1)
@@ -459,8 +468,12 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
             pfrn_Switch.state                 = NSControl.StateValue(rawValue: promptForDict["promptForRealName"] as? Int ?? 1)
             prn_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["prefillRealname"] as? Int ?? 1)
             pfe_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["promptForEmail"] as? Int ?? 1)
-            pe_Switch.state                   = NSControl.StateValue(rawValue: promptForDict["prefillEmail"] as? Int ?? 1)
             emailEnding_Textfield.stringValue = promptForDict["emailEnding"] as? String ?? ""
+            if emailEnding_Textfield.stringValue.isEmpty || emailEnding_Textfield.stringValue.first != "@" {
+                pe_Switch.state                   = .off
+            } else {
+                pe_Switch.state                   = NSControl.StateValue(rawValue: promptForDict["prefillEmail"] as? Int ?? 0)
+            }
             pfp_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["promptForPosition"] as? Int ?? 1)
             pfat_Switch.state                 = NSControl.StateValue(rawValue: promptForDict["promptForAssetTag"] as? Int ?? 1)
             disableAssetTagRegex_Button.state = NSControl.StateValue(rawValue: promptForDict["disableAssetTagRegex"] as? Int ?? 1)
@@ -486,7 +499,11 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         
         
         buildings_TextField.string = Settings.shared.dict["buildingsListRaw"] as? String ?? ""
+        buildings_TextField.font = NSFont.systemFont(ofSize: 16)
         departments_TextField.string = Settings.shared.dict["departmentListRaw"] as? String ?? ""
+        departments_TextField.font = NSFont.systemFont(ofSize: 16)
+        positions_TextField.string = Settings.shared.dict["positionListRaw"] as? String ?? ""
+        positions_TextField.font = NSFont.systemFont(ofSize: 16)
         
         let style = NSMutableParagraphStyle()
         style.alignment = NSTextAlignment.center
@@ -516,6 +533,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         // location
         buildings_TextField.delegate    = self
         departments_TextField.delegate  = self
+        positions_TextField.delegate  = self
         
         
         settings_AC.add(contentsOf: settingsArray)

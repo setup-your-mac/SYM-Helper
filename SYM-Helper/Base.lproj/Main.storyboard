@@ -2097,7 +2097,7 @@ DQ
                                                     <rect key="frame" x="4" y="-2" width="688" height="322"/>
                                                     <clipView key="contentView" drawsBackground="NO" id="zoq-bL-5tw">
                                                         <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
-                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>
                                                             <textView identifier="buildings" wantsLayer="YES" importsGraphics="NO" richText="NO" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="28C-7p-jXE">
                                                                 <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
@@ -2228,6 +2228,59 @@ DQ
                                             </constraints>
                                         </view>
                                     </tabViewItem>
+                                    <tabViewItem label="positions" identifier="positions" id="n7m-aj-o5l">
+                                        <view key="view" id="pCT-P7-dLH">
+                                            <rect key="frame" x="0.0" y="0.0" width="691" height="352"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <subviews>
+                                                <scrollView borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" translatesAutoresizingMaskIntoConstraints="NO" id="b2p-Cd-5XX">
+                                                    <rect key="frame" x="4" y="-2" width="688" height="322"/>
+                                                    <clipView key="contentView" drawsBackground="NO" id="JhF-9I-Sqy">
+                                                        <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
+                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                        <subviews>
+                                                            <textView identifier="departments" wantsLayer="YES" importsGraphics="NO" richText="NO" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="jB4-QK-p7S">
+                                                                <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
+                                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                <size key="minSize" width="688" height="322"/>
+                                                                <size key="maxSize" width="688" height="10000000"/>
+                                                            </textView>
+                                                        </subviews>
+                                                    </clipView>
+                                                    <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="Li0-11-rn1">
+                                                        <rect key="frame" x="-100" y="-100" width="240" height="16"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                    </scroller>
+                                                    <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="OBs-IS-A9Z">
+                                                        <rect key="frame" x="672" y="0.0" width="16" height="322"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                    </scroller>
+                                                </scrollView>
+                                                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0gh-XN-LbE">
+                                                    <rect key="frame" x="4" y="329" width="198" height="19"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="19" id="2gq-z2-YhJ"/>
+                                                        <constraint firstAttribute="width" constant="194" id="fbK-e8-y5e"/>
+                                                    </constraints>
+                                                    <textFieldCell key="cell" lineBreakMode="clipping" title="Enter one position per line:" id="wML-45-nTf">
+                                                        <font key="font" metaFont="system" size="16"/>
+                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="b2p-Cd-5XX" firstAttribute="leading" secondItem="pCT-P7-dLH" secondAttribute="leading" constant="4" id="Aql-vY-S3Y"/>
+                                                <constraint firstAttribute="trailing" secondItem="b2p-Cd-5XX" secondAttribute="trailing" constant="-1" id="ErY-Wn-GC1"/>
+                                                <constraint firstItem="0gh-XN-LbE" firstAttribute="leading" secondItem="pCT-P7-dLH" secondAttribute="leading" constant="6" id="Ov6-1b-3Fs"/>
+                                                <constraint firstItem="b2p-Cd-5XX" firstAttribute="top" secondItem="0gh-XN-LbE" secondAttribute="bottom" constant="9" id="cMO-ip-9ci"/>
+                                                <constraint firstItem="0gh-XN-LbE" firstAttribute="top" secondItem="pCT-P7-dLH" secondAttribute="top" constant="4" id="mf7-D9-boX"/>
+                                                <constraint firstAttribute="bottom" secondItem="b2p-Cd-5XX" secondAttribute="bottom" constant="-2" id="wfF-zY-56n"/>
+                                            </constraints>
+                                        </view>
+                                    </tabViewItem>
                                 </tabViewItems>
                             </tabView>
                         </subviews>
@@ -2277,6 +2330,7 @@ DQ
                         <outlet property="pfr_Switch" destination="A49-nG-cHn" id="Ui7-qa-Qlj"/>
                         <outlet property="pfrn_Switch" destination="s8C-Qr-iIS" id="w1v-Xw-62v"/>
                         <outlet property="pfu_Switch" destination="8hy-sJ-aGf" id="dwd-OF-OpV"/>
+                        <outlet property="positions_TextField" destination="jB4-QK-p7S" id="Gd0-JD-jhy"/>
                         <outlet property="prn_Switch" destination="I3N-uV-sCy" id="OTy-EC-mrz"/>
                         <outlet property="pu_Switch" destination="aRn-PA-Jaf" id="0i2-3J-JcO"/>
                         <outlet property="scriptSource_TextField" destination="JsP-um-KOm" id="6xB-eB-q6n"/>
