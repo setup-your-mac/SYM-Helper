@@ -518,19 +518,6 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        migrateSettings()
-        
-        // to clear saved list of servers
-//        defaults.set([:] as [String:[String:AnyObject]], forKey: "serversDict")
-//        sharedDefaults!.set([:] as [String:[String:AnyObject]], forKey: "serversDict")
-        // clear lastServer
-//        defaults.set("", forKey: "currentServer")
-        
-//        header_TextField.stringValue = ""
-//        header_TextField.wantsLayer = true
-//        let textFrame = NSTextField(frame: NSRect(x: 0, y: 0, width: 268, height: 1))
-//        header_TextField.frame = textFrame.frame
-        
         let hideCredsState = defaults.integer(forKey: "hideCreds")
         hideCreds_button.image = (hideCredsState == 0) ? NSImage(named: NSImage.rightFacingTriangleTemplateName):NSImage(named: NSImage.touchBarGoDownTemplateName)
         hideCreds_button.state = NSControl.StateValue(rawValue: hideCredsState)

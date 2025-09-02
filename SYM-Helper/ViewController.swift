@@ -1341,7 +1341,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         NotificationCenter.default.addObserver(self, selector: #selector(updateScriptVersion(_:)), name: .updateScriptVersion, object: nil)
         
         version_TextField.stringValue = AppInfo.version
@@ -1384,6 +1384,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         selectedPolicies_TableView.registerForDraggedTypes([.string])
         
         configuration_Button.selectItem(at: 0)
+        
     }
     
     override func viewDidAppear() {
