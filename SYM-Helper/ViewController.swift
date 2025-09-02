@@ -493,6 +493,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             policyArray_Spinner.maxValue = Double(idArray.count-1)
             policyArray_Spinner.startAnimation(self)
             policyArray_Spinner.isHidden = false
+            symScript = symScriptRaw
             processPolicies(whichId: 0, theConfigIndex: 0)
         } else {
             _ = Alert.shared.display(header: "", message: "No policies were selected, nothing generated.", secondButton: "")
@@ -792,6 +793,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
             setPrompt(whichPrompt: "promptForBuilding")
             setPrompt(whichPrompt: "promptForDepartment")
             setPrompt(whichPrompt: "promptForConfiguration")
+            setPrompt(whichPrompt: "hideQuitButton")
             setPrompt(whichPrompt: "moveableInProduction")
             
             setSupport(whichField: "teamName")
@@ -937,6 +939,16 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 let regex = try! NSRegularExpression(pattern: "\(whichPrompt)=\".*?\"")
                 symScript = (regex.stringByReplacingMatches(in: symScript, range: NSRange(0..<symScript.utf16.count), withTemplate: "\(whichPrompt)=\"\(settingsRawValue)\""))
             }
+        case "hideQuitButton":
+            print("hideQuitButton: \(promptForDict["\(whichPrompt)"] as? Int)")
+            if let settingsRawValue = promptForDict["\(whichPrompt)"] as? Int, settingsRawValue == 1 {
+                let modifiedString = symScript
+                    .components(separatedBy: .newlines)
+                    .filter { !$0.contains("\"button2text\" : \"Quit\"") }
+                    .joined(separator: "\n")
+                symScript = modifiedString
+            }
+            
         default:
             var trueFalse = "true"
             if let settingsRawValue = promptForDict["\(whichPrompt)"] as? Int {
@@ -994,6 +1006,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         SYMScript().get(scriptURL: scriptSource) { [self]
             (result: String) in
             symScript = result
+            symScriptRaw = symScript
             
             if !symScript.contains("# Setup Your Mac via swiftDialog") || !symScript.contains("# https://snelson.us/sym") {
                 _ = Alert.shared.display(header: "Attention:", message: "Set-Up-Your-Mac script was not found.  Verify the server URL listed in Settings.", secondButton: "")

@@ -2017,6 +2017,21 @@ DQ
                                                         <action selector="switchPrompt_Action:" target="pYm-xb-CiH" id="aBC-1O-fJ0"/>
                                                     </connections>
                                                 </switch>
+                                                <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DXk-p5-I1n">
+                                                    <rect key="frame" x="367" y="45" width="170" height="19"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="19" id="qud-fJ-85Z"/>
+                                                        <constraint firstAttribute="width" constant="166" id="vyg-C3-0Ju"/>
+                                                    </constraints>
+                                                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Hide Quit button: " id="Q8A-hr-VLh">
+                                                        <font key="font" metaFont="system" size="16"/>
+                                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <switch horizontalHuggingPriority="750" verticalHuggingPriority="750" controlSize="small" baseWritingDirection="leftToRight" alignment="left" translatesAutoresizingMaskIntoConstraints="NO" id="jaR-JQ-7Gc">
+                                                    <rect key="frame" x="553" y="44" width="36" height="21"/>
+                                                </switch>
                                             </subviews>
                                             <constraints>
                                                 <constraint firstItem="bBO-rb-fg5" firstAttribute="top" secondItem="tCQ-pX-tVJ" secondAttribute="bottom" constant="13" id="02r-zf-AxS"/>
@@ -2032,9 +2047,11 @@ DQ
                                                 <constraint firstItem="aRn-PA-Jaf" firstAttribute="centerY" secondItem="lY8-C2-Avo" secondAttribute="centerY" id="AVd-TF-SKx"/>
                                                 <constraint firstItem="VN4-FC-XbC" firstAttribute="leading" secondItem="RRy-SQ-0VR" secondAttribute="trailing" constant="20" id="Agj-zS-jlI"/>
                                                 <constraint firstItem="TQs-cl-BN6" firstAttribute="leading" secondItem="gw3-Zy-7vr" secondAttribute="leading" id="BgR-uw-GjV"/>
+                                                <constraint firstItem="jaR-JQ-7Gc" firstAttribute="leading" secondItem="VN4-FC-XbC" secondAttribute="leading" id="Cmu-GT-lWW"/>
                                                 <constraint firstItem="VN4-FC-XbC" firstAttribute="trailing" secondItem="aAO-fI-pze" secondAttribute="trailing" id="D6Z-LK-jlQ"/>
                                                 <constraint firstItem="G5S-nu-f36" firstAttribute="centerY" secondItem="kqz-Eh-XP2" secondAttribute="centerY" id="EAb-eG-YaS"/>
                                                 <constraint firstItem="RRy-SQ-0VR" firstAttribute="centerY" secondItem="tCQ-pX-tVJ" secondAttribute="centerY" id="ELH-Z0-V62"/>
+                                                <constraint firstItem="jaR-JQ-7Gc" firstAttribute="centerY" secondItem="DXk-p5-I1n" secondAttribute="centerY" id="ERY-P2-7P7"/>
                                                 <constraint firstItem="lY8-C2-Avo" firstAttribute="centerY" secondItem="EU8-hh-ay9" secondAttribute="centerY" id="FGp-Sh-reT"/>
                                                 <constraint firstAttribute="trailing" secondItem="aRn-PA-Jaf" secondAttribute="trailing" constant="104" id="FmW-ya-zWV"/>
                                                 <constraint firstItem="lY8-C2-Avo" firstAttribute="trailing" secondItem="Qdi-Dt-2pa" secondAttribute="trailing" id="G2x-PP-Jq4"/>
@@ -2049,9 +2066,11 @@ DQ
                                                 <constraint firstItem="aRn-PA-Jaf" firstAttribute="leading" secondItem="lY8-C2-Avo" secondAttribute="trailing" constant="20" id="P1J-eH-Fk6"/>
                                                 <constraint firstItem="C5f-N3-gJ6" firstAttribute="top" secondItem="EU8-hh-ay9" secondAttribute="bottom" constant="13" id="P50-0s-TP5"/>
                                                 <constraint firstItem="G4Y-gm-sml" firstAttribute="centerY" secondItem="cPk-wW-2vY" secondAttribute="centerY" id="POu-tk-rE7"/>
+                                                <constraint firstItem="cPk-wW-2vY" firstAttribute="trailing" secondItem="DXk-p5-I1n" secondAttribute="trailing" id="QQz-z3-nRy"/>
                                                 <constraint firstItem="8hy-sJ-aGf" firstAttribute="centerY" secondItem="EU8-hh-ay9" secondAttribute="centerY" id="QgO-RF-RWf"/>
                                                 <constraint firstItem="PDV-S9-Xri" firstAttribute="leading" secondItem="TQs-cl-BN6" secondAttribute="leading" id="RUx-5R-LQY"/>
                                                 <constraint firstItem="A49-nG-cHn" firstAttribute="leading" secondItem="PDV-S9-Xri" secondAttribute="leading" id="SQO-Q2-qSO"/>
+                                                <constraint firstItem="DXk-p5-I1n" firstAttribute="centerY" secondItem="DP8-bG-jcN" secondAttribute="centerY" id="TYF-F7-5oQ"/>
                                                 <constraint firstItem="htk-jo-WXh" firstAttribute="trailing" secondItem="EU8-hh-ay9" secondAttribute="trailing" id="Uuz-s7-9Mc"/>
                                                 <constraint firstItem="EU8-hh-ay9" firstAttribute="leading" secondItem="FfV-Md-tN4" secondAttribute="leading" constant="75" id="V8l-ka-0bl"/>
                                                 <constraint firstItem="NL2-kR-KA8" firstAttribute="top" secondItem="bBO-rb-fg5" secondAttribute="bottom" constant="28" id="W6V-GX-NYd"/>
@@ -2097,7 +2116,7 @@ DQ
                                                     <rect key="frame" x="4" y="-2" width="688" height="322"/>
                                                     <clipView key="contentView" drawsBackground="NO" id="zoq-bL-5tw">
                                                         <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
-                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
                                                         <subviews>
                                                             <textView identifier="buildings" wantsLayer="YES" importsGraphics="NO" richText="NO" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="28C-7p-jXE">
                                                                 <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
@@ -2166,7 +2185,7 @@ DQ
                                                     <rect key="frame" x="4" y="-2" width="688" height="322"/>
                                                     <clipView key="contentView" drawsBackground="NO" id="zgH-OI-j38">
                                                         <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
-                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
                                                         <subviews>
                                                             <textView identifier="departments" wantsLayer="YES" importsGraphics="NO" richText="NO" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="rbr-34-ZXP">
                                                                 <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
@@ -2237,7 +2256,7 @@ DQ
                                                     <rect key="frame" x="4" y="-2" width="688" height="322"/>
                                                     <clipView key="contentView" drawsBackground="NO" id="JhF-9I-Sqy">
                                                         <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
-                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
                                                         <subviews>
                                                             <textView identifier="departments" wantsLayer="YES" importsGraphics="NO" richText="NO" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="jB4-QK-p7S">
                                                                 <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
@@ -2314,6 +2333,7 @@ DQ
                         <outlet property="helpHyperlink_Button" destination="h8z-x4-IIK" id="IQ4-6E-9oI"/>
                         <outlet property="helpWebsite_Label" destination="8G8-6H-EWV" id="uZl-ql-UMr"/>
                         <outlet property="helpWebsite_TextField" destination="ZMr-Dh-Tki" id="itG-Ik-kc2"/>
+                        <outlet property="hqb_Switch" destination="jaR-JQ-7Gc" id="4Ou-qx-gXU"/>
                         <outlet property="kb_TextField" destination="tah-qQ-3Di" id="Isb-G5-VPI"/>
                         <outlet property="lightIcon_TextField" destination="nlr-u8-Rt4" id="cAp-4H-1Ud"/>
                         <outlet property="mip_Switch" destination="G4Y-gm-sml" id="tAb-9X-Qnc"/>

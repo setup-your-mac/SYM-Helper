@@ -22,6 +22,7 @@ let httpSuccess     = 200...299
 let refreshInterval: UInt32 = 20*60 // 20 minutes
 var runComplete     = false
 var symScript       = ""
+var symScriptRaw    = ""
 var scriptVersion   = (0,0,0,"")
 var tokenTimeCreated: Date?
 

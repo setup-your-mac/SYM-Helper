@@ -78,6 +78,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
     @IBOutlet weak var pfd_Switch: NSSwitch!
     @IBOutlet weak var pfp_Switch: NSSwitch!
     @IBOutlet weak var pfc_Switch: NSSwitch!
+    @IBOutlet weak var hqb_Switch: NSSwitch!
     @IBOutlet weak var mip_Switch: NSSwitch!
     
     @IBOutlet var buildings_TextField: NSTextView!
@@ -266,6 +267,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         promptForDict["promptForBuilding"]      = pfb_Switch.state.rawValue
         promptForDict["promptForDepartment"]    = pfd_Switch.state.rawValue
         promptForDict["promptForConfiguration"] = pfc_Switch.state.rawValue
+        promptForDict["hideQuitButton"]         = hqb_Switch.state.rawValue
         promptForDict["moveableInProduction"]   = mip_Switch.state.rawValue
 //        print("promptForDict: \(promptForDict)")
         
@@ -311,6 +313,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         SYMScript().get(scriptURL: scriptSource_TextField.stringValue, updateDisplay: false) { [self]
             (result: String) in
             symScript = result
+            symScriptRaw = symScript
 //            print("[Settings] getScript: \(symScript)")
             spinner_Progress.stopAnimation(self)
             if symScript == "" {
@@ -456,6 +459,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
             pfb_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForBuilding"))
             pfd_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForDepartment"))
             pfc_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "promptForConfiguration"))
+            hqb_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "hideQuitButton"))
             mip_Switch.state                  = NSControl.StateValue(rawValue: onOff(whichButton: "moveableInProduction"))
         } else {
 //            print("use new settings")
@@ -481,6 +485,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
             pfb_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["promptForBuilding"] as? Int ?? 1)
             pfd_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["promptForDepartment"] as? Int ?? 1)
             pfc_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["promptForConfiguration"] as? Int ?? 1)
+            hqb_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["hideQuitButton"] as? Int ?? 0)
             mip_Switch.state                  = NSControl.StateValue(rawValue: promptForDict["moveableInProduction"] as? Int ?? 1)
         }
         
