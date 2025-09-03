@@ -23,6 +23,7 @@
 		B5BBDBB829A1758C0040FD71 /* TokenDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */; };
 		B5BBDBBA29A177040040FD71 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB929A177040040FD71 /* Alert.swift */; };
 		B5EFF0522AC05A560013A849 /* KbPopoverVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5EFF0512AC05A560013A849 /* KbPopoverVC.swift */; };
+		CE87A6502E67D16C00DC110F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE87A64F2E67D16C00DC110F /* WebKit.framework */; };
 		CE948EBF2A2C9BCA00C889B6 /* NewConfigVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE948EBE2A2C9BCA00C889B6 /* NewConfigVC.swift */; };
 		CE948EC12A2C9C4500C889B6 /* CloneConfigVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE948EC02A2C9C4500C889B6 /* CloneConfigVC.swift */; };
 /* End PBXBuildFile section */
@@ -47,6 +48,7 @@
 		B5BBDBB929A177040040FD71 /* Alert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 		B5BBDBBC29A4380D0040FD71 /* Notes */ = {isa = PBXFileReference; lastKnownFileType = text; path = Notes; sourceTree = "<group>"; };
 		B5EFF0512AC05A560013A849 /* KbPopoverVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KbPopoverVC.swift; sourceTree = "<group>"; };
+		CE87A64F2E67D16C00DC110F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		CE948EBE2A2C9BCA00C889B6 /* NewConfigVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewConfigVC.swift; sourceTree = "<group>"; };
 		CE948EC02A2C9C4500C889B6 /* CloneConfigVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CloneConfigVC.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -56,6 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE87A6502E67D16C00DC110F /* WebKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -109,6 +112,7 @@
 		B5BEAF622AC792E50088FD9E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CE87A64F2E67D16C00DC110F /* WebKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
