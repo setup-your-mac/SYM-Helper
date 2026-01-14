@@ -85,9 +85,10 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
     @IBOutlet weak var optOut_button: NSButton!
     
     @IBAction func optOut_action(_ sender: NSButton) {
-        UserDefaults.standard.set(sender.state == .on, forKey: "optOut")
-        TelemetryDeckConfig.optOut = (sender.state == .on)
+        optOutCurrent = (sender.state == .on)
     }
+    private var optOutCurrent: Bool = false
+    
     
     @IBOutlet var buildings_TextField: NSTextView!
     @IBOutlet var departments_TextField: NSTextView!
@@ -280,6 +281,9 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         // set positions
         Settings.shared.dict["positionListRaw"] = positions_TextField.string
         
+        // Telemetry Deck
+        defaults.set(optOutCurrent, forKey: "optOut")
+        TelemetryDeckConfig.optOut = optOutCurrent
         
         if validScriptSource != scriptSource_TextField.stringValue {
             validateScript(notificationName: "ok_Button") {
