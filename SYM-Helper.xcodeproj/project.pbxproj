@@ -23,6 +23,8 @@
 		B5BBDBB829A1758C0040FD71 /* TokenDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */; };
 		B5BBDBBA29A177040040FD71 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BBDBB929A177040040FD71 /* Alert.swift */; };
 		B5EFF0522AC05A560013A849 /* KbPopoverVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5EFF0512AC05A560013A849 /* KbPopoverVC.swift */; };
+		CE77342B2F17C1D8001860CF /* TelemetryDeckConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE77342A2F17C1D8001860CF /* TelemetryDeckConfig.swift */; };
+		CE77342E2F17C1EF001860CF /* TelemetryDeck in Frameworks */ = {isa = PBXBuildFile; productRef = CE77342D2F17C1EF001860CF /* TelemetryDeck */; };
 		CE87A6502E67D16C00DC110F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE87A64F2E67D16C00DC110F /* WebKit.framework */; };
 		CE948EBF2A2C9BCA00C889B6 /* NewConfigVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE948EBE2A2C9BCA00C889B6 /* NewConfigVC.swift */; };
 		CE948EC12A2C9C4500C889B6 /* CloneConfigVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE948EC02A2C9C4500C889B6 /* CloneConfigVC.swift */; };
@@ -48,6 +50,7 @@
 		B5BBDBB929A177040040FD71 /* Alert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 		B5BBDBBC29A4380D0040FD71 /* Notes */ = {isa = PBXFileReference; lastKnownFileType = text; path = Notes; sourceTree = "<group>"; };
 		B5EFF0512AC05A560013A849 /* KbPopoverVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KbPopoverVC.swift; sourceTree = "<group>"; };
+		CE77342A2F17C1D8001860CF /* TelemetryDeckConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryDeckConfig.swift; sourceTree = "<group>"; };
 		CE87A64F2E67D16C00DC110F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		CE948EBE2A2C9BCA00C889B6 /* NewConfigVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewConfigVC.swift; sourceTree = "<group>"; };
 		CE948EC02A2C9C4500C889B6 /* CloneConfigVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CloneConfigVC.swift; sourceTree = "<group>"; };
@@ -59,6 +62,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CE87A6502E67D16C00DC110F /* WebKit.framework in Frameworks */,
+				CE77342E2F17C1EF001860CF /* TelemetryDeck in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,6 +103,7 @@
 				B57069DA29D891950004C848 /* OtherItemVC.swift */,
 				B568542C2A0004940004630D /* SettingsVC.swift */,
 				B522EA942A4B2697009F3110 /* SYMScript.swift */,
+				CE77342A2F17C1D8001860CF /* TelemetryDeckConfig.swift */,
 				B5BBDBB729A1758C0040FD71 /* TokenDelegate.swift */,
 				B5BBDBA229A168490040FD71 /* ViewController.swift */,
 				B5BBDBAF29A171570040FD71 /* WriteToLog.swift */,
@@ -162,6 +167,9 @@
 				Base,
 			);
 			mainGroup = B5BBDB9429A168490040FD71;
+			packageReferences = (
+				CE77342C2F17C1EF001860CF /* XCRemoteSwiftPackageReference "SwiftSDK" */,
+			);
 			productRefGroup = B5BBDB9E29A168490040FD71 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -224,6 +232,7 @@
 				B5BBDBB429A1719D0040FD71 /* Credentials.swift in Sources */,
 				B54D66972A60016600998963 /* ClassicAPI.swift in Sources */,
 				B5EFF0522AC05A560013A849 /* KbPopoverVC.swift in Sources */,
+				CE77342B2F17C1D8001860CF /* TelemetryDeckConfig.swift in Sources */,
 				B5BBDBBA29A177040040FD71 /* Alert.swift in Sources */,
 				B5BBDBA129A168490040FD71 /* AppDelegate.swift in Sources */,
 			);
@@ -436,6 +445,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CE77342C2F17C1EF001860CF /* XCRemoteSwiftPackageReference "SwiftSDK" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TelemetryDeck/SwiftSDK";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.11.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CE77342D2F17C1EF001860CF /* TelemetryDeck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CE77342C2F17C1EF001860CF /* XCRemoteSwiftPackageReference "SwiftSDK" */;
+			productName = TelemetryDeck;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B5BBDB9529A168490040FD71 /* Project object */;
 }

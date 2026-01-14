@@ -3,3 +3,4 @@ localOnly/
 *.xcuserstate
 *.xcbkptlist
 Notes
+TelemetryDeckConfig.swift
