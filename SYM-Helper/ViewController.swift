@@ -611,18 +611,18 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                     (data, response, error) -> Void in
                     session.finishTasksAndInvalidate()
                     if let httpResponse = response as? HTTPURLResponse {
-                        WriteToLog.shared.message(stringOfText: "[updatePolicy] status code: \(httpResponse.statusCode)")
+                        WriteToLog.shared.message("[updatePolicy] status code: \(httpResponse.statusCode)")
                         if httpSuccess.contains(httpResponse.statusCode) {
-                            WriteToLog.shared.message(stringOfText: "[updatePolicy] A custom trigger of \"\(id)\" has been added to policy id \(id)")
+                            WriteToLog.shared.message("[updatePolicy] A custom trigger of \"\(id)\" has been added to policy id \(id)")
                             completion(id)
                             return
                         } else {
-                            WriteToLog.shared.message(stringOfText: "[updatePolicy] No data was returned trying to set the custom trigger.  Verify/edit the custome trigger \"\(id)\" on the server manually")
+                            WriteToLog.shared.message("[updatePolicy] No data was returned trying to set the custom trigger.  Verify/edit the custome trigger \"\(id)\" on the server manually")
                         }
                     } else {
                         print("could not read response or no response")
                     }
-                    WriteToLog.shared.message(stringOfText: "[updatePolicy] No data was returned trying to set the custom trigger.  Verify/edit the custome trigger \"\(id)\" on the server manually")
+                    WriteToLog.shared.message("[updatePolicy] No data was returned trying to set the custom trigger.  Verify/edit the custome trigger \"\(id)\" on the server manually")
                     completion(id)
                 })
                 task.resume()
@@ -1120,8 +1120,12 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         (JamfProServer.displayName, JamfProServer.destination, JamfProServer.username, JamfProServer.password,saveCredsState) = loginInfo
         let jamfUtf8Creds = "\(JamfProServer.username):\(JamfProServer.password)".data(using: String.Encoding.utf8)
         JamfProServer.base64Creds = (jamfUtf8Creds?.base64EncodedString())!
-
-        WriteToLog.shared.message(stringOfText: "[ViewController] Running SYM-Helper v\(AppInfo.version)")
+        
+        WriteToLog.shared.message("-------------------------------------------------------")
+        WriteToLog.shared.message("-     SYM-Helper Version: \(AppInfo.version) Build: \(AppInfo.build)")
+        WriteToLog.shared.message("-------------------------------------------------------")
+        WriteToLog.shared.message("TelemetryDeck: \(defaults.bool(forKey: "optOut") ? "disabled" : "enabled")")
+        
         TokenDelegate().getToken(serverUrl: JamfProServer.destination, whichServer: "destination", base64creds: JamfProServer.base64Creds) { [self]
             authResult in
             let (statusCode,theResult) = authResult
@@ -1164,7 +1168,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 
                 // migrate old promptFor settings - 230924
                 if Settings.shared.dict["promptFor"] == nil {
-                    WriteToLog.shared.message(stringOfText: "convert prompt for... settings to new format")
+                    WriteToLog.shared.message("convert prompt for... settings to new format")
                     var promptForDict = [String:Any]()
                     
                     for whichPrompt in ["promptForUsername", "prefillUsername", "promptForRealName", "prefillRealname", "promptForEmail", "prefillEmail", "promptForPosition", "promptForComputerName", "prefillComputerName", "promptForAssetTag", "promptForRoom", "promptForBuilding", "promptForDepartment", "promptForConfiguration", "moveableInProduction"] {
@@ -1187,7 +1191,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 fetchScript()
             } else {
                 DispatchQueue.main.async { [self] in
-                    WriteToLog.shared.message(stringOfText: "Failed to authenticate, status code: \(statusCode)")
+                    WriteToLog.shared.message("Failed to authenticate, status code: \(statusCode)")
                     performSegue(withIdentifier: "loginView", sender: nil)
 //                        working(isWorking: false)
                 }
@@ -1304,7 +1308,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                 selectedPolicies_TableView.selectRowIndexes(IndexSet(integer: selectedPoliciesArray.count-1), byExtendingSelection: false)
                  
              } else {
-                 WriteToLog.shared.message(stringOfText: "[sendCommand] Unable to add command: \(newItem).")
+                 WriteToLog.shared.message("[sendCommand] Unable to add command: \(newItem).")
              }
         }
 
@@ -1465,7 +1469,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                 completion(endpointJSON)
                                 return
                             } else {
-                                WriteToLog.shared.message(stringOfText: "\n[getScript] No data was returned from post/put.")
+                                WriteToLog.shared.message("\n[getScript] No data was returned from post/put.")
                             }
                         }
                     } else {
@@ -1508,7 +1512,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
                                 completion(String(data: data!, encoding: .utf8)!)
                                 return
                             } else {
-                                WriteToLog.shared.message(stringOfText: "\n[getScript] No data was returned from post/put.")
+                                WriteToLog.shared.message("\n[getScript] No data was returned from post/put.")
                             }
                         }
                     } else {

@@ -671,7 +671,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
                             sharedDefaults!.set(value, forKey: key)
                         }
                         sharedDefaults!.set(true as AnyObject, forKey: "migrated")
-                        WriteToLog.shared.message(stringOfText: "[migrateSettings] migrated settings")
+                        WriteToLog.shared.message("[migrateSettings] migrated settings")
                     } catch {
     //                    print("[migrateSettings] failed to migrate settings")
     //                    print("[migrateSettings] error: \(error.localizedDescription)\n")
@@ -679,7 +679,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
                     }
                 } else {
     //                print("[migrateSettings] file is not readable")
-                    WriteToLog.shared.message(stringOfText: "[migrateSettings] file is not readable")
+                    WriteToLog.shared.message("[migrateSettings] file is not readable")
                     NSApplication.shared.terminate(nil)
                 }
             } else {

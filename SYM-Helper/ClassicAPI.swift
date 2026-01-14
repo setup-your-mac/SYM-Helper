@@ -39,7 +39,7 @@ class ClassicAPI: NSObject, URLSessionDelegate {
                                 completion(endpointJSON)
                                 return
                             } else {
-                                WriteToLog.shared.message(stringOfText: "[getAllPolicies] No data was returned from post/put.")
+                                WriteToLog.shared.message("[getAllPolicies] No data was returned from post/put.")
                             }
                         }
                     } else {

@@ -81,6 +81,14 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
     @IBOutlet weak var hqb_Switch: NSSwitch!
     @IBOutlet weak var mip_Switch: NSSwitch!
     
+    // Telemetry Deck
+    @IBOutlet weak var optOut_button: NSButton!
+    
+    @IBAction func optOut_action(_ sender: NSButton) {
+        UserDefaults.standard.set(sender.state == .on, forKey: "optOut")
+        TelemetryDeckConfig.optOut = (sender.state == .on)
+    }
+    
     @IBOutlet var buildings_TextField: NSTextView!
     @IBOutlet var departments_TextField: NSTextView!
     @IBOutlet var positions_TextField: NSTextView!
@@ -142,10 +150,9 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
                          SYMSetting(name: "Prompt For...", tab: "promptFor"),
                          SYMSetting(name: "Buildings", tab: "buildings"),
                          SYMSetting(name: "Departments", tab: "departments"),
-                         SYMSetting(name: "Positions", tab: "positions")]
-    
-//    var settingsDict      = [String:Any]()
-    
+                         SYMSetting(name: "Positions", tab: "positions"),
+                         SYMSetting(name: "TelemetryDeck", tab: "telemetryDeck")]
+        
     var currentConfig     = ""
     var validScriptSource = ""
     var newScriptSource   = ""
@@ -153,16 +160,9 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
     var brandingDict      = [String:Any]()
     var supportDict       = [String:Any]()
     
-//    @IBAction func prompt_Action(_ sender: NSButton) {
-//        guard let theIdentifier = sender.identifier?.rawValue else {
-//            WriteToLog.shared.message(stringOfText: "Unknown prompt/prefill value")
-//            return
-//        }
-//        Settings.shared.dict[theIdentifier] = sender.title
-//    }
     @IBAction func switchPrompt_Action(_ sender: NSSwitch) {
         guard let theIdentifier = sender.identifier?.rawValue else {
-            WriteToLog.shared.message(stringOfText: "Unknown prompt/prefill value")
+            WriteToLog.shared.message("Unknown prompt/prefill value")
             return
         }
         switch theIdentifier {
@@ -322,7 +322,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
                     validScriptSource = scriptSource_TextField.stringValue
                     newScriptSource = validScriptSource
                     scriptVersion = (0,0,0,"")
-                    WriteToLog.shared.message(stringOfText: "Unknown script is selected, setting the version to 0.0.0")
+                    WriteToLog.shared.message("Unknown script is selected, setting the version to 0.0.0")
                     if notificationName != "NSControlTextDidEndEditingNotification" {
                         completion("use unknown script")
                         if notificationName == "ok_Button" {

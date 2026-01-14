@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="24412" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="24412"/>
-        <plugIn identifier="com.apple.WebKit2IBPlugin" version="24412"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="24506"/>
+        <plugIn identifier="com.apple.WebKit2IBPlugin" version="24506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -2116,7 +2116,7 @@ DQ
                                                     <rect key="frame" x="4" y="-2" width="688" height="322"/>
                                                     <clipView key="contentView" drawsBackground="NO" id="zoq-bL-5tw">
                                                         <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
-                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>
                                                             <textView identifier="buildings" wantsLayer="YES" importsGraphics="NO" richText="NO" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="28C-7p-jXE">
                                                                 <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
@@ -2134,7 +2134,7 @@ DQ
                                                         <autoresizingMask key="autoresizingMask"/>
                                                     </scroller>
                                                     <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="axx-1m-nHU">
-                                                        <rect key="frame" x="672" y="0.0" width="16" height="322"/>
+                                                        <rect key="frame" x="671" y="0.0" width="17" height="322"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                     </scroller>
                                                 </scrollView>
@@ -2256,7 +2256,7 @@ DQ
                                                     <rect key="frame" x="4" y="-2" width="688" height="322"/>
                                                     <clipView key="contentView" drawsBackground="NO" id="JhF-9I-Sqy">
                                                         <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
-                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                         <subviews>
                                                             <textView identifier="departments" wantsLayer="YES" importsGraphics="NO" richText="NO" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="jB4-QK-p7S">
                                                                 <rect key="frame" x="0.0" y="0.0" width="688" height="322"/>
@@ -2273,7 +2273,7 @@ DQ
                                                         <autoresizingMask key="autoresizingMask"/>
                                                     </scroller>
                                                     <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="OBs-IS-A9Z">
-                                                        <rect key="frame" x="672" y="0.0" width="16" height="322"/>
+                                                        <rect key="frame" x="671" y="0.0" width="17" height="322"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                     </scroller>
                                                 </scrollView>
@@ -2297,6 +2297,44 @@ DQ
                                                 <constraint firstItem="b2p-Cd-5XX" firstAttribute="top" secondItem="0gh-XN-LbE" secondAttribute="bottom" constant="9" id="cMO-ip-9ci"/>
                                                 <constraint firstItem="0gh-XN-LbE" firstAttribute="top" secondItem="pCT-P7-dLH" secondAttribute="top" constant="4" id="mf7-D9-boX"/>
                                                 <constraint firstAttribute="bottom" secondItem="b2p-Cd-5XX" secondAttribute="bottom" constant="-2" id="wfF-zY-56n"/>
+                                            </constraints>
+                                        </view>
+                                    </tabViewItem>
+                                    <tabViewItem label="telemetryDeck" identifier="telemetryDeck" id="5mM-dZ-bLA" userLabel="telemetryDeck">
+                                        <view key="view" id="Duc-Jl-zNo">
+                                            <rect key="frame" x="0.0" y="0.0" width="691" height="352"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <subviews>
+                                                <textField focusRingType="none" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="icv-8C-grJ">
+                                                    <rect key="frame" x="4" y="225" width="683" height="95"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="683" id="Myl-Or-zX7"/>
+                                                        <constraint firstAttribute="height" constant="95" id="m08-fW-dVL"/>
+                                                    </constraints>
+                                                    <textFieldCell key="cell" selectable="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="1ak-eZ-Y8f">
+                                                        <font key="font" metaFont="system" size="18"/>
+                                                        <string key="title">By default this application sends basic hardware, OS, and usage data for the app. Data is sent anonymously to https://telemetrydeck.com and used to aid in application development. To disable the sending of data click the 'Opt out of analytics' below.</string>
+                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                </textField>
+                                                <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="GB1-gK-Fkk">
+                                                    <rect key="frame" x="4" y="183" width="164" height="19"/>
+                                                    <buttonCell key="cell" type="check" title="Opt out of analytics" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Bkx-Wq-NtN">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" metaFont="system" size="16"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="optOut_action:" target="pYm-xb-CiH" id="Fjk-eI-BkL"/>
+                                                    </connections>
+                                                </button>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="icv-8C-grJ" firstAttribute="leading" secondItem="Duc-Jl-zNo" secondAttribute="leading" constant="4" id="4HI-RK-CoT"/>
+                                                <constraint firstItem="GB1-gK-Fkk" firstAttribute="top" secondItem="icv-8C-grJ" secondAttribute="bottom" constant="23" id="GqH-dJ-xKU"/>
+                                                <constraint firstItem="GB1-gK-Fkk" firstAttribute="leading" secondItem="icv-8C-grJ" secondAttribute="leading" id="IOa-0E-f50"/>
+                                                <constraint firstAttribute="trailing" secondItem="icv-8C-grJ" secondAttribute="trailing" constant="4" id="TgO-RV-PwP"/>
+                                                <constraint firstItem="icv-8C-grJ" firstAttribute="top" secondItem="Duc-Jl-zNo" secondAttribute="top" constant="32" id="jiH-DD-dHT"/>
                                             </constraints>
                                         </view>
                                     </tabViewItem>
@@ -2338,6 +2376,7 @@ DQ
                         <outlet property="lightIcon_TextField" destination="nlr-u8-Rt4" id="cAp-4H-1Ud"/>
                         <outlet property="mip_Switch" destination="G4Y-gm-sml" id="tAb-9X-Qnc"/>
                         <outlet property="ok_Button" destination="lZl-7N-qzP" id="UQp-t0-5sY"/>
+                        <outlet property="optOut_button" destination="GB1-gK-Fkk" id="ciY-Zf-4bg"/>
                         <outlet property="pcn_Switch" destination="Ivh-pd-PIE" id="GYq-B1-pBB"/>
                         <outlet property="pe_Switch" destination="VN4-FC-XbC" id="7Il-aa-X8q"/>
                         <outlet property="pfat_Switch" destination="PDV-S9-Xri" id="RdX-vs-KNh"/>
@@ -2757,11 +2796,11 @@ Gw
                                 <tabViewItems>
                                     <tabViewItem label="command" identifier="commandTab" id="KQw-RT-GYz" userLabel="command">
                                         <view key="view" id="3Ra-GB-BAC">
-                                            <rect key="frame" x="0.0" y="0.0" width="790" height="157"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="790" height="180"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="88M-34-8tp">
-                                                    <rect key="frame" x="44" y="113" width="69" height="22"/>
+                                                    <rect key="frame" x="44" y="136" width="69" height="22"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="65" id="2q7-xK-Zcf"/>
                                                         <constraint firstAttribute="height" constant="22" id="hw3-lE-Rmb"/>
@@ -2773,7 +2812,7 @@ Gw
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="UmI-JR-0S5">
-                                                    <rect key="frame" x="115" y="114" width="400" height="23"/>
+                                                    <rect key="frame" x="115" y="137" width="400" height="23"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="23" id="T2r-M0-tXk"/>
                                                         <constraint firstAttribute="width" constant="400" id="W1A-cZ-YcK"/>
@@ -2785,7 +2824,7 @@ Gw
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="MxN-P9-APJ">
-                                                    <rect key="frame" x="65" y="84" width="48" height="22"/>
+                                                    <rect key="frame" x="65" y="107" width="48" height="22"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="22" id="hVQ-RU-cN1"/>
                                                     </constraints>
@@ -2796,7 +2835,7 @@ Gw
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="5Ra-xC-sGw">
-                                                    <rect key="frame" x="115" y="84" width="400" height="23"/>
+                                                    <rect key="frame" x="115" y="107" width="400" height="23"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="400" id="Icf-EM-Vx7"/>
                                                         <constraint firstAttribute="height" constant="23" id="aDo-Uz-x8Z"/>
@@ -2808,7 +2847,7 @@ Gw
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="H0e-S9-43E">
-                                                    <rect key="frame" x="30" y="58" width="83" height="19"/>
+                                                    <rect key="frame" x="30" y="81" width="83" height="19"/>
                                                     <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Command:" id="9at-yO-BqG">
                                                         <font key="font" metaFont="system" size="16"/>
                                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -2816,7 +2855,7 @@ Gw
                                                     </textFieldCell>
                                                 </textField>
                                                 <textField identifier="commandOther" focusRingType="none" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JIx-xM-c6V">
-                                                    <rect key="frame" x="115" y="54" width="658" height="23"/>
+                                                    <rect key="frame" x="115" y="77" width="658" height="23"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="658" id="Ghx-dp-jCp"/>
                                                         <constraint firstAttribute="height" constant="23" id="xxh-TJ-lON"/>

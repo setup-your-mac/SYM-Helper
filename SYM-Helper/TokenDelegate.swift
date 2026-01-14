@@ -112,7 +112,7 @@ class TokenDelegate: NSObject, URLSessionDelegate {
         let tokenUrl = URL(string: "\(tokenUrlString)")
         guard let _  = URL(string: "\(tokenUrlString)") else {
             print("problem constructing the URL from \(tokenUrlString)")
-            WriteToLog.shared.message(stringOfText: "[getToken] problem constructing the URL from \(tokenUrlString)")
+            WriteToLog.shared.message("[getToken] problem constructing the URL from \(tokenUrlString)")
             completion((500, "failed"))
             return
         }
@@ -129,8 +129,8 @@ class TokenDelegate: NSObject, URLSessionDelegate {
         //        print("[getToken] JamfProServer.currentCred[\(whichServer)]: \(String(describing: JamfProServer.currentCred[whichServer]))")
 //        print("[getToken] JamfProServer.authExpires: \(JamfProServer.authExpires*60)")
         if !(JamfProServer.validToken && tokenAgeInSeconds < JamfProServer.authExpires) {
-            WriteToLog.shared.message(stringOfText: "[getToken] \(whichServer) tokenAgeInSeconds: \(tokenAgeInSeconds)")
-            WriteToLog.shared.message(stringOfText: "[getToken] Attempting to retrieve token from \(tokenUrlString)")
+            WriteToLog.shared.message("[getToken] \(whichServer) tokenAgeInSeconds: \(tokenAgeInSeconds)")
+            WriteToLog.shared.message("[getToken] Attempting to retrieve token from \(tokenUrlString)")
             
             if apiClient {
                 let clientId = JamfProServer.username
@@ -148,7 +148,7 @@ class TokenDelegate: NSObject, URLSessionDelegate {
             }
             
             let authType = apiClient ? "API client / secret" : "username / password"
-            WriteToLog.shared.message(stringOfText: "[getToken] authenticating with \(authType)")
+            WriteToLog.shared.message("[getToken] authenticating with \(authType)")
 //            print("[getToken] tokenUrlString: \(tokenUrlString)")
 //            print("[getToken] configuration.httpAdditionalHeaders: \(String(describing: configuration.httpAdditionalHeaders))")
             
@@ -194,7 +194,7 @@ class TokenDelegate: NSObject, URLSessionDelegate {
                             
                             
                             JamfProServer.authExpires  = Double(Int((JamfProServer.authExpires*0.75)/10)*10)
-                            WriteToLog.shared.message(stringOfText: "[getToken] renewal interval: \(String(describing: JamfProServer.authExpires ?? -1)) seconds")
+                            WriteToLog.shared.message("[getToken] renewal interval: \(String(describing: JamfProServer.authExpires ?? -1)) seconds")
                             
                             JamfProServer.tokenCreated = Date()
                             JamfProServer.validToken   = true
@@ -207,7 +207,7 @@ class TokenDelegate: NSObject, URLSessionDelegate {
                                     let versionString = result["version"] as! String
                                     
                                     if versionString != "" {
-                                        WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] Jamf Pro Version: \(versionString)")
+                                        WriteToLog.shared.message("[JamfPro.getVersion] Jamf Pro Version: \(versionString)")
                                         JamfProServer.version = versionString
                                         let tmpArray = versionString.components(separatedBy: ".")
                                         if tmpArray.count > 2 {
@@ -229,12 +229,12 @@ class TokenDelegate: NSObject, URLSessionDelegate {
                                             }
                                             if ( JamfProServer.majorVersion > 10 || (JamfProServer.majorVersion > 9 && JamfProServer.minorVersion > 34) ) {
                                                 JamfProServer.authType = "Bearer"
-                                                WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use OAuth")
+                                                WriteToLog.shared.message("[JamfPro.getVersion] \(serverUrl) set to use OAuth")
                                                 
                                             } else {
                                                 JamfProServer.authType    = "Basic"
                                                 JamfProServer.accessToken = base64creds
-                                                WriteToLog.shared.message(stringOfText: "[JamfPro.getVersion] \(serverUrl) set to use Basic")
+                                                WriteToLog.shared.message("[JamfPro.getVersion] \(serverUrl) set to use Basic")
                                             }
                                             completion((200, "success"))
                                             return
@@ -248,21 +248,21 @@ class TokenDelegate: NSObject, URLSessionDelegate {
                             }
                         } catch {
                             let tokenResponseString = String(data: data ?? Data(), encoding: .utf8) ?? "No data returned"
-                            WriteToLog.shared.message(stringOfText: "[getToken] Problem decoding token response: \(tokenResponseString)")
+                            WriteToLog.shared.message("[getToken] Problem decoding token response: \(tokenResponseString)")
                             JamfProServer.validToken  = false
                             completion((httpResponse.statusCode, "failed"))
                             return
                         }
                     } else {    // if httpResponse.statusCode <200 or >299
                         _ = Alert.shared.display(header: "\(serverUrl)", message: "Failed to authenticate to \(serverUrl). \nStatus Code: \(httpResponse.statusCode)", secondButton: "")
-                        WriteToLog.shared.message(stringOfText: "[getToken] Failed to authenticate to \(serverUrl).  Response error: \(httpResponse.statusCode)")
+                        WriteToLog.shared.message("[getToken] Failed to authenticate to \(serverUrl).  Response error: \(httpResponse.statusCode)")
                         JamfProServer.validToken = false
                         completion((httpResponse.statusCode, "failed"))
                         return
                     }
                 } else {
                     _ = Alert.shared.display(header: "\(serverUrl)", message: "Failed to connect. \nUnknown error, verify url and port.", secondButton: "")
-                    WriteToLog.shared.message(stringOfText: "[getToken] token response error from \(serverUrl).  Verify url and port")
+                    WriteToLog.shared.message("[getToken] token response error from \(serverUrl).  Verify url and port")
                     JamfProServer.validToken = false
                     completion((0, "failed"))
                     return
@@ -270,7 +270,7 @@ class TokenDelegate: NSObject, URLSessionDelegate {
             })
             task.resume()
         } else {
-//            WriteToLog.shared.message(stringOfText: "[getToken] Use existing token from \(String(describing: tokenUrl))")
+//            WriteToLog.shared.message("[getToken] Use existing token from \(String(describing: tokenUrl))")
             completion((200, "success"))
             return
         }
@@ -279,7 +279,7 @@ class TokenDelegate: NSObject, URLSessionDelegate {
     func getVersion(serverUrl: String, endpoint: String, apiData: [String:Any], id: String, token: String, method: String, completion: @escaping (_ returnedJSON: [String: Any]) -> Void) {
         
         if method.lowercased() == "skip" {
-//            if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Jpapi.action] skipping \(endpoint) endpoint with id \(id).") }
+//            if LogLevel.debug { WriteToLog.shared.message("[Jpapi.action] skipping \(endpoint) endpoint with id \(id).") }
             let JPAPI_result = (endpoint == "auth/invalidate-token") ? "no valid token":"failed"
             completion(["JPAPI_result":JPAPI_result, "JPAPI_response":000])
             return
@@ -322,7 +322,7 @@ class TokenDelegate: NSObject, URLSessionDelegate {
             }
         }
         
-        WriteToLog.shared.message(stringOfText: "[getVersion] Attempting \(method) on \(urlString).")
+        WriteToLog.shared.message("[getVersion] Attempting \(method) on \(urlString).")
 //        print("[Jpapi.action] Attempting \(method) on \(urlString).")
         
         configuration.httpAdditionalHeaders = ["Authorization" : "Bearer \(token)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
@@ -347,12 +347,12 @@ class TokenDelegate: NSObject, URLSessionDelegate {
                         return
                     }
                 } else {    // if httpResponse.statusCode <200 or >299
-                    WriteToLog.shared.message(stringOfText: "[getVersion] Response error: \(httpResponse.statusCode)")
+                    WriteToLog.shared.message("[getVersion] Response error: \(httpResponse.statusCode)")
                     completion(["JPAPI_result":"failed", "JPAPI_method":request.httpMethod ?? method, "JPAPI_response":httpResponse.statusCode, "JPAPI_server":urlString, "JPAPI_token":token])
                     return
                 }
             } else {
-                WriteToLog.shared.message(stringOfText: "[getVersion] GET response error.  Verify url and port")
+                WriteToLog.shared.message("[getVersion] GET response error.  Verify url and port")
                 completion([:])
                 return
             }

@@ -57,9 +57,9 @@ var defaultTeamWebsite   = "support.domain.com"
 
 struct AppInfo {
     static let dict    = Bundle.main.infoDictionary!
-    static let version = dict["CFBundleShortVersionString"] as! String
-    static let build   = dict["CFBundleVersion"] as! String
-    static let name    = dict["CFBundleExecutable"] as! String
+    static let version = dict["CFBundleShortVersionString"] as? String ?? "0.0.0"
+    static let build   = dict["CFBundleVersion"] as? String ?? "0"
+    static let name    = dict["CFBundleExecutable"] as? String ?? "unknown"
     static var stopUpdates = false
 
     static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(AppInfo.version)"
@@ -122,13 +122,13 @@ func cleanup() {
             // remove old history files
             if logCount > Log.maxFiles {
                 for i in (0..<logCount-Log.maxFiles) {
-//                    if LogLevel.debug { WriteToLog.shared.message(stringOfText: "Deleting log file: " + logArray[i] + "\n") }
+//                    if LogLevel.debug { WriteToLog.shared.message("Deleting log file: " + logArray[i] + "\n") }
                     
                     do {
                         try FileManager.default.removeItem(atPath: logArray[i])
                     }
                     catch let error as NSError {
-                        WriteToLog.shared.message(stringOfText: "Error deleting log file:\n    " + logArray[i] + "\n    \(error)")
+                        WriteToLog.shared.message("Error deleting log file:\n    " + logArray[i] + "\n    \(error)")
                     }
                 }
             }
@@ -141,11 +141,11 @@ func cleanup() {
                 try FileManager.default.removeItem(atPath: logArray[0])
             }
             catch let error as NSError {
-                WriteToLog.shared.message(stringOfText: "Error deleting log file:    \n" + Log.path! + logArray[0] + "    \(error)")
+                WriteToLog.shared.message("Error deleting log file:    \n" + Log.path! + logArray[0] + "    \(error)")
             }
         }
     } catch {
-        WriteToLog.shared.message(stringOfText: "no log files found")
+        WriteToLog.shared.message("no log files found")
     }
 }
 
@@ -155,7 +155,7 @@ func betweenTags(xmlString:String, startTag:String, endTag:String) -> String {
         let end  = xmlString.range(of: endTag, range: start.upperBound..<xmlString.endIndex) {
         rawValue.append(String(xmlString[start.upperBound..<end.lowerBound]))
     } else {
-        WriteToLog.shared.message(stringOfText: "[betweenTags] Start, \(startTag), and end, \(endTag), not found.")
+        WriteToLog.shared.message("[betweenTags] Start, \(startTag), and end, \(endTag), not found.")
     }
     return rawValue
 }
@@ -164,7 +164,7 @@ public func timeDiff(startTime: Date) -> (Int, Int, Int, Double) {
     let endTime = Date()
 //                    let components = Calendar.current.dateComponents([.second, .nanosecond], from: startTime, to: endTime)
 //                    let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
-//                    WriteToLog.shared.message(stringOfText: "[ViewController.download] time difference: \(timeDifference) seconds")
+//                    WriteToLog.shared.message("[ViewController.download] time difference: \(timeDifference) seconds")
     let components = Calendar.current.dateComponents([
         .hour, .minute, .second, .nanosecond], from: startTime, to: endTime)
     var diffInSeconds = Double(components.hour!)*3600 + Double(components.minute!)*60 + Double(components.second!) + Double(components.nanosecond!)/1000000000
@@ -172,7 +172,7 @@ public func timeDiff(startTime: Date) -> (Int, Int, Int, Double) {
 //    let timeDifference = Int(components.second!) //+ Double(components.nanosecond!)/1000000000
 //    let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
 //    let (m,s) = r.quotientAndRemainder(dividingBy: 60)
-//    WriteToLog.shared.message(stringOfText: "[ViewController.download] download time: \(h):\(m):\(s) (h:m:s)")
+//    WriteToLog.shared.message("[ViewController.download] download time: \(h):\(m):\(s) (h:m:s)")
     return (Int(components.hour!), Int(components.minute!), Int(components.second!), diffInSeconds)
 //    return (h, m, s)
 }
@@ -188,7 +188,7 @@ func timeDiff(forWhat: String) -> (Int,Int,Int) {
         break
     }
 //          let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
-//          WriteToLog.shared.message(stringOfText: "[Migration Complete] runtime: \(timeDifference) seconds\n")
+//          WriteToLog.shared.message("[Migration Complete] runtime: \(timeDifference) seconds\n")
     let timeDifference = Int(components?.second! ?? 0)
     let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
     let (m,s) = r.quotientAndRemainder(dividingBy: 60)

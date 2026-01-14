@@ -11,17 +11,7 @@ class WriteToLog {
     
     var logFileW: FileHandle? = FileHandle(forUpdatingAtPath: "")
 
-    func message(stringOfText: String) {
-        /*
-        let logString = "\(getCurrentTime()) \(stringOfText)\n"
-
-        self.logFileW = FileHandle(forUpdatingAtPath: (Log.path! + Log.file))
-//        let fullpath = Log.path! + Log.file
-        
-        let logText = (logString as NSString).data(using: String.Encoding.utf8.rawValue)
-        self.logFileW?.seekToEndOfFile()
-        self.logFileW?.write(logText!)
-         */
+    func message(_ stringOfText: String) {
         
         let logString = "\(getCurrentTime()) \(stringOfText)\n"
 
