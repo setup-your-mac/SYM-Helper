@@ -408,6 +408,7 @@ class SettingsVC: NSViewController, NSTextFieldDelegate, NSTextViewDelegate, Sen
         
 //        print("currentConfig: \(currentConfig)")
 //        print("settingsDict: \(Settings.shared.dict)")
+        optOut_button.state = defaults.bool(forKey: "optOut") ? .on : .off
         
         func onOff(whichButton: String) -> Int {
             var buttonState = 1
