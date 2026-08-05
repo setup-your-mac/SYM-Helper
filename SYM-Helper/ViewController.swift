@@ -8,8 +8,26 @@ import Cocoa
 import Foundation
 import WebKit
 
+// Subclass used in storyboard for iconPreview_WebView — overrides context menu to handle "Download Image"
+class IconPreviewWebView: WKWebView {
+    var onDownloadImage: (() -> Void)?
 
- class Policy: NSObject {
+    override func willOpenMenu(_ menu: NSMenu, with event: NSEvent) {
+        super.willOpenMenu(menu, with: event)
+        print("[iconDownload] willOpenMenu — items: \(menu.items.map { $0.title })")
+        for item in menu.items where item.title == "Download Image" {
+            item.target = self
+            item.action = #selector(handleDownloadImage)
+        }
+    }
+
+    @objc private func handleDownloadImage() {
+        print("[iconDownload] handleDownloadImage called")
+        onDownloadImage?()
+    }
+}
+
+class Policy: NSObject {
      @objc var name: String
      @objc var id: String
      @objc var configs: [String]    // minimum, standard, full config, custom name
@@ -62,7 +80,7 @@ public class Settings {
 }
 
 
-class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate, OtherItemDelegate, SendingLoginInfoDelegate, SendNewConfigInfoDelegate, SendClonedConfigInfoDelegate, WKNavigationDelegate, WKDownloadDelegate {
+class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate, OtherItemDelegate, SendingLoginInfoDelegate, SendNewConfigInfoDelegate, SendClonedConfigInfoDelegate, WKNavigationDelegate {
     
     
     @IBOutlet weak var connectTo_Button: NSButton!
@@ -337,7 +355,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
     @IBOutlet weak var subtitle_TextField: NSTextField!
     @IBOutlet weak var iconPath_TextField: NSTextField!
     
-    @IBOutlet weak var iconPreview_WebView: WKWebView!
+    @IBOutlet weak var iconPreview_WebView: IconPreviewWebView!
     
     @IBOutlet weak var progressText_TextField: NSTextField!
     @IBOutlet weak var trigger_TextField: NSTextField!
@@ -1367,6 +1385,7 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         validation_TextField.delegate          = self
 
         iconPreview_WebView.navigationDelegate = self
+        iconPreview_WebView.onDownloadImage = { [weak self] in self?.downloadIconToDownloadsFolder() }
         
         allPolicies_Spinner.startAnimation(self)
         policies_TableView.delegate     = self
@@ -1568,20 +1587,24 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
     }
     
     fileprivate func previewIcon() {
-        // preview icon, if available
-        if iconPath_TextField.stringValue.prefix(4).lowercased() != "http" {
-            if !FileManager.default.fileExists(atPath: iconPath_TextField.stringValue) {
-                iconPreview_WebView.isHidden = true
-                return
-            }
-        }
-        if let url = URL(string: iconPath_TextField.stringValue) {
-            let request = URLRequest(url: url)
-            iconPreview_WebView?.load(request)
-            iconPreview_WebView.isHidden = false
-        } else {
+        let path = iconPath_TextField.stringValue
+        let isHTTP = path.prefix(4).lowercased() == "http"
+
+        if !isHTTP && !FileManager.default.fileExists(atPath: path) {
             iconPreview_WebView.isHidden = true
+            return
         }
+
+        let encodedPath = path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? path
+        let src = isHTTP ? path : "file://\(encodedPath)"
+        let baseURL = isHTTP ? nil : URL(fileURLWithPath: "/")
+        let html = """
+            <html><body style="margin:0;background:transparent;">
+            <img src="\(src)" style="max-width:100%;max-height:100%;object-fit:contain;">
+            </body></html>
+            """
+        iconPreview_WebView?.loadHTMLString(html, baseURL: baseURL)
+        iconPreview_WebView.isHidden = false
     }
     
     func tableViewSelectionDidChange(_ notification: Notification) {
@@ -1706,47 +1729,61 @@ extension Notification.Name {
     public static let updateScriptVersion = Notification.Name("updateScriptVersion")
 }
 
-// MARK: - WKNavigationDelegate / WKDownloadDelegate (icon download)
+// MARK: - WKUIDelegate / WKNavigationDelegate (icon preview + download)
 extension ViewController {
 
-    // Handles "Download Image" context menu — WebKit marks these as shouldPerformDownload
     func webView(_ webView: WKWebView,
                  decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        print("[iconDownload] decidePolicyFor called — shouldPerformDownload: \(navigationAction.shouldPerformDownload), url: \(String(describing: navigationAction.request.url))")
         guard navigationAction.shouldPerformDownload else {
             decisionHandler(.allow)
             return
         }
+        downloadIconToDownloadsFolder()
+        decisionHandler(.cancel)
+    }
 
-        let requestURL = navigationAction.request.url
-        // file:// URLs can't get a sandbox extension for WKDownload — copy manually instead
-        if requestURL == nil || requestURL!.isFileURL {
-            let sourcePath = iconPath_TextField.stringValue
-            if !sourcePath.isEmpty, FileManager.default.fileExists(atPath: sourcePath) {
-                let filename = URL(fileURLWithPath: sourcePath).lastPathComponent
-                let dest = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
-                    .appendingPathComponent(filename)
-                try? FileManager.default.copyItem(at: URL(fileURLWithPath: sourcePath), to: dest)
+    private func downloadIconToDownloadsFolder() {
+        let path = iconPath_TextField.stringValue
+        print("[iconDownload] downloadIconToDownloadsFolder — path: '\(path)'")
+        guard !path.isEmpty else { print("[iconDownload] path empty, bailing"); return }
+
+        let policyName = listitemDisplayText_TextField.stringValue
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "/", with: "-")
+            .replacingOccurrences(of: " ", with: "_")
+        let filename = policyName.isEmpty ? "icon.png" : "\(policyName)_icon.png"
+        let dest = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(filename)
+        print("[iconDownload] destination: \(dest.path)")
+
+        if path.prefix(4).lowercased() == "http" {
+            guard let url = URL(string: path) else { print("[iconDownload] bad URL"); return }
+            print("[iconDownload] starting URLSession downloadTask")
+            URLSession.shared.downloadTask(with: url) { tmpURL, response, error in
+                print("[iconDownload] task complete — tmpURL: \(String(describing: tmpURL)), error: \(String(describing: error))")
+                guard let tmpURL else { return }
+                do {
+                    if FileManager.default.fileExists(atPath: dest.path) {
+                        try FileManager.default.removeItem(at: dest)
+                    }
+                    try FileManager.default.moveItem(at: tmpURL, to: dest)
+                    print("[iconDownload] saved to \(dest.path)")
+                } catch {
+                    print("[iconDownload] move failed: \(error)")
+                }
+            }.resume()
+        } else {
+            do {
+                if FileManager.default.fileExists(atPath: dest.path) {
+                    try FileManager.default.removeItem(at: dest)
+                }
+                try FileManager.default.copyItem(at: URL(fileURLWithPath: path), to: dest)
+                print("[iconDownload] copied to \(dest.path)")
+            } catch {
+                print("[iconDownload] copy failed: \(error)")
             }
-            decisionHandler(.cancel)
-            return
         }
-
-        decisionHandler(.download)
-    }
-
-    // Called when the action-level decision becomes a download
-    func webView(_ webView: WKWebView,
-                 navigationAction: WKNavigationAction,
-                 didBecome download: WKDownload) {
-        download.delegate = self
-    }
-
-    func download(_ download: WKDownload,
-                  decideDestinationUsing response: URLResponse,
-                  suggestedFilename: String,
-                  completionHandler: @escaping (URL?) -> Void) {
-        let downloadsURL = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
-        completionHandler(downloadsURL.appendingPathComponent(suggestedFilename))
     }
 }

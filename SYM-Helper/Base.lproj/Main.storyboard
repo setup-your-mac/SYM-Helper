@@ -1192,7 +1192,7 @@
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <wkWebView hidden="YES" wantsLayer="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wER-mP-TJt">
+                            <wkWebView customClass="IconPreviewWebView" customModule="SYM_Helper" customModuleProvider="target" hidden="YES" wantsLayer="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wER-mP-TJt">
                                 <rect key="frame" x="852" y="145" width="48" height="48"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="48" id="AzH-1I-Aa5"/>
