@@ -1709,18 +1709,35 @@ extension Notification.Name {
 // MARK: - WKNavigationDelegate / WKDownloadDelegate (icon download)
 extension ViewController {
 
+    // Handles "Download Image" context menu — WebKit marks these as shouldPerformDownload
     func webView(_ webView: WKWebView,
-                 decidePolicyFor navigationResponse: WKNavigationResponse,
-                 decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
-        if navigationResponse.canShowMIMEType {
+                 decidePolicyFor navigationAction: WKNavigationAction,
+                 decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        guard navigationAction.shouldPerformDownload else {
             decisionHandler(.allow)
-        } else {
-            decisionHandler(.download)
+            return
         }
+
+        let requestURL = navigationAction.request.url
+        // file:// URLs can't get a sandbox extension for WKDownload — copy manually instead
+        if requestURL == nil || requestURL!.isFileURL {
+            let sourcePath = iconPath_TextField.stringValue
+            if !sourcePath.isEmpty, FileManager.default.fileExists(atPath: sourcePath) {
+                let filename = URL(fileURLWithPath: sourcePath).lastPathComponent
+                let dest = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
+                    .appendingPathComponent(filename)
+                try? FileManager.default.copyItem(at: URL(fileURLWithPath: sourcePath), to: dest)
+            }
+            decisionHandler(.cancel)
+            return
+        }
+
+        decisionHandler(.download)
     }
 
+    // Called when the action-level decision becomes a download
     func webView(_ webView: WKWebView,
-                 navigationResponse: WKNavigationResponse,
+                 navigationAction: WKNavigationAction,
                  didBecome download: WKDownload) {
         download.delegate = self
     }
