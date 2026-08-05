@@ -62,7 +62,7 @@ public class Settings {
 }
 
 
-class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate, OtherItemDelegate, SendingLoginInfoDelegate, SendNewConfigInfoDelegate, SendClonedConfigInfoDelegate {
+class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate, OtherItemDelegate, SendingLoginInfoDelegate, SendNewConfigInfoDelegate, SendClonedConfigInfoDelegate, WKNavigationDelegate, WKDownloadDelegate {
     
     
     @IBOutlet weak var connectTo_Button: NSButton!
@@ -1365,6 +1365,8 @@ class ViewController: NSViewController, NSTextFieldDelegate, URLSessionDelegate,
         progressText_TextField.delegate        = self
         iconPath_TextField.delegate            = self
         validation_TextField.delegate          = self
+
+        iconPreview_WebView.navigationDelegate = self
         
         allPolicies_Spinner.startAnimation(self)
         policies_TableView.delegate     = self
@@ -1702,4 +1704,32 @@ extension ViewController : NSTableViewDataSource, NSTableViewDelegate {
 
 extension Notification.Name {
     public static let updateScriptVersion = Notification.Name("updateScriptVersion")
+}
+
+// MARK: - WKNavigationDelegate / WKDownloadDelegate (icon download)
+extension ViewController {
+
+    func webView(_ webView: WKWebView,
+                 decidePolicyFor navigationResponse: WKNavigationResponse,
+                 decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        if navigationResponse.canShowMIMEType {
+            decisionHandler(.allow)
+        } else {
+            decisionHandler(.download)
+        }
+    }
+
+    func webView(_ webView: WKWebView,
+                 navigationResponse: WKNavigationResponse,
+                 didBecome download: WKDownload) {
+        download.delegate = self
+    }
+
+    func download(_ download: WKDownload,
+                  decideDestinationUsing response: URLResponse,
+                  suggestedFilename: String,
+                  completionHandler: @escaping (URL?) -> Void) {
+        let downloadsURL = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+        completionHandler(downloadsURL.appendingPathComponent(suggestedFilename))
+    }
 }
